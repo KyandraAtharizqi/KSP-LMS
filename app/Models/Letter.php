@@ -20,7 +20,7 @@ class Letter extends Model
      */
     protected $fillable = [
         'reference_number',
-        'agenda_number',
+        'knowledge_number',
         'from',
         'to',
         'letter_date',
@@ -93,7 +93,7 @@ class Letter extends Model
         return $query->when($search, function($query, $find) {
             return $query
                 ->where('reference_number', $find)
-                ->orWhere('agenda_number', $find)
+                ->orWhere('knowledge_number', $find)
                 ->orWhere('from', 'LIKE', $find . '%')
                 ->orWhere('to', 'LIKE', $find . '%');
         });
@@ -111,7 +111,7 @@ class Letter extends Model
             ]);
     }
 
-    public function scopeAgenda($query, $since, $until, $filter)
+    public function scopeKnowledge($query, $since, $until, $filter)
     {
         return $query
             ->when($since && $until && $filter, function ($query, $condition) use ($since, $until, $filter) {

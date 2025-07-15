@@ -21,7 +21,7 @@ class UpdateLetterRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'agenda_number' => __('model.letter.agenda_number'),
+            'knowledge_number' => __('model.letter.knowledge_number'),
             'from' => __('model.letter.from'),
             'to' => __('model.letter.to'),
             'reference_number' => __('model.letter.reference_number'),
@@ -41,7 +41,7 @@ class UpdateLetterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'agenda_number' => ['required'],
+            'knowledge_number' => ['required'],
             'from' => [Rule::requiredIf($this->type == LetterType::INCOMING->type())],
             'to' => [Rule::requiredIf($this->type == LetterType::OUTGOING->type())],
             'reference_number' => ['required', Rule::unique('letters', 'reference_number')->ignore($this->id)],

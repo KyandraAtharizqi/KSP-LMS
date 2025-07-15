@@ -2,7 +2,7 @@
 
 return [
     'letter' => [
-        'agenda_number' => 'Agenda Number',
+        'knowledge_number' => 'Knowledge Number',
         'from' => 'Sender',
         'to' => 'Receiver',
         'reference_number' => 'Reference Number',

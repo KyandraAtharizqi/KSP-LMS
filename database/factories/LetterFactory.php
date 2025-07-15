@@ -20,7 +20,7 @@ class LetterFactory extends Factory
     {
         return [
             'reference_number' => $this->faker->ean13(),
-            'agenda_number' => $this->faker->randomNumber(5),
+            'knowledge_number' => $this->faker->randomNumber(5),
             'from' => $this->faker->name('male'),
             'to' => $this->faker->name('female'),
             'letter_date' => $this->faker->date(),

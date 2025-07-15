@@ -218,7 +218,7 @@ DROP TABLE IF EXISTS `letters`;
 CREATE TABLE `letters` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `reference_number` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nomor Surat',
-  `agenda_number` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `knowledge_number` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `from` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `to` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `letter_date` date DEFAULT NULL,

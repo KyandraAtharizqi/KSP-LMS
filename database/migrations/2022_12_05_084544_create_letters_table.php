@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->string('reference_number')->unique()->comment('Nomor Surat');
-            $table->string('agenda_number');
+            $table->string('knowledge_number');
             $table->string('from')->nullable();
             $table->string('to')->nullable();
             $table->date('letter_date')->nullable();

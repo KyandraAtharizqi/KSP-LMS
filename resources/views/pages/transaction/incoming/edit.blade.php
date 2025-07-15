@@ -20,8 +20,8 @@
                     <x-input-form :value="$data->from" name="from" :label="__('model.letter.from')"/>
                 </div>
                 <div class="col-sm-12 col-12 col-md-6 col-lg-4">
-                    <x-input-form :value="$data->agenda_number" name="agenda_number"
-                                  :label="__('model.letter.agenda_number')"/>
+                    <x-input-form :value="$data->knowledge_number" name="knowledge_number"
+                                  :label="__('model.letter.knowledge_number')"/>
                 </div>
                 <div class="col-sm-12 col-12 col-md-6 col-lg-6">
                     <x-input-form :value="date('Y-m-d', strtotime($data->letter_date))" name="letter_date"

@@ -32,15 +32,15 @@ class IncomingLetterController extends Controller
     }
 
     /**
-     * Display a listing of the incoming letter agenda.
+     * Display a listing of the incoming letter knowledge.
      *
      * @param Request $request
      * @return View
      */
-    public function agenda(Request $request): View
+    public function knowledge (Request $request): View
     {
-        return view('pages.transaction.incoming.agenda', [
-            'data' => Letter::incoming()->agenda($request->since, $request->until, $request->filter)->render($request->search),
+        return view('pages.transaction.incoming.knowledge', [
+            'data' => Letter::incoming()->knowledge($request->since, $request->until, $request->filter)->render($request->search),
             'search' => $request->search,
             'since' => $request->since,
             'until' => $request->until,
@@ -55,11 +55,11 @@ class IncomingLetterController extends Controller
      */
     public function print(Request $request): View
     {
-        $agenda = __('menu.agenda.menu');
-        $letter = __('menu.agenda.incoming_letter');
-        $title = App::getLocale() == 'id' ? "$agenda $letter" : "$letter $agenda";
+        $knowledge = __('menu.knowledge.menu');
+        $letter = __('menu.knowledge.incoming_letter');
+        $title = App::getLocale() == 'id' ? "$knowledge $letter" : "$letter $knowledge";
         return view('pages.transaction.incoming.print', [
-            'data' => Letter::incoming()->agenda($request->since, $request->until, $request->filter)->get(),
+            'data' => Letter::incoming()->knowledge($request->since, $request->until, $request->filter)->get(),
             'search' => $request->search,
             'since' => $request->since,
             'until' => $request->until,

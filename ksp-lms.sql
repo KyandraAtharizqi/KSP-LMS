@@ -246,7 +246,7 @@ INSERT INTO `jabatans` (`id`, `name`, `created_at`, `updated_at`) VALUES
 (14, 'Junior Officer', NULL, NULL),
 (15, 'Hotel Staff', NULL, NULL);
 
--- --------------------------------------------------------
+-- --------------------------------------------------------s
 
 --
 -- Table structure for table `letters`
@@ -255,7 +255,7 @@ INSERT INTO `jabatans` (`id`, `name`, `created_at`, `updated_at`) VALUES
 CREATE TABLE `letters` (
   `id` bigint UNSIGNED NOT NULL,
   `reference_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nomor Surat',
-  `agenda_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `knowledge_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `from` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `to` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `letter_date` date DEFAULT NULL,
@@ -273,7 +273,7 @@ CREATE TABLE `letters` (
 -- Dumping data for table `letters`
 --
 
-INSERT INTO `letters` (`id`, `reference_number`, `agenda_number`, `from`, `to`, `letter_date`, `received_date`, `description`, `note`, `type`, `classification_code`, `user_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `letters` (`id`, `reference_number`, `knowledge_number`, `from`, `to`, `letter_date`, `received_date`, `description`, `note`, `type`, `classification_code`, `user_id`, `created_at`, `updated_at`) VALUES
 (1, '0-1', '0-1-1', 'ADMIN', NULL, '2025-06-23', '2025-06-24', 'oklahoma', 'test keterangan', 'incoming', '0', 1, '2025-06-23 05:04:28', '2025-06-23 05:04:28');
 
 -- --------------------------------------------------------

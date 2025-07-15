@@ -9,8 +9,8 @@ return [
         'outgoing_letter' => 'Surat Keluar',
         'disposition_letter' => 'Surat Disposisi',
     ],
-    'agenda' => [
-        'menu' => 'Buku Agenda',
+    'knowledge' => [
+        'menu' => 'Knowledge Sharing',
         'incoming_letter' => 'Surat Masuk',
         'outgoing_letter' => 'Surat Keluar',
         'disposition_letter' => 'Surat Disposisi',

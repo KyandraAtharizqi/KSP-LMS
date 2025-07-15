@@ -10,6 +10,7 @@ use App\Http\Controllers\DispositionController;
 use App\Http\Controllers\LetterGalleryController;
 use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LetterStatusController;
+use App\Http\Controllers\ProfileController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [PageController::class, 'index'])->name('home');
@@ -26,8 +27,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Profile routes
     Route::get('/profile', [PageController::class, 'profile'])->name('profile.show');
-    Route::put('/profile', [PageController::class, 'profileUpdate'])->name('profile.update');
-    Route::put('/profile/deactivate', [PageController::class, 'deactivate'])
+    Route::post('/profile', [PageController::class, 'profileUpdate'])->name('profile.update');
+    Route::post('/profile/deactivate', [PageController::class, 'deactivate'])
         ->name('profile.deactivate')
         ->middleware(['role:staff']);
 
@@ -51,11 +52,11 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('{letter}/disposition', DispositionController::class)->except(['show']);
     });
 
-    // Agenda
-    Route::prefix('agenda')->as('agenda.')->group(function () {
-        Route::get('incoming', [IncomingLetterController::class, 'agenda'])->name('incoming');
+    // knowledge
+    Route::prefix('knowledge')->as('knowledge.')->group(function () {
+        Route::get('incoming', [IncomingLetterController::class, 'knowledge'])->name('incoming');
         Route::get('incoming/print', [IncomingLetterController::class, 'print'])->name('incoming.print');
-        Route::get('outgoing', [OutgoingLetterController::class, 'agenda'])->name('outgoing');
+        Route::get('outgoing', [OutgoingLetterController::class, 'knowledge'])->name('outgoing');
         Route::get('outgoing/print', [OutgoingLetterController::class, 'print'])->name('outgoing.print');
     });
 

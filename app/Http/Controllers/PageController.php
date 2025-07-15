@@ -19,6 +19,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UpdateProfileRequest;
+
 
 class PageController extends Controller
 {
@@ -58,32 +60,36 @@ class PageController extends Controller
         ]);
     }
 
-    public function profileUpdate(UpdateUserRequest $request): RedirectResponse
+    public function profileUpdate(UpdateProfileRequest $request): \Illuminate\Http\RedirectResponse
     {
         try {
             $user = auth()->user();
-            $newProfile = $request->validated();
-
-            // Handle profile picture
+            
+            // Ambil semua data yang sudah divalidasi dari UpdateProfileRequest
+            $updateData = $request->validated();
+    
+            // Handle profile picture HANYA JIKA ADA FILE BARU
             if ($request->hasFile('profile_picture')) {
-                $oldPicture = $user->profile_picture;
-                if (str_contains($oldPicture, '/storage/avatars/')) {
-                    $url = parse_url($oldPicture, PHP_URL_PATH);
-                    Storage::delete(str_replace('/storage', 'public', $url));
+                // Hapus foto lama
+                if ($user->profile_picture) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
                 }
-
-                $filename = time() . '-' . $request->file('profile_picture')->getClientOriginalName();
-                $request->file('profile_picture')->storeAs('public/avatars', $filename);
-                $newProfile['profile_picture'] = asset('storage/avatars/' . $filename);
+    
+                // Simpan foto baru
+                $path = $request->file('profile_picture')->store('avatars', 'public');
+    
+                $updateData['profile_picture'] = $path;
             }
-
-            $user->update($newProfile);
-            return back()->with('success', __('menu.general.success'));
-
+    
+            $user->update($updateData);
+            
+            return back()->with('success', 'Profil berhasil diperbarui.');
+    
         } catch (\Throwable $exception) {
             return back()->with('error', $exception->getMessage());
         }
     }
+
 
     public function deactivate(): RedirectResponse
     {
@@ -150,7 +156,7 @@ class PageController extends Controller
 
             SignatureAndParaf::updateOrCreate(
                 ['registration_id' => $user->registration_id],
-                ['signature_path' => 'storage/signatures/' . $filename]
+                ['signature_path' => 'signatures/' . $filename]
             );
 
             return back()->with('success', 'Signature uploaded successfully.');
@@ -175,12 +181,16 @@ class PageController extends Controller
 
             SignatureAndParaf::updateOrCreate(
                 ['registration_id' => $user->registration_id],
-                ['paraf_path' => 'storage/parafs/' . $filename]
+                ['paraf_path' => 'parafs/' . $filename]
             );
 
             return back()->with('success', 'Paraf uploaded successfully.');
         } catch (\Throwable $e) {
             return back()->with('error', 'Failed to upload paraf: ' . $e->getMessage());
         }
+    }
+    public function testProfile()
+    {
+        dd('KONEKSI BERHASIL! Controller terhubung.');
     }
 }

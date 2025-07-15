@@ -6,7 +6,7 @@
                 <small class="text-black">
                     {{ $letter->type == 'incoming' ? $letter->from : $letter->to }} |
                     <span
-                        class="text-secondary">{{ __('model.letter.agenda_number') }}:</span> {{ $letter->agenda_number }}
+                        class="text-secondary">{{ __('model.letter.knowledge_number') }}:</span> {{ $letter->knowledge_number }}
                     |
                     {{ $letter->classification?->type }}
                 </small>

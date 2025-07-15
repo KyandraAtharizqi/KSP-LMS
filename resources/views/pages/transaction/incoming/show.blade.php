@@ -21,8 +21,8 @@
                 <dt class="col-sm-3">{{ __('model.letter.reference_number') }}</dt>
                 <dd class="col-sm-9">{{ $data->reference_number }}</dd>
 
-                <dt class="col-sm-3">{{ __('model.letter.agenda_number') }}</dt>
-                <dd class="col-sm-9">{{ $data->agenda_number }}</dd>
+                <dt class="col-sm-3">{{ __('model.letter.knowledge_number') }}</dt>
+                <dd class="col-sm-9">{{ $data->knowledge_number }}</dd>
 
                 <dt class="col-sm-3">{{ __('model.classification.code') }}</dt>
                 <dd class="col-sm-9">{{ $data->classification_code }}</dd>
