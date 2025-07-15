@@ -48,6 +48,7 @@ return [
         'active' => 'Active',
         'nonactive' => 'Nonactive',
         'reset_password' => 'Reset Password to Default?',
+        'registration_id' => 'Registration Number / Nomor Induk Karyawan',
     ],
     'general' => [
         'created_at' => 'Created At',

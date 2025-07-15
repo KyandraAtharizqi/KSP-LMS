@@ -30,6 +30,7 @@ class User extends Authenticatable
         'division_id',         // Added
         'directorate_id',
         'superior_id',
+        'golongan',
         'nik',
         'address',
         'profile_picture',

@@ -20,6 +20,7 @@
         $('#editModal select#directorate_id').val($(this).data('directorate_id')).trigger('change');
         $('#editModal select#division_id').val($(this).data('division_id')).trigger('change');
         $('#editModal select#department_id').val($(this).data('department_id')).trigger('change');
+        $('#editModal input#golongan').val($(this).data('golongan'));
 
         $('#editModal input#is_active').prop('checked', $(this).data('active') == 1);
 
@@ -32,16 +33,57 @@
 
 @section('content')
 <x-breadcrumb :values="[__('menu.users')]">
+
+
+        <!-- CSV Import Button -->
+    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#importCsvModal">
+        Import CSV
+    </button>
+
+    <!-- CSV Import Modal -->
+    <div class="modal fade" id="importCsvModal" tabindex="-1" aria-labelledby="importCsvModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ route('users.import.csv') }}" enctype="multipart/form-data" class="modal-content">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importCsvModalLabel">Import Pengguna dari CSV</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label">File CSV</label>
+                        <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv" required>
+                        <small class="form-text text-muted">
+                            Format kolom: Registration_ID, Nama, Alamat, Jabatan_Full, Golongan, Direktorat, Jabatan
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <button type="button" class="btn btn-primary btn-create" data-bs-toggle="modal" data-bs-target="#createModal">
         {{ __('menu.general.create') }}
     </button>
 </x-breadcrumb>
 
+@if(session('success'))
+    <div class="alert alert-success mt-2">
+        {{ session('success') }}
+    </div>
+@endif
+
+
 <form method="GET" action="{{ route('user.index') }}" class="row g-3 mb-3">
     <div class="col-md-4">
         <input type="text" name="search" class="form-control" placeholder="Cari nama/email..." value="{{ request('search') }}">
     </div>
-    <div class="col-md-3">
+
+    <div class="col-md-2">
         <select name="jabatan_id" class="form-select">
             <option value="">-- Semua Jabatan --</option>
             @foreach ($jabatans as $jabatan)
@@ -51,7 +93,30 @@
             @endforeach
         </select>
     </div>
-    <div class="col-md-3">
+
+    <div class="col-md-2">
+        <select name="directorate_id" class="form-select">
+            <option value="">-- Semua Direktorat --</option>
+            @foreach ($directorates as $dir)
+                <option value="{{ $dir->id }}" {{ request('directorate_id') == $dir->id ? 'selected' : '' }}>
+                    {{ $dir->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="division_id" class="form-select">
+            <option value="">-- Semua Divisi --</option>
+            @foreach ($divisions as $div)
+                <option value="{{ $div->id }}" {{ request('division_id') == $div->id ? 'selected' : '' }}>
+                    {{ $div->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-2">
         <select name="department_id" class="form-select">
             <option value="">-- Semua Departemen --</option>
             @foreach ($departments as $dept)
@@ -61,11 +126,26 @@
             @endforeach
         </select>
     </div>
+
+    <div class="col-md-2">
+        <select name="golongan" class="form-select">
+            <option value="">-- Semua Golongan --</option>
+            @foreach ($golongans as $gol)
+                <option value="{{ $gol }}" {{ request('golongan') == $gol ? 'selected' : '' }}>
+                    Golongan {{ $gol }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
     <div class="col-md-2">
         <button type="submit" class="btn btn-primary w-100">Filter</button>
     </div>
 </form>
 
+
+
+<!-- Table Display -->
 <div class="card mb-5">
     <div class="table-responsive text-nowrap">
         <table class="table">
@@ -78,6 +158,7 @@
                     <th>Direktorat</th>
                     <th>Divisi</th>
                     <th>Departemen</th>
+                    <th>Golongan</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
@@ -94,7 +175,7 @@
                         <td>{{ optional($user->directorate)->name ?? optional($user->department?->directorate)->name ?? '-' }}</td>
                         <td>{{ optional($user->division)->name ?? optional($user->department?->division)->name ?? '-' }}</td>
                         <td>{{ optional($user->department)->name ?? '-' }}</td>
-
+                        <td>{{ $user->golongan ?? '-' }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->phone }}</td>
                         <td>
@@ -117,6 +198,7 @@
                                 data-directorate_id="{{ $user->directorate_id }}"
                                 data-division_id="{{ $user->division_id }}"
                                 data-department_id="{{ $user->department_id }}"
+                                data-golongan="{{ $user->golongan }}"
                                 data-superior_registration_id="{{ optional($user->superior)->registration_id }}"
                                 @if(auth()->user()->role === \App\Enums\Role::ADMIN->value)
                                     data-role="{{ $user->role }}"
@@ -133,7 +215,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="11" class="text-center">Data kosong</td>
+                        <td colspan="12" class="text-center">Data kosong</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -163,6 +245,7 @@
                 <x-select-form name="directorate_id" label="Direktorat (jika tanpa departemen)" :options="$directorates" id="directorate_id_create" />
                 <x-select-form name="division_id" label="Divisi (jika ada)" :options="$divisions" id="division_id_create" />
                 <x-select-form name="department_id" label="Departemen" :options="$departments" id="department_id_create" />
+                <x-input-form name="golongan" label="Golongan (opsional)" id="golongan" />
 
                 @if(auth()->user()->role === \App\Enums\Role::ADMIN->value)
                     <select name="role" class="form-select mt-2">
@@ -208,6 +291,7 @@
                 <x-select-form name="directorate_id" label="Direktorat (jika tanpa departemen)" :options="$directorates" id="directorate_id" />
                 <x-select-form name="division_id" label="Divisi (jika ada)" :options="$divisions" id="division_id" />
                 <x-select-form name="department_id" label="Departemen" :options="$departments" id="department_id" />
+                <x-input-form name="golongan" label="Golongan (opsional)" id="golongan" />
 
                 @if(auth()->user()->role === \App\Enums\Role::ADMIN->value)
                     <select name="role" class="form-select mt-2">

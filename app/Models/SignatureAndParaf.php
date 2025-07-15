@@ -19,4 +19,6 @@ class SignatureAndParaf extends Model
     {
         return $this->belongsTo(User::class, 'registration_id', 'registration_id');
     }
+
+    
 }

@@ -8,9 +8,7 @@
 * Created by: ThemeSelection
 * License: You must have a valid license purchased in order to legally use the theme for your project.
 * Copyright ThemeSelection (https://themeselection.com)
-
-=========================================================
- -->
+========================================================= -->
 <!-- beautify ignore:start -->
 <html
     lang="en"
@@ -71,13 +69,25 @@
                         </a>
                     </div>
 
+                    <!-- Display login errors -->
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form id="formAuthentication" class="mb-3" action="{{ route('login') }}" method="POST">
                         @csrf
                         <div class="mb-3">
+                            <!-- Changed from email to registration_id -->
                             <x-input-form
-                                name="email"
-                                type="email"
-                                :label="__('model.user.email')"
+                                name="registration_id"
+                                type="text"
+                                :label="__('model.user.registration_id')"
                             />
                         </div>
                         <div class="mb-3">
@@ -88,7 +98,9 @@
                             />
                         </div>
                         <div class="mt-2">
-                            <button class="btn btn-primary d-grid w-100" type="submit">{{ __('menu.auth.login') }}</button>
+                            <button class="btn btn-primary d-grid w-100" type="submit">
+                                {{ __('menu.auth.login') }}
+                            </button>
                         </div>
                     </form>
                 </div>

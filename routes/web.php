@@ -14,8 +14,14 @@ use App\Http\Controllers\LetterStatusController;
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [PageController::class, 'index'])->name('home');
 
+    // User Management
     Route::resource('user', UserController::class)
         ->except(['show', 'edit', 'create'])
+        ->middleware(['role:admin,department_admin,division_admin']);
+
+    // ✅ Added: CSV Import Route for User
+    Route::post('/users/import-csv', [UserController::class, 'importCsv'])
+        ->name('users.import.csv')
         ->middleware(['role:admin,department_admin,division_admin']);
 
     // Profile routes
@@ -70,6 +76,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [SuratPengajuanPelatihanController::class, 'index'])->name('index');
         Route::get('/create', [SuratPengajuanPelatihanController::class, 'create'])->name('create');
         Route::post('/', [SuratPengajuanPelatihanController::class, 'store'])->name('store');
-        Route::get('/{example}/preview', [SuratPengajuanPelatihanController::class, 'preview'])->name('preview');
+
+        Route::get('/{id}/preview', [SuratPengajuanPelatihanController::class, 'preview'])->name('preview');
+        Route::get('/{id}/edit', [SuratPengajuanPelatihanController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [SuratPengajuanPelatihanController::class, 'update'])->name('update');
+
+        Route::post('/{id}/approval/{approval}/approve', [SuratPengajuanPelatihanController::class, 'approve'])->name('approve');
+        Route::post('/{id}/approval/{approval}/reject', [SuratPengajuanPelatihanController::class, 'reject'])->name('reject');
     });
 });

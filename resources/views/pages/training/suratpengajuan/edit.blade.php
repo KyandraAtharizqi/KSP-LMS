@@ -1,12 +1,69 @@
 @extends('layout.main')
 
 @push('script')
+@php
+    // Pre-process the data in PHP to avoid complex expressions in Blade directives
+    $participantsData = $surat->participants->map(function($p) {
+        return [
+            'registration_id' => $p->registration_id,
+            'name' => $p->user->name,
+        ];
+    })->values();
+
+    $maxRound = $surat->approvals->max('round') ?? 1;
+    
+    $parafsData = $surat->approvals
+        ->where('round', $maxRound)
+        ->where('type', 'paraf')
+        ->map(function($a) {
+            return [
+                'registration_id' => $a->registration_id,
+                'name' => $a->user->name,
+            ];
+        })->values();
+
+    $signature1Data = $surat->approvals
+        ->where('round', $maxRound)
+        ->where('type', 'signature')
+        ->slice(0, 1)
+        ->map(function($a) {
+            return [
+                'registration_id' => $a->registration_id,
+                'name' => $a->user->name,
+            ];
+        })->values();
+
+    $signature2Data = $surat->approvals
+        ->where('round', $maxRound)
+        ->where('type', 'signature')
+        ->slice(1, 1)
+        ->map(function($a) {
+            return [
+                'registration_id' => $a->registration_id,
+                'name' => $a->user->name,
+            ];
+        })->values();
+
+    $signature3Data = $surat->approvals
+        ->where('round', $maxRound)
+        ->where('type', 'signature')
+        ->slice(2, 1)
+        ->map(function($a) {
+            return [
+                'registration_id' => $a->registration_id,
+                'name' => $a->user->name,
+            ];
+        })->values();
+@endphp
+
 <script>
-    let selectedParticipants = [];
-    let selectedParafs = [];
-    let selectedSignature1 = [];
-    let selectedSignature2 = [];
-    let selectedSignature3 = [];
+    // Initialize JavaScript selection arrays based on existing approvals/participants
+    let selectedParticipants = @json($participantsData);
+    let lastRound = {{ $maxRound }};
+    let selectedParafs = @json($parafsData);
+    let selectedSignature1 = @json($signature1Data);
+    let selectedSignature2 = @json($signature2Data);
+    let selectedSignature3 = @json($signature3Data);
 
     function renderList(arr, containerId, inputName, inputContainerId, color) {
         const container = document.getElementById(containerId);
@@ -129,23 +186,33 @@
 </script>
 @endpush
 
-
-
 @section('content')
-<div class="page-heading"><h3>Form Pengajuan Pelatihan</h3></div>
+<div class="page-heading"><h3>Edit Surat Pengajuan Pelatihan</h3></div>
+
+@if ($latestRejection)
+    <div class="alert alert-danger">
+        <strong>❗ Surat Ditolak!</strong><br>
+        Round {{ $latestRejection->round }}, Seq {{ $latestRejection->sequence }} – "{{ $latestRejection->rejection_reason }}"
+    </div>
+@endif
+
 <div class="page-content">
-    <form action="{{ route('training.suratpengajuan.store') }}" method="POST">
-        @csrf
+    <form action="{{ route('training.suratpengajuan.update', $surat->id) }}" method="POST">
+        @csrf @method('PUT')
         <div class="card">
             <div class="card-body row">
+                {{-- Kode Pelatihan --}}
                 <div class="col-md-6 mb-3">
                     <label>Kode Pelatihan</label>
-                    <input type="text" name="kode_pelatihan" class="form-control" required>
+                    <input type="text" name="kode_pelatihan" class="form-control" value="{{ $surat->kode_pelatihan }}" readonly>
                 </div>
+
+                {{-- Kompetensi --}}
                 <div class="col-md-6 mb-3">
                     <label>Kompetensi</label>
-                    <input type="text" name="kompetensi" class="form-control" required>
+                    <input type="text" name="kompetensi" value="{{ old('kompetensi', $surat->kompetensi) }}" class="form-control" required>
                 </div>
+
                 <div class="col-md-6 mb-3">
                     <label>Judul</label>
                     <input type="text" name="judul" class="form-control" required>
@@ -230,7 +297,8 @@
                     <textarea name="keterangan" class="form-control"></textarea>
                 </div>
 
-                <!-- Participant -->
+
+                {{-- Participants --}}
                 <hr><h5>Peserta</h5>
                 <div class="col-12 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#participantModal">+ Tambah Peserta</button>
@@ -238,7 +306,7 @@
                 <div class="col-12 mb-2" id="selected-participant-list"></div>
                 <div id="participant-inputs"></div>
 
-                <!-- Paraf -->
+                {{-- Paraf --}}
                 <hr><h5>Paraf</h5>
                 <div class="col-12 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#parafModal">+ Tambah Paraf</button>
@@ -246,41 +314,27 @@
                 <div class="col-12 mb-2" id="selected-paraf-list"></div>
                 <div id="paraf-inputs"></div>
 
-                <!-- Signatures (1, 2, 3 in one list but shown separately) -->
+                {{-- Signatures --}}
                 <hr><h5>Penandatangan</h5>
-
-                <!-- Signature 1 -->
                 <h6>Signature 1</h6>
-                <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Penandatangan</button>
-                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Penandatangan 1</button>
                 <div class="col-12 mb-2" id="selected-signature1-list"></div>
                 <div id="signature1-inputs"></div>
 
-                <!-- Signature 2 -->
-                <h6 class="mt-3">Signature 2</h6>
-                <p class="text-muted">Pilih <strong>Human Capital Manager</strong> sebagai penandatangan kedua.</p>
-                <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Signature 2</button>
-                </div>
+                <h6>Signature 2</h6>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Penandatangan 2</button>
                 <div class="col-12 mb-2" id="selected-signature2-list"></div>
                 <div id="signature2-inputs"></div>
 
-                <!-- Signature 3 -->
-                <h6 class="mt-3">Signature 3</h6>
-                <p class="text-muted">Pilih <strong>Director HC & Finance</strong> sebagai penandatangan ketiga.</p>
-                <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature3Modal">+ Tambah Signature 3</button>
-                </div>
+                <h6>Signature 3</h6>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature3Modal">+ Tambah Penandatangan 3</button>
                 <div class="col-12 mb-2" id="selected-signature3-list"></div>
                 <div id="signature3-inputs"></div>
 
-                <!-- Submit Button -->
+                {{-- Submit --}}
                 <div class="col-12 mt-3">
-                    <button type="submit" class="btn btn-primary">Ajukan Surat</button>
+                    <button type="submit" class="btn btn-primary">Submit Perubahan & Ajukan Ulang</button>
                 </div>
-
-
             </div>
         </div>
     </form>
@@ -481,6 +535,4 @@
     </div>
   </div>
 </div>
-
-
 @endsection

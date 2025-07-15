@@ -14,56 +14,81 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>No. Surat</th>
+                        <th>Kode Pelatihan</th>
                         <th>Judul</th>
                         <th>Tanggal</th>
                         <th>Tempat</th>
                         <th>Penyelenggara</th>
-                        <th>Status Tanda Tangan</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($examples as $example)
+                        @php
+                            $userApproval = $example->approvals
+                                ->where('user_id', auth()->id())
+                                ->where('status', 'pending')
+                                ->first();
+
+                            $latestRound = $example->approvals->max('round');
+                            $rejectedInLatestRound = $example->approvals
+                                ->where('round', $latestRound)
+                                ->contains(fn($item) => $item->status === 'rejected');
+
+                            $isCreator = auth()->id() === $example->created_by;
+                        @endphp
                         <tr>
-                            <td>{{ $example->surat_id ?? '-' }}</td>
+                            <td>{{ $example->kode_pelatihan }}</td>
                             <td>{{ $example->judul }}</td>
-                            <td>{{ $example->tanggal_mulai->format('d M Y') ?? '-' }}</td>
+                            <td>{{ $example->tanggal_mulai?->format('d M Y') ?? '-' }}</td>
                             <td>{{ $example->tempat }}</td>
                             <td>{{ $example->penyelenggara }}</td>
-
                             <td>
-                                @php
-                                    $userSignature = $example->signatures
-                                        ->where('user_id', auth()->id())
-                                        ->first();
-                                @endphp
-
-                                @if ($userSignature)
-                                    @if ($userSignature->status === 'pending')
-                                        <form action="{{ route('training.suratpengajuan.sign', [$example->id, $userSignature->id]) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button class="btn btn-sm btn-warning" onclick="return confirm('Tandatangani surat ini?')">
-                                                Tandatangani ({{ ucfirst($userSignature->role_type) }})
-                                            </button>
-                                        </form>
-                                    @elseif ($userSignature->status === 'accepted')
-                                        <span class="badge bg-success">Ditandatangani ({{ ucfirst($userSignature->role_type) }})</span>
-                                    @elseif ($userSignature->status === 'rejected')
-                                        <span class="badge bg-danger">Ditolak ({{ ucfirst($userSignature->role_type) }})</span>
-                                    @endif
+                                @if ($userApproval)
+                                    <span class="badge bg-warning">Menunggu {{ ucfirst($userApproval->type) }}</span>
+                                @elseif ($rejectedInLatestRound)
+                                    <span class="badge bg-danger">Ditolak</span>
                                 @else
                                     @php
-                                        $statusList = $example->signatures->pluck('status')->unique()->implode(', ');
+                                        $statuses = $example->approvals
+                                            ->pluck('status')
+                                            ->unique()
+                                            ->implode(', ');
                                     @endphp
-                                    <span class="badge bg-secondary">{{ ucfirst($statusList) }}</span>
+                                    <span class="badge bg-secondary">
+                                        {{ ucfirst($statuses ?: 'Belum ditentukan') }}
+                                    </span>
                                 @endif
                             </td>
 
                             <td>
-                                <a href="{{ route('training.suratpengajuan.preview', $example->id) }}" class="btn btn-sm btn-outline-primary">
+                                <a href="{{ route('training.suratpengajuan.preview', $example->id) }}" class="btn btn-sm btn-outline-primary mb-1">
                                     Lihat Surat
                                 </a>
+
+                                <button class="btn btn-sm btn-outline-secondary mb-1" data-bs-toggle="modal" data-bs-target="#trackerModal-{{ $example->id }}">
+                                    🔍 Tracking
+                                </button>
+
+                                @if ($userApproval && $userApproval->status === 'pending')
+                                    <form action="{{ route('training.suratpengajuan.approve', [$example->id, $userApproval->id]) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button class="btn btn-sm btn-success mb-1" onclick="return confirm('Setujui surat ini?')">
+                                            {{ $userApproval->type === 'paraf' ? 'Parafkan' : 'Tandatangani' }}
+                                        </button>
+                                    </form>
+
+                                    <button class="btn btn-sm btn-danger mb-1" data-bs-toggle="modal" data-bs-target="#rejectModal-{{ $userApproval->id }}">
+                                        Tolak
+                                    </button>
+                                @endif
+
+                                @if ($isCreator && $rejectedInLatestRound)
+                                    <a href="{{ route('training.suratpengajuan.edit', $example->id) }}" class="btn btn-sm btn-outline-warning mb-1">
+                                        ✏️ Edit & Ajukan Ulang
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -74,4 +99,89 @@
         </div>
     </div>
 </div>
+
+{{-- Approval Tracking Modals --}}
+@foreach($examples as $example)
+<div class="modal fade" id="trackerModal-{{ $example->id }}" tabindex="-1" aria-labelledby="trackerLabel-{{ $example->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trackerLabel-{{ $example->id }}">📋 Riwayat Persetujuan - {{ $example->kode_pelatihan }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    @foreach ($example->approvals->sortBy(['round', 'sequence']) as $step)
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div>
+                                    <strong>
+                                        {{ ucfirst($step->type) }} -
+                                        {{ $step->user->name }}
+                                        ({{ $step->user->registration_id ?? '-' }},
+                                        {{ $step->user->jabatan_full ?? '-' }})
+                                    </strong>
+                                </div>
+                                <small>Round {{ $step->round }}, Step {{ $step->sequence }}</small><br>
+                                @if ($step->status === 'approved')
+                                    <span class="badge bg-success">
+                                        ✅ Disetujui -
+                                        {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
+                                    </span>
+                                @elseif ($step->status === 'rejected')
+                                    <span class="badge bg-danger">
+                                        ❌ Ditolak -
+                                        {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
+                                    </span><br>
+                                    <small>Alasan: {{ $step->rejection_reason }}</small>
+                                @else
+                                    <span class="badge bg-secondary">⏳ Menunggu Tindakan</span>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
+{{-- Reject Modals --}}
+@foreach($examples as $example)
+    @php
+        $userApproval = $example->approvals
+            ->where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->first();
+    @endphp
+    @if ($userApproval)
+    <div class="modal fade" id="rejectModal-{{ $userApproval->id }}" tabindex="-1" aria-labelledby="rejectLabel-{{ $userApproval->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('training.suratpengajuan.reject', [$example->id, $userApproval->id]) }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectLabel-{{ $userApproval->id }}">Tolak Surat - {{ $example->kode_pelatihan }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Alasan Penolakan</label>
+                            <textarea name="rejection_reason" class="form-control" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger">Tolak</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+@endforeach
 @endsection

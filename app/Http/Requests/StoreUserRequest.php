@@ -28,6 +28,7 @@ class StoreUserRequest extends FormRequest
             'superior_registration_id' => 'Atasan',
             'nik' => 'NIK',
             'address' => 'Alamat',
+            'golongan' => 'Golongan',
             'role' => 'Peran',
         ];
     }
@@ -47,6 +48,7 @@ class StoreUserRequest extends FormRequest
             'superior_registration_id' => ['nullable', 'string'],
             'nik' => ['nullable', 'string'],
             'address' => ['nullable', 'string'],
+            'golongan' => ['nullable', 'string'], // ✅ Added here
             'is_active' => ['nullable'],
             'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
         ];

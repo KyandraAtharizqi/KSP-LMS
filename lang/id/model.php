@@ -48,6 +48,8 @@ return [
         'active' => 'Aktif',
         'nonactive' => 'Nonaktif',
         'reset_password' => 'Setel ulang Kata Sandi menjadi bawaan?',
+        'registration_id' => 'Nomor Registrasi / Nomor Induk Karyawan',
+
     ],
     'general' => [
         'created_at' => 'Dibuat pada',

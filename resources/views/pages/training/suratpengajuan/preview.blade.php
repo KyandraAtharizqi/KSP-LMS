@@ -280,6 +280,76 @@
             <div class="creator-info">
                 <strong>Dibuat oleh:</strong> {{ $surat->creator->name ?? '-' }}
             </div>
+
+
+
+            <!-- Approval Section -->
+            <div class="form-section">
+                <div class="section-header">Persetujuan</div>
+                <div class="section-content">
+
+                    {{-- Paraf Section --}}
+                    @if ($surat->approvals->where('type', 'paraf')->count())
+                        <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">Paraf</div>
+                        <table style="width: 100%; margin-top: 5px; text-align: center;">
+                            <tr>
+                                @foreach ($surat->approvals->where('type', 'paraf')->sortBy('sequence') as $paraf)
+                                    <td>
+                                        <div style="height: 60px;">
+                                            @if ($paraf->status === 'approved' && $paraf->image_path)
+                                                <img src="{{ asset('storage/' . $paraf->image_path) }}" alt="Paraf" style="height: 50px;">
+                                            @else
+                                                <div style="height: 50px; border-bottom: 1px solid #000;"></div>
+                                            @endif
+                                        </div>
+                                        <div style="font-size: 12px; margin-top: 4px;">
+                                            {{ $paraf->user->name ?? '-' }}<br>
+                                            <small>{{ $paraf->user->registration_id ?? '-' }}</small><br>
+                                            <small>{{ $paraf->user->jabatan_full ?? '-' }}</small>
+                                        </div>
+                                        <div style="font-size: 10px; color: #888;">(Paraf)</div>
+                                    </td>
+                                @endforeach
+                            </tr>
+                        </table>
+                    @endif
+
+                    {{-- Signature Section --}}
+                    @if ($surat->approvals->where('type', 'signature')->count())
+                        <div style="font-weight: bold; font-size: 13px; margin: 25px 0 8px;">Tanda Tangan</div>
+                        <table style="width: 100%; text-align: center;">
+                            <tr style="font-size: 10px; color: #888;">
+                                <td>Mengusulkan</td>
+                                <td>Mengetahui</td>
+                                <td>Menyetujui</td>
+                            </tr>
+                            <tr>
+                                @foreach ($surat->approvals->where('type', 'signature')->sortBy('sequence') as $signature)
+                                    <td>
+                                        <div style="height: 60px;">
+                                            @if ($signature->status === 'approved' && $signature->image_path)
+                                                <img src="{{ asset('storage/' . $signature->image_path) }}" alt="Signature" style="height: 50px;">
+                                            @else
+                                                <div style="height: 50px; border-bottom: 1px solid #000;"></div>
+                                            @endif
+                                        </div>
+                                        <div style="font-size: 12px; margin-top: 4px;">
+                                            {{ $signature->user->name ?? '-' }}<br>
+                                            <small>{{ $signature->user->registration_id ?? '-' }}</small><br>
+                                            <small>{{ $signature->user->jabatan_full ?? '-' }}</small>
+                                        </div>
+                                        <div style="font-size: 10px; color: #888;">(Tanda Tangan)</div>
+                                    </td>
+                                @endforeach
+                            </tr>
+                        </table>
+                    @endif
+                </div>
+            </div>
+
+
+
+
         </div>
     </div>
 </body>

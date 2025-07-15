@@ -12,24 +12,19 @@ class UpdateUserRequest extends FormRequest
     {
         $authUser = auth()->user();
 
-        // Allow admin full access
         if ($authUser->role === Role::ADMIN->status()) {
             return true;
         }
 
-        // Allow user to update their own data
         if ($this->id == $authUser->id) {
             return true;
         }
 
-        // Get the target user being updated
         $targetUser = \App\Models\User::find($this->id);
-
         if (!$targetUser) {
             return false;
         }
 
-        // If Department Admin, only allow if same department
         if (
             $authUser->role === Role::DEPARTMENT_ADMIN->status() &&
             $authUser->department_id &&
@@ -38,7 +33,6 @@ class UpdateUserRequest extends FormRequest
             return true;
         }
 
-        // If Division Admin, only allow if same division
         if (
             $authUser->role === Role::DIVISION_ADMIN->status() &&
             $authUser->division_id &&
@@ -65,6 +59,7 @@ class UpdateUserRequest extends FormRequest
             'superior_registration_id' => 'Atasan (Registration ID)',
             'nik' => 'NIK',
             'address' => 'Alamat',
+            'golongan' => 'Golongan',
             'role' => 'Peran',
         ];
     }
@@ -84,6 +79,7 @@ class UpdateUserRequest extends FormRequest
             'superior_registration_id' => ['nullable', 'exists:users,registration_id'],
             'nik' => ['nullable', 'string'],
             'address' => ['nullable', 'string'],
+            'golongan' => ['nullable', 'string'], // ✅ Added here
             'is_active' => ['nullable'],
             'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
         ];
