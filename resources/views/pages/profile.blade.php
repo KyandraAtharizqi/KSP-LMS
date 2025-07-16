@@ -32,6 +32,17 @@
 @section('content')
 <x-breadcrumb :values="[__('navbar.profile.profile')]"></x-breadcrumb>
 
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <h5 class="alert-heading">Terdapat Kesalahan Validasi:</h5>
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="row">
     <div class="col">
         @if(auth()->user()->role == 'admin')
@@ -48,11 +59,23 @@
         <div class="card mb-4">
             <form action="{{ route('profile.update') }}" method="post" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
+
                 <div class="card-body">
                     <div class="d-flex align-items-start align-items-sm-center gap-4">
-                        <img src="{{ $data->profile_picture }}" alt="user-avatar"
-                             class="d-block rounded" height="100" width="100" id="uploadedAvatar">
+                        @php
+                            $picture = $data->profile_picture;
+                            // Cek apakah $picture ada isinya dan BUKAN sebuah URL lengkap
+                            if ($picture && !Illuminate\Support\Str::startsWith($picture, 'http')) {
+                                // Jika ini path lokal, maka kita tambahkan asset storage
+                                $pictureUrl = asset('storage/' . $picture);
+                            } else {
+                                // Jika ini SUDAH URL lengkap (cth: dari ui-avatars) ATAU kosong,
+                                // kita gunakan langsung atau berikan gambar default.
+                                $pictureUrl = $picture ?: asset('assets/img/avatars/1.png');
+                            }
+                        @endphp
+
+                        <img src="{{ $pictureUrl }}" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar">
                         <div class="button-wrapper">
                             <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
                                 <span class="d-none d-sm-block">{{ __('menu.general.upload') }}</span>
@@ -90,7 +113,7 @@
                             </button>
                             <div class="mt-2">
                                 @if ($data->signatureParaf && $data->signatureParaf->signature_path)
-                                    <img src="{{ asset(str_replace('storage/', 'storage/', $data->signatureParaf->signature_path)) }}" alt="Signature" height="100">
+                                    <img src="{{ asset('storage/' . $data->signatureParaf->signature_path) }}" alt="Signature" height="100">
                                 @else
                                     <p class="text-muted">Belum diunggah.</p>
                                 @endif
@@ -105,7 +128,7 @@
                             </button>
                             <div class="mt-2">
                                 @if ($data->signatureParaf && $data->signatureParaf->paraf_path)
-                                    <img src="{{ asset(str_replace('storage/', 'storage/', $data->signatureParaf->paraf_path)) }}" alt="Paraf" height="100">
+                                    <img src="{{ asset('storage/' . $data->signatureParaf->paraf_path) }}" alt="Paraf" height="100">
                                 @else
                                     <p class="text-muted">Belum diunggah.</p>
                                 @endif
@@ -131,7 +154,6 @@
                 </div>
                 <form id="formAccountDeactivation" action="{{ route('profile.deactivate') }}" method="post">
                     @csrf
-                    @method('PUT')
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" name="accountActivation" id="accountActivation">
                         <label class="form-check-label" for="accountActivation">{{ __('navbar.profile.deactivate_confirm') }}</label>

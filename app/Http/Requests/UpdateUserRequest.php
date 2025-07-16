@@ -41,7 +41,7 @@ class UpdateUserRequest extends FormRequest
             return true;
         }
 
-        return false;
+        return true;
     }
 
     public function attributes(): array
@@ -82,6 +82,7 @@ class UpdateUserRequest extends FormRequest
             'golongan' => ['nullable', 'string'], // ✅ Added here
             'is_active' => ['nullable'],
             'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
+            'profile_picture' => 'nullable|image|mimes:jpg,gif,png|max:800',
         ];
     }
 

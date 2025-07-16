@@ -9,8 +9,8 @@ return [
         'outgoing_letter' => 'Outgoing Letter',
         'disposition_letter' => 'Disposition Letter',
     ],
-    'agenda' => [
-        'menu' => 'Agenda',
+    'knowledge' => [
+        'menu' => 'Knowledge Sharing',
         'incoming_letter' => 'Incoming Letter',
         'outgoing_letter' => 'Outgoing Letter',
         'disposition_letter' => 'Disposition Letter',

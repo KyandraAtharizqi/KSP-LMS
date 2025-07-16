@@ -2,7 +2,7 @@
 
 @section('content')
     <x-breadcrumb
-        :values="[__('menu.agenda.menu'), __('menu.agenda.outgoing_letter')]">
+        :values="[__('menu.knowledge.menu'), __('menu.knowledge.outgoing_letter')]">
     </x-breadcrumb>
 
     <div class="card mb-5">
@@ -11,16 +11,16 @@
                 <input type="hidden" name="search" value="{{ $search ?? '' }}">
                 <div class="row">
                     <div class="col">
-                        <x-input-form name="since" :label="__('menu.agenda.start_date')" type="date"
+                        <x-input-form name="since" :label="__('menu.knowledge.start_date')" type="date"
                                       :value="$since ? date('Y-m-d', strtotime($since)) : ''"/>
                     </div>
                     <div class="col">
-                        <x-input-form name="until" :label="__('menu.agenda.end_date')" type="date"
+                        <x-input-form name="until" :label="__('menu.knowledge.end_date')" type="date"
                                       :value="$until ? date('Y-m-d', strtotime($until)) : ''"/>
                     </div>
                     <div class="col">
                         <div class="mb-3">
-                            <label for="filter" class="form-label">{{ __('menu.agenda.filter_by') }}</label>
+                            <label for="filter" class="form-label">{{ __('menu.knowledge.filter_by') }}</label>
                             <select class="form-select" id="filter" name="filter">
                                 <option
                                     value="letter_date" @selected(old('filter', $filter) == 'letter_date')>{{ __('model.letter.letter_date') }}</option>
@@ -37,7 +37,7 @@
                                     <button class="btn btn-primary"
                                             type="submit">{{ __('menu.general.filter') }}</button>
                                     <a
-                                        href="{{ route('agenda.outgoing.print') . '?' . $query }}"
+                                        href="{{ route('knowledge.outgoing.print') . '?' . $query }}"
                                         target="_blank"
                                         class="btn btn-primary">
                                         {{ __('menu.general.print') }}
@@ -53,7 +53,7 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>{{ __('model.letter.agenda_number') }}</th>
+                    <th>{{ __('model.letter.knowledge_number') }}</th>
                     <th>{{ __('model.letter.reference_number') }}</th>
                     <th>{{ __('model.letter.to') }}</th>
                     <th>{{ __('model.letter.letter_date') }}</th>
@@ -61,15 +61,15 @@
                 </thead>
                 @if($data)
                     <tbody>
-                    @foreach($data as $agenda)
+                    @foreach($data as $knowledge)
                         <tr>
                             <td><i class="fab fa-angular fa-lg text-danger me-3"></i>
-                                <strong>{{ $agenda->agenda_number }}</strong></td>
+                                <strong>{{ $knowledge->knowledge_number }}</strong></td>
                             <td>
-                                <a href="{{ route('transaction.outgoing.show', $agenda) }}">{{ $agenda->reference_number }}</a>
+                                <a href="{{ route('transaction.outgoing.show', $knowledge) }}">{{ $knowledge->reference_number }}</a>
                             </td>
-                            <td>{{ $agenda->to }}</td>
-                            <td>{{ $agenda->formatted_letter_date }}</td>
+                            <td>{{ $knowledge->to }}</td>
+                            <td>{{ $knowledge->formatted_letter_date }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -84,7 +84,7 @@
                 @endif
                 <tfoot class="table-border-bottom-0">
                 <tr>
-                    <th>{{ __('model.letter.agenda_number') }}</th>
+                    <th>{{ __('model.letter.knowledge_number') }}</th>
                     <th>{{ __('model.letter.reference_number') }}</th>
                     <th>{{ __('model.letter.to') }}</th>
                     <th>{{ __('model.letter.letter_date') }}</th>

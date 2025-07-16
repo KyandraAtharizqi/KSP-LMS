@@ -26,15 +26,15 @@ class User extends Authenticatable
         'role',
         'is_active',
         'jabatan_id',
+        'jabatan_full',
         'department_id',
-        'division_id',         // Added
+        'division_id',
         'directorate_id',
         'superior_id',
         'golongan',
         'nik',
         'address',
         'profile_picture',
-        'jabatan_full',        // Added
     ];
 
     /**
