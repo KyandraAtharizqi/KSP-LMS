@@ -14,6 +14,9 @@ use App\Http\Controllers\LetterStatusController;
 use App\Http\Controllers\ProfileController;
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/surat-pengajuan/{id}/download', [SuratPengajuanPelatihanController::class, 'downloadPDF'])->name('surat.pengajuan.download');
+    
     Route::get('/', [PageController::class, 'index'])->name('home');
 
     // User Management
@@ -98,6 +101,5 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{id}/approve/{approval}', [SuratTugasPelatihanController::class, 'approve'])->name('approve');
         Route::post('/{id}/reject/{approval}', [SuratTugasPelatihanController::class, 'reject'])->name('reject');
     });
-
 
 });

@@ -18,8 +18,8 @@
         }
         
         .header {
-            background-color: #4a90e2;
-            color: white;
+            background-color: #ffffff;
+            color: black;
             padding: 10px 15px;
             font-weight: bold;
             font-size: 14px;
@@ -58,44 +58,44 @@
         
         .form-section {
             border: 1px solid #333;
-            margin-bottom: 15px;
+            margin-bottom: 0px;
         }
         
         .section-header {
-            background-color: #e8e8e8;
+            background-color: #FFFFFF;
             padding: 6px 10px;
             font-weight: bold;
             font-size: 12px;
-            border-bottom: 1px solid #333;
+            border-bottom: 0px solid #333;
         }
         
         .section-content {
-            padding: 10px;
+            padding: 2px 10px 10px 10px;
         }
         
         .field-group {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         
         .field {
             flex: 1;
-            min-width: 200px;
+            min-width: 0px;
         }
         
         .field-label {
             font-weight: bold;
             font-size: 12px;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
             display: block;
         }
         
         .field-value {
             border: 1px solid #999;
             padding: 5px 8px;
-            background-color: #f9f9f9;
+            background-color: #ffffff;
             min-height: 18px;
             font-size: 12px;
         }
@@ -156,8 +156,7 @@
 <body>
     <div class="form-container">
         <div class="header">
-            KRAKATAU
-            <span style="margin-left: auto; font-size: 10px;">SARANA PROPERTI</span>
+            <img src="{{ asset('logoksp.png') }}" alt="Logo" style="height: 40px;">
         </div>
         
         <div class="title-bar">SURAT PENGAJUAN PELATIHAN</div>
@@ -165,15 +164,12 @@
         <div class="form-content">
             <!-- Kompetensi Section -->
             <div class="form-section">
-                <div class="section-header">Kompetensi</div>
-                <div class="section-content">
-                    <div class="field-value">{{ $surat->kompetensi }}</div>
-                </div>
+                <div class="section-header">Kompetensi : {{ $surat->kompetensi }}</div>
             </div>
             
             <!-- Judul Pelatihan Section -->
             <div class="form-section">
-                <div class="section-header">Judul Pelatihan :</div>
+                <div class="section-header">Judul Pelatihan : {{ $surat->judul }}</div>
                 <div class="section-content">
                     <div class="field-group">
                         <div class="field">
@@ -193,73 +189,67 @@
                             <div class="field-value">{{ $surat->kompetensi_wajib }}</div>
                         </div>
                     </div>
-                    
-                    <div class="field">
-                        <span class="field-label">Judul:</span>
-                        <div class="field-value">{{ $surat->judul }}</div>
-                    </div>
                 </div>
             </div>
             
             <!-- Materi Global Section -->
             <div class="form-section">
-                <div class="section-header">Materi Global :</div>
-                <div class="section-content">
-                    <div class="field-value">{{ $surat->materi_global }}</div>
-                </div>
+                <div class="section-header">Materi Global : {{ $surat->materi_global }}</div>
             </div>
             
             <!-- Program Pelatihan Section -->
             <div class="form-section">
-                <div class="section-content">
-                    <div style="font-weight: bold; margin-bottom: 10px;">
-                        Pelatihan ini <strong>{{ $surat->program_pelatihan_ksp }}</strong> dalam Program Pelatihan PT. KSP
-                    </div>
+                <div class="section-header">
+                    Pelatihan ini <strong>{{ $surat->program_pelatihan_ksp }}</strong> dalam Program Pelatihan PT. KSP
                 </div>
             </div>
             
             <!-- Schedule Section -->
             <div class="form-section">
                 <div class="section-content">
-                    <div class="field-group">
-                        <div class="field">
-                            <span class="field-label">Tanggal</span>
-                            <div class="field-value">
-                                {{ \Carbon\Carbon::parse($surat->tanggal_mulai)->format('d M Y') }} - 
-                                {{ \Carbon\Carbon::parse($surat->tanggal_selesai)->format('d M Y') }}
-                            </div>
-                        </div>
-                        <div class="field">
-                            <span class="field-label">Durasi :</span>
-                            <div class="field-value">{{ $surat->durasi }} Hari</div>
-                        </div>
-                    </div>
-                    
-                    <div class="field" style="margin-bottom: 15px;">
-                        <span class="field-label">Tempat</span>
-                        <div class="field-value">{{ $surat->tempat }}</div>
-                    </div>
-                    
-                    <div class="field" style="margin-bottom: 15px;">
-                        <span class="field-label">Penyelenggara</span>
-                        <div class="field-value">{{ $surat->penyelenggara }}</div>
-                    </div>
-                    
-                    <div class="field-group" style="margin-bottom: 15px;">
-                        <div class="field">
-                            <span class="field-label">Biaya</span>
-                            <div class="field-value">{{ $surat->biaya }}</div>
-                        </div>
-                        <div class="field">
-                            <span class="field-label">Per Orang/Paket</span>
-                            <div class="field-value">{{ $surat->per_paket_or_orang }}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <span class="field-label">Keterangan</span>
-                        <div class="field-value">{{ $surat->keterangan }}</div>
-                    </div>
+                    <table class="schedule-table" style="width: 100%; border-collapse: separate; border-spacing: 0 5px;">
+                        <tr>
+                            <td style="width: 50%;">
+                                <span class="field-label">Tanggal</span>
+                                <div class="field-value">
+                                    {{ \Carbon\Carbon::parse($surat->tanggal_mulai)->format('d M Y') }} - 
+                                    {{ \Carbon\Carbon::parse($surat->tanggal_selesai)->format('d M Y') }}
+                                </div>
+                            </td>
+                            <td style="width: 50%;">
+                                <span class="field-label">Durasi :</span>
+                                <div class="field-value">{{ $surat->durasi }} Hari</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span class="field-label">Tempat</span>
+                                <div class="field-value">{{ $surat->tempat }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span class="field-label">Penyelenggara</span>
+                                <div class="field-value">{{ $surat->penyelenggara }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="field-label">Biaya</span>
+                                <div class="field-value">{{ number_format($surat->biaya, 0, ',', '.') }}</div>
+                            </td>
+                            <td>
+                                <span class="field-label">Per Orang/Paket</span>
+                                <div class="field-value">{{ $surat->per_paket_or_orang }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span class="field-label">Keterangan</span>
+                                <div class="field-value" style="min-height: 30px;">{{ $surat->keterangan }}</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
             
@@ -276,16 +266,10 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="creator-info">
-                <strong>Dibuat oleh:</strong> {{ $surat->creator->name ?? '-' }}
-            </div>
-
 
 
             <!-- Approval Section -->
-            <div class="form-section">
-                <div class="section-header">Persetujuan</div>
+            <div style="margin-top: 10px;">
                 <div class="section-content">
 
                     {{-- Paraf Section --}}

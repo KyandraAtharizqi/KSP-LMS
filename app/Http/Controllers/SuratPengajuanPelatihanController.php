@@ -9,6 +9,8 @@ use App\Models\SuratPengajuanPelatihanSignatureAndParaf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class SuratPengajuanPelatihanController extends Controller
 {
@@ -205,6 +207,40 @@ class SuratPengajuanPelatihanController extends Controller
         }
 
         return view('pages.training.suratpengajuan.preview', compact('surat'));
+    }
+
+    public function downloadPDF($id)
+    {
+        // 1. Ambil data surat (logikanya sama persis dengan method preview Anda)
+        $surat = SuratPengajuanPelatihan::with([
+            'creator',
+            'participants.user',
+            'approvals.user',
+        ])->findOrFail($id);
+
+        foreach ($surat->approvals as $approval) {
+            $registrationId = $approval->registration_id;
+            $sigRecord = DB::table('signature_and_parafs')
+                ->where('registration_id', $registrationId)
+                ->first();
+
+            if ($sigRecord) {
+                if ($approval->type === 'paraf') {
+                    $approval->image_path = str_replace('storage/', '', $sigRecord->paraf_path);
+                } elseif ($approval->type === 'signature') {
+                    $approval->image_path = str_replace('storage/', '', $sigRecord->signature_path);
+                }
+            } else {
+                $approval->image_path = null;
+            }
+        }
+
+        // 2. Load view 'preview' Anda yang sudah ada dengan data surat
+        $pdf = PDF::loadView('pages.training.suratpengajuan.preview', compact('surat'));
+
+        // 3. Buat nama file dan unduh
+        $filename = Str::slug($surat->judul) . '.pdf';
+        return $pdf->download($filename);
     }
 
     public function update(Request $request, $id)
@@ -439,5 +475,6 @@ class SuratPengajuanPelatihanController extends Controller
 
         return back()->with('danger', 'Surat telah ditolak dan dikembalikan ke pembuat.');
     }
+
 
 }

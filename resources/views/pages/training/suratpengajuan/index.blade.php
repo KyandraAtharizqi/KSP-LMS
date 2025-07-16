@@ -73,6 +73,10 @@
                                     Lihat Surat
                                 </a>
 
+                                <a href="{{ route('surat.pengajuan.download', ['id' => $example->id]) }}" class="btn btn-sm btn-success mb-1">
+                                    Unduh PDF
+                                </a>
+
                                 <button class="btn btn-sm btn-outline-secondary mb-1" data-bs-toggle="modal" data-bs-target="#trackerModal-{{ $example->id }}">
                                     🔍 Tracking
                                 </button>
