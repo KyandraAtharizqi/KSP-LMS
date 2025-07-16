@@ -8,7 +8,8 @@ use Illuminate\View\Component;
 
 class InputForm extends Component
 {
-    public string $name, $label, $type, $value;
+    public string $name, $label, $type;
+    public ?string $value; // Tambahkan '?' di sini
     /**
      * Create a new component instance.
      *

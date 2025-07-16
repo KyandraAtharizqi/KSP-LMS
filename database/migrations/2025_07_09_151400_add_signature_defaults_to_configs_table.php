@@ -12,13 +12,13 @@ return new class extends Migration {
         DB::table('configs')->insert([
             [
                 'code' => 'pengajuan_pelatihan_signature_2_default',
-                'value' => null, // you can update this later from UI
+                'value' => '', // you can update this later from UI
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'code' => 'pengajuan_pelatihan_signature_3_default',
-                'value' => null, // you can update this later from UI
+                'value' => '', // you can update this later from UI
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

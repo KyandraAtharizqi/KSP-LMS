@@ -26,6 +26,23 @@ class TrainingParticipant extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * INI ADALAH BAGIAN YANG HILANG DAN MENYEBABKAN ERROR
+     * Tambahkan dua fungsi di bawah ini.
+     */
+
+    // Relasi ke tabel jabatans berdasarkan 'jabatan_id'
+    public function jabatan()
+    {
+        return $this->belongsTo(Jabatan::class, 'jabatan_id');
+    }
+
+    // Relasi ke tabel departments berdasarkan 'department_id'
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
     }
 }

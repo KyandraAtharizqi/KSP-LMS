@@ -22,7 +22,7 @@
 
             const input = document.createElement('input');
             input.type = 'hidden';
-            input.name = inputName + (inputName.includes('[]') ? '' : '[]');
+            input.name = inputName;
             input.value = user.id;
             inputContainer.appendChild(input);
         });

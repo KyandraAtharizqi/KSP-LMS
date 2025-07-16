@@ -77,31 +77,45 @@
                                 @endif
                             </td>
                             <td>{{ $surat->creator?->name ?? '-' }}</td>
+                            
                             <td>
+                                {{-- Tombol Preview selalu muncul --}}
                                 <a href="{{ route('training.surattugas.preview', $surat->id) }}" class="btn btn-sm btn-primary">
                                     <i class="bx bx-show"></i> Preview
                                 </a>
 
-                                @if ($approvalNeeded)
-                                    @if ($canAssign)
-                                        <a href="{{ route('training.surattugas.assign.view', $surat->id) }}" 
-                                           class="btn btn-sm btn-info">
-                                            <i class="bx bx-user-plus"></i> Assign
-                                        </a>
-                                    @else
-                                        <button class="btn btn-sm btn-info" onclick="alert('You are not authorized to assign.')">
-                                            <i class="bx bx-user-plus"></i> Assign
-                                        </button>
-                                    @endif
-                                @endif
+                                {{-- JIKA SURAT SUDAH SELESAI (is_accepted == true) --}}
+                                @if ($surat->is_accepted)
+                                    {{-- Maka hanya tampilkan tombol Download --}}
+                                    <a href="{{ route('training.surattugas.download', $surat->id) }}" class="btn btn-sm btn-success">
+                                        <i class="bx bx-download"></i> Download
+                                    </a>
+                                @else
+                                    {{-- JIKA SURAT MASIH DALAM PROSES --}}
 
-                                @if ($currentApproval)
-                                    <a href="{{ route('training.surattugas.approve.view', [$surat->id, $currentApproval->id]) }}" class="btn btn-sm btn-success">
-                                        <i class="bx bx-check"></i> Approve
-                                    </a>
-                                    <a href="{{ route('training.surattugas.reject.view', [$surat->id, $currentApproval->id]) }}" class="btn btn-sm btn-danger">
-                                        <i class="bx bx-x"></i> Reject
-                                    </a>
+                                    {{-- Tampilkan tombol Assign jika diperlukan --}}
+                                    @if ($approvalNeeded)
+                                        @if ($canAssign)
+                                            <a href="{{ route('training.surattugas.assign.view', $surat->id) }}"
+                                            class="btn btn-sm btn-info">
+                                                <i class="bx bx-user-plus"></i> Assign
+                                            </a>
+                                        @else
+                                            <button class="btn btn-sm btn-info" onclick="alert('You are not authorized to assign.')">
+                                                <i class="bx bx-user-plus"></i> Assign
+                                            </button>
+                                        @endif
+                                    @endif
+
+                                    {{-- Tampilkan tombol Approve/Reject untuk user yang berwenang --}}
+                                    @if ($currentApproval)
+                                        <a href="{{ route('training.surattugas.approve.view', [$surat->id, $currentApproval->id]) }}" class="btn btn-sm btn-success">
+                                            <i class="bx bx-check"></i> Approve
+                                        </a>
+                                        <a href="{{ route('training.surattugas.reject.view', [$surat->id, $currentApproval->id]) }}" class="btn btn-sm btn-danger">
+                                            <i class="bx bx-x"></i> Reject
+                                        </a>
+                                    @endif
                                 @endif
                             </td>
                         </tr>

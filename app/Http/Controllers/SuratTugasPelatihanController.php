@@ -7,6 +7,7 @@ use App\Models\SuratTugasPelatihanSignatureAndParaf;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PDF;
 
 class SuratTugasPelatihanController extends Controller
 {
@@ -35,8 +36,13 @@ class SuratTugasPelatihanController extends Controller
 
     public function preview($id): \Illuminate\Contracts\View\View
     {
+        // Eager loading yang sudah diperbaiki
         $surat = SuratTugasPelatihan::with([
-            'creator', 'pelatihan', 'signaturesAndParafs.user', 'pelatihan.participants.user'
+            'creator',
+            'pelatihan.participants.user', // Untuk mengambil nama user
+            'pelatihan.participants.jabatan', // Sekarang ini akan berfungsi
+            'pelatihan.participants.department', // Sekarang ini akan berfungsi
+            'signaturesAndParafs.user.jabatan',
         ])->findOrFail($id);
 
         return view('pages.training.surattugas.preview', compact('surat'));
@@ -87,7 +93,6 @@ class SuratTugasPelatihanController extends Controller
             abort(403);
         }
 
-        // Clear existing signatures and parafs
         $surat->signaturesAndParafs()->delete();
 
         $round = 1;
@@ -124,7 +129,7 @@ class SuratTugasPelatihanController extends Controller
         if ($approval->user_id !== Auth::id()) {
             abort(403);
         }
-
+        
         return view('pages.training.surattugas.approve', compact('surat', 'approval'));
     }
 
@@ -139,7 +144,6 @@ class SuratTugasPelatihanController extends Controller
 
         $approval->update([
             'status' => 'approved',
-            'signed_at' => now(),
         ]);
 
         $pending = $surat->signaturesAndParafs()->where('status', 'pending')->count();
@@ -159,7 +163,7 @@ class SuratTugasPelatihanController extends Controller
         if ($approval->user_id !== Auth::id()) {
             abort(403);
         }
-
+        
         return view('pages.training.surattugas.reject', compact('surat', 'approval'));
     }
 
@@ -178,10 +182,24 @@ class SuratTugasPelatihanController extends Controller
 
         $approval->update([
             'status' => 'rejected',
-            'signed_at' => now(),
             'rejection_reason' => $request->reason,
         ]);
 
         return redirect()->route('training.surattugas.index')->with('warning', 'Surat ditolak.');
+    }
+
+    public function download($id)
+    {
+        // Eager loading yang sudah diperbaiki
+        $surat = SuratTugasPelatihan::with([
+            'pelatihan.participants.user',
+            'pelatihan.participants.jabatan',
+            'pelatihan.participants.department',
+            'signaturesAndParafs.user.jabatan'
+        ])->findOrFail($id);
+
+        $pdf = PDF::loadView('pages.training.surattugas.pdf_view', ['surat' => $surat]);
+        $namaFile = 'ST-' . ($surat->kode_tugas ?? '000') . '.pdf';
+        return $pdf->download($namaFile);
     }
 }

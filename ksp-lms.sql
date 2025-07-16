@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 15, 2025 at 01:37 AM
+-- Generation Time: Jul 16, 2025 at 04:04 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -246,7 +246,7 @@ INSERT INTO `jabatans` (`id`, `name`, `created_at`, `updated_at`) VALUES
 (14, 'Junior Officer', NULL, NULL),
 (15, 'Hotel Staff', NULL, NULL);
 
--- --------------------------------------------------------s
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `letters`
@@ -255,7 +255,7 @@ INSERT INTO `jabatans` (`id`, `name`, `created_at`, `updated_at`) VALUES
 CREATE TABLE `letters` (
   `id` bigint UNSIGNED NOT NULL,
   `reference_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nomor Surat',
-  `knowledge_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `agenda_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `from` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `to` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `letter_date` date DEFAULT NULL,
@@ -273,7 +273,7 @@ CREATE TABLE `letters` (
 -- Dumping data for table `letters`
 --
 
-INSERT INTO `letters` (`id`, `reference_number`, `knowledge_number`, `from`, `to`, `letter_date`, `received_date`, `description`, `note`, `type`, `classification_code`, `user_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `letters` (`id`, `reference_number`, `agenda_number`, `from`, `to`, `letter_date`, `received_date`, `description`, `note`, `type`, `classification_code`, `user_id`, `created_at`, `updated_at`) VALUES
 (1, '0-1', '0-1-1', 'ADMIN', NULL, '2025-06-23', '2025-06-24', 'oklahoma', 'test keterangan', 'incoming', '0', 1, '2025-06-23 05:04:28', '2025-06-23 05:04:28');
 
 -- --------------------------------------------------------
@@ -330,7 +330,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (26, '2025_07_09_104744_create_surat_pengajuan_pelatihans_table', 12),
 (27, '2025_07_09_105015_create_training_participants_table', 13),
 (28, '2025_07_09_110122_create_surat_pengajuan_pelatihan_signatures_and_parafs_table', 14),
-(29, '2025_07_11_115559_add_golongan_to_users_table', 15);
+(29, '2025_07_11_115559_add_golongan_to_users_table', 15),
+(33, '2025_07_15_120446_create_surat_tugas_pelatihans_table', 16);
 
 -- --------------------------------------------------------
 
@@ -453,8 +454,8 @@ CREATE TABLE `surat_pengajuan_pelatihan_signatures_and_parafs` (
 --
 
 INSERT INTO `surat_pengajuan_pelatihan_signatures_and_parafs` (`id`, `pelatihan_id`, `user_id`, `kode_pelatihan`, `registration_id`, `round`, `sequence`, `type`, `status`, `signed_at`, `rejection_reason`, `created_at`, `updated_at`) VALUES
-(1, 2, 52, 'Pelatihan 1', 'EA001', 1, 1, 'paraf', 'pending', NULL, NULL, '2025-07-09 04:44:57', '2025-07-09 04:44:57'),
-(2, 2, 51, 'Pelatihan 1', 'GM002', 1, 2, 'signature', 'pending', NULL, NULL, '2025-07-09 04:44:58', '2025-07-09 04:44:58'),
+(1, 2, 52, 'Pelatihan 1', 'EA001', 1, 1, 'paraf', 'approved', '2025-07-15 05:54:30', NULL, '2025-07-09 04:44:57', '2025-07-15 05:54:30'),
+(2, 2, 51, 'Pelatihan 1', 'GM002', 1, 2, 'signature', 'approved', '2025-07-15 07:04:42', NULL, '2025-07-09 04:44:58', '2025-07-15 07:04:42'),
 (3, 3, 52, 'Pelatihan 2', 'EA001', 1, 1, 'paraf', 'rejected', '2025-07-10 10:25:32', 'ganti peserta nya ya', '2025-07-09 08:50:59', '2025-07-10 10:25:32'),
 (4, 3, 50, 'Pelatihan 2', 'GM001', 1, 2, 'signature', 'rejected', '2025-07-10 10:25:32', 'Auto rejected due to earlier rejection', '2025-07-09 08:50:59', '2025-07-10 10:25:32'),
 (5, 5, 52, 'Pelatihan 3', 'EA001', 1, 1, 'paraf', 'approved', '2025-07-10 08:20:02', NULL, '2025-07-09 09:53:43', '2025-07-10 08:20:02'),
@@ -486,6 +487,53 @@ CREATE TABLE `surat_pengajuan_training_example` (
 
 INSERT INTO `surat_pengajuan_training_example` (`id`, `title`, `description`, `training_date`, `submitted_by`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'TES SURAT', 'HALO', '2025-06-28', 1, 'pending', '2025-06-26 05:09:05', '2025-06-26 05:09:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `surat_tugas_pelatihans`
+--
+
+CREATE TABLE `surat_tugas_pelatihans` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `judul` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tanggal` date NOT NULL,
+  `tempat` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tanggal_pelatihan` date NOT NULL,
+  `durasi` int UNSIGNED NOT NULL,
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `is_accepted` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `surat_tugas_pelatihans`
+--
+
+INSERT INTO `surat_tugas_pelatihans` (`id`, `pelatihan_id`, `kode_pelatihan`, `judul`, `tanggal`, `tempat`, `tanggal_pelatihan`, `durasi`, `created_by`, `status`, `is_accepted`, `created_at`, `updated_at`) VALUES
+(1, 2, 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-15', 'Jakarta', '2025-07-10', 2, 51, 'draft', 0, '2025-07-15 07:04:42', '2025-07-15 07:04:42');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `surat_tugas_pelatihan_signatures_and_parafs`
+--
+
+CREATE TABLE `surat_tugas_pelatihan_signatures_and_parafs` (
+  `id` bigint UNSIGNED NOT NULL,
+  `surat_tugas_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `type` enum('paraf','signature') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sequence` int NOT NULL,
+  `round` int NOT NULL DEFAULT '1',
+  `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -558,7 +606,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `registration_id`, `name`, `email`, `email_verified_at`, `password`, `two_factor_secret`, `two_factor_recovery_codes`, `phone`, `address`, `signature_path`, `paraf_path`, `role`, `is_active`, `profile_picture`, `remember_token`, `created_at`, `updated_at`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`, `nik`) VALUES
-(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, 'ABHLmYwW02ZXcLYIsicuVSD0oPXo3rbxH8CFmUrs6kANOemk3pj2RAA0EAAy', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, 'jzyCVYXuzwZVgP3uJqwOYCtzvi8UESKwBlV0E5EwYeqwSHVla4F40LNrtjmz', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (48, 'DIR001', 'Dewi Director', 'TEST@GMAIL.COM', NULL, '$2y$10$DjeExht8y6bI2lMEYJP1UOmGqacRPa4jL.hf1A/NjiBDBa3pX6iR2', NULL, NULL, '08111111001', 'Jl. Direksi No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:04', 1, NULL, NULL, 1, NULL, NULL, '00', '3173000000000001'),
 (49, 'ASDIR001', 'Arief Assistant', 'asdir@gmail.com', NULL, '$2y$10$BhayvALSwTi.vUXmICMK9eYkNoZCYzCQubfU7zwSrKN8z8MZ.9rHO', NULL, NULL, '08111111002', 'Jl. HC No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:20', 2, NULL, NULL, 1, NULL, 48, '01', '3173000000000002'),
 (50, 'GM001', 'Gita GM CP', NULL, NULL, '$2y$10$.0rbg1iVgUFkDZKfec3uUOV2jIyujakIsd2iRCNs4z4BJjYuPY/YS', NULL, NULL, '08111111003', 'Jl. Komersial No.1', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-07 06:13:17', 3, NULL, NULL, 2, 1, NULL, NULL, '3173000000000003'),
@@ -963,6 +1011,20 @@ ALTER TABLE `surat_pengajuan_training_example`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `surat_tugas_pelatihans`
+--
+ALTER TABLE `surat_tugas_pelatihans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `surat_tugas_pelatihans_pelatihan_id_foreign` (`pelatihan_id`),
+  ADD KEY `surat_tugas_pelatihans_created_by_foreign` (`created_by`);
+
+--
+-- Indexes for table `surat_tugas_pelatihan_signatures_and_parafs`
+--
+ALTER TABLE `surat_tugas_pelatihan_signatures_and_parafs`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `training_participants`
 --
 ALTER TABLE `training_participants`
@@ -1056,7 +1118,7 @@ ALTER TABLE `letter_statuses`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
@@ -1087,6 +1149,18 @@ ALTER TABLE `surat_pengajuan_pelatihan_signatures_and_parafs`
 --
 ALTER TABLE `surat_pengajuan_training_example`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `surat_tugas_pelatihans`
+--
+ALTER TABLE `surat_tugas_pelatihans`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `surat_tugas_pelatihan_signatures_and_parafs`
+--
+ALTER TABLE `surat_tugas_pelatihan_signatures_and_parafs`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `training_participants`
@@ -1151,6 +1225,13 @@ ALTER TABLE `surat_pengajuan_pelatihans`
 ALTER TABLE `surat_pengajuan_pelatihan_signatures_and_parafs`
   ADD CONSTRAINT `fk_signatures_and_parafs_pelatihan` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `surat_pengajuan_pelatihan_signatures_and_parafs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `surat_tugas_pelatihans`
+--
+ALTER TABLE `surat_tugas_pelatihans`
+  ADD CONSTRAINT `surat_tugas_pelatihans_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `surat_tugas_pelatihans_pelatihan_id_foreign` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `training_participants`

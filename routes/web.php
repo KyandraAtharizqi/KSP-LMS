@@ -15,7 +15,20 @@ use App\Http\Controllers\ProfileController;
 
 Route::middleware(['auth'])->group(function () {
 
+    // Route untuk MENAMPILKAN halaman konfirmasi approve
+    Route::get('/training/surattugas/approve/{id}/{approvalId}', [SuratTugasPelatihanController::class, 'approveView'])->name('training.surattugas.approve.view');
+
+    // Route untuk MEMPROSES persetujuan dari form
+    Route::post('/training/surattugas/approve/{id}/{approvalId}', [SuratTugasPelatihanController::class, 'approve'])->name('training.surattugas.approve.submit');
+    
+    Route::get('/training/surattugas/reject/{id}/{approvalId}', [SuratTugasPelatihanController::class, 'rejectView'])->name('training.surattugas.reject.view');
+
+    // Route untuk MEMPROSES data reject dari form
+    Route::post('/training/surattugas/reject/{id}/{approvalId}', [SuratTugasPelatihanController::class, 'reject'])->name('training.surattugas.reject.submit');
+
     Route::get('/surat-pengajuan/{id}/download', [SuratPengajuanPelatihanController::class, 'downloadPDF'])->name('surat.pengajuan.download');
+
+    Route::get('/training/surattugas/download/{id}', [SuratTugasPelatihanController::class, 'download'])->name('training.surattugas.download');
     
     Route::get('/', [PageController::class, 'index'])->name('home');
 
