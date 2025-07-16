@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SuratPengajuanPelatihanController;
+use App\Http\Controllers\SuratTugasPelatihanController;
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\OutgoingLetterController;
 use App\Http\Controllers\DispositionController;
@@ -19,7 +20,7 @@ Route::middleware(['auth'])->group(function () {
         ->except(['show', 'edit', 'create'])
         ->middleware(['role:admin,department_admin,division_admin']);
 
-    // ✅ Added: CSV Import Route for User
+    // CSV Import Route for User
     Route::post('/users/import-csv', [UserController::class, 'importCsv'])
         ->name('users.import.csv')
         ->middleware(['role:admin,department_admin,division_admin']);
@@ -84,4 +85,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{id}/approval/{approval}/approve', [SuratPengajuanPelatihanController::class, 'approve'])->name('approve');
         Route::post('/{id}/approval/{approval}/reject', [SuratPengajuanPelatihanController::class, 'reject'])->name('reject');
     });
+
+    Route::prefix('training/surattugas')->as('training.surattugas.')->group(function () {
+        Route::get('/', [SuratTugasPelatihanController::class, 'index'])->name('index');
+        Route::get('/{id}/preview', [SuratTugasPelatihanController::class, 'preview'])->name('preview');
+
+        Route::get('/{id}/assign', [SuratTugasPelatihanController::class, 'assignView'])->name('assign.view'); // ✅ ADD THIS
+        Route::post('/assign', [SuratTugasPelatihanController::class, 'assignSave'])->name('assign.submit');
+
+        Route::get('/{id}/approve/{approval}', [SuratTugasPelatihanController::class, 'approveView'])->name('approve.view');
+        Route::post('/{id}/approve/{approval}', [SuratTugasPelatihanController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject/{approval}', [SuratTugasPelatihanController::class, 'reject'])->name('reject');
+    });
+
+
 });

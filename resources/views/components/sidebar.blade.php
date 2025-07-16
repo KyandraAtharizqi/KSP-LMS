@@ -77,8 +77,14 @@
                         <div data-i18n="Surat Pengajuan Pelatihan">Surat Pengajuan Pelatihan</div>
                     </a>
                 </li>
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.surattugas.index') ? 'active' : '' }}">
+                    <a href="{{ route('training.surattugas.index') }}" class="menu-link">
+                        <div data-i18n="Surat Tugas Pelatihan">Surat Tugas Pelatihan</div>
+                    </a>
+                </li>
             </ul>
         </li>
+
 
         <!-- Other Menu -->
         <li class="menu-header small text-uppercase">

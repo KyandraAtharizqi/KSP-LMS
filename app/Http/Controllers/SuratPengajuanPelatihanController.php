@@ -346,13 +346,54 @@ class SuratPengajuanPelatihanController extends Controller
             ->where('status', 'pending')
             ->firstOrFail();
 
-        $approval->update([
-            'status' => 'approved',
-            'signed_at' => now(),
-        ]);
+        // ⛔ Check if this is the first pending in sequence
+        $minPending = SuratPengajuanPelatihanSignatureAndParaf::where('pelatihan_id', $suratId)
+            ->where('round', $approval->round)
+            ->where('status', 'pending')
+            ->orderBy('sequence')
+            ->first();
+
+        if ($minPending->id !== $approval->id) {
+            return back()->with('error', 'Belum waktunya Anda menyetujui surat ini.');
+        }
+
+        DB::transaction(function () use ($approval, $suratId) {
+            $approval->update([
+                'status' => 'approved',
+                'signed_at' => now(),
+            ]);
+
+            $surat = SuratPengajuanPelatihan::with('approvals')->findOrFail($suratId);
+            $currentRound = $approval->round;
+
+            $allCompleted = $surat->approvals()
+                ->where('round', $currentRound)
+                ->where('status', 'pending')
+                ->doesntExist();
+
+            if ($allCompleted) {
+                $alreadyExists = \App\Models\SuratTugasPelatihan::where('pelatihan_id', $surat->id)->exists();
+
+                if (!$alreadyExists) {
+                    \App\Models\SuratTugasPelatihan::create([
+                        'pelatihan_id' => $surat->id,
+                        'kode_pelatihan' => $surat->kode_pelatihan,
+                        'judul' => $surat->judul,
+                        'tanggal' => now()->toDateString(),
+                        'tempat' => $surat->tempat,
+                        'tanggal_pelatihan' => $surat->tanggal_mulai,
+                        'durasi' => $surat->durasi,
+                        'created_by' => auth()->id(),
+                        'status' => 'draft',
+                        'is_accepted' => false,
+                    ]);
+                }
+            }
+        });
 
         return back()->with('success', 'Surat telah disetujui.');
     }
+
 
     public function reject(Request $request, $suratId, $approvalId)
     {
@@ -366,6 +407,17 @@ class SuratPengajuanPelatihanController extends Controller
             ->where('status', 'pending')
             ->firstOrFail();
 
+        // ⛔ Check sequence enforcement
+        $minPending = SuratPengajuanPelatihanSignatureAndParaf::where('pelatihan_id', $suratId)
+            ->where('round', $approval->round)
+            ->where('status', 'pending')
+            ->orderBy('sequence')
+            ->first();
+
+        if ($minPending->id !== $approval->id) {
+            return back()->with('error', 'Belum waktunya Anda menolak surat ini.');
+        }
+
         DB::transaction(function () use ($approval, $request) {
             $approval->update([
                 'status' => 'rejected',
@@ -373,7 +425,7 @@ class SuratPengajuanPelatihanController extends Controller
                 'rejection_reason' => $request->rejection_reason,
             ]);
 
-            // ❗ Reject all later approvals in same round
+            // Auto reject later steps in same round
             SuratPengajuanPelatihanSignatureAndParaf::where('pelatihan_id', $approval->pelatihan_id)
                 ->where('round', $approval->round)
                 ->where('sequence', '>', $approval->sequence)
@@ -387,4 +439,5 @@ class SuratPengajuanPelatihanController extends Controller
 
         return back()->with('danger', 'Surat telah ditolak dan dikembalikan ke pembuat.');
     }
+
 }

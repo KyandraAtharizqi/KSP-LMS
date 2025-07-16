@@ -37,6 +37,12 @@
                                 ->contains(fn($item) => $item->status === 'rejected');
 
                             $isCreator = auth()->id() === $example->created_by;
+
+                            $minPendingApproval = $example->approvals
+                                ->where('round', $latestRound)
+                                ->where('status', 'pending')
+                                ->sortBy('sequence')
+                                ->first();
                         @endphp
                         <tr>
                             <td>{{ $example->kode_pelatihan }}</td>
@@ -71,7 +77,12 @@
                                     🔍 Tracking
                                 </button>
 
-                                @if ($userApproval && $userApproval->status === 'pending')
+                                @if (
+                                    $userApproval &&
+                                    $userApproval->status === 'pending' &&
+                                    $userApproval->round === $latestRound &&
+                                    $userApproval->id === $minPendingApproval?->id
+                                )
                                     <form action="{{ route('training.suratpengajuan.approve', [$example->id, $userApproval->id]) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button class="btn btn-sm btn-success mb-1" onclick="return confirm('Setujui surat ini?')">
@@ -116,8 +127,8 @@
                             <div class="ms-2 me-auto">
                                 <div>
                                     <strong>
-                                        {{ ucfirst($step->type) }} -
-                                        {{ $step->user->name }}
+                                        {{ ucfirst($step->type) }} - 
+                                        {{ $step->user->name }} 
                                         ({{ $step->user->registration_id ?? '-' }},
                                         {{ $step->user->jabatan_full ?? '-' }})
                                     </strong>
@@ -157,8 +168,20 @@
             ->where('user_id', auth()->id())
             ->where('status', 'pending')
             ->first();
+
+        $latestRound = $example->approvals->max('round');
+        $minPendingApproval = $example->approvals
+            ->where('round', $latestRound)
+            ->where('status', 'pending')
+            ->sortBy('sequence')
+            ->first();
     @endphp
-    @if ($userApproval)
+    @if (
+        $userApproval &&
+        $userApproval->status === 'pending' &&
+        $userApproval->round === $latestRound &&
+        $userApproval->id === $minPendingApproval?->id
+    )
     <div class="modal fade" id="rejectModal-{{ $userApproval->id }}" tabindex="-1" aria-labelledby="rejectLabel-{{ $userApproval->id }}" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

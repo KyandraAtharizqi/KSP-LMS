@@ -147,4 +147,9 @@ class User extends Authenticatable
             ->paginate(Config::getValueByCode(ConfigEnum::PAGE_SIZE))
             ->appends(['search' => $search]);
     }
+
+    public function hasRole(string $role): bool
+    {
+    return $this->role === $role;
+    }
 }

@@ -100,4 +100,15 @@ class SuratPengajuanPelatihan extends Model
             'message' => '✅ Fully approved',
         ];
     }
+
+    public function suratTugas()
+    {
+    return $this->hasOne(SuratTugasPelatihan::class, 'pelatihan_id');
+    }
+
+    public function signaturesAndParafs()
+    {
+    return $this->hasMany(SuratTugasPelatihanSignatureAndParaf::class, 'surat_tugas_id');
+    }
+
 }
