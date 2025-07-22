@@ -14,6 +14,9 @@ use Illuminate\Support\Str;
 
 class SuratPengajuanPelatihanController extends Controller
 {
+    /* -----------------------------------------------------------------
+     | Index
+     |----------------------------------------------------------------- */
     public function index()
     {
         $user = Auth::user();
@@ -33,6 +36,9 @@ class SuratPengajuanPelatihanController extends Controller
         return view('pages.training.suratpengajuan.index', compact('examples'));
     }
 
+    /* -----------------------------------------------------------------
+     | Create / Store
+     |----------------------------------------------------------------- */
     public function create()
     {
         $users = User::all();
@@ -42,144 +48,156 @@ class SuratPengajuanPelatihanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kode_pelatihan' => 'required|string|unique:surat_pengajuan_pelatihans,kode_pelatihan',
-            'kompetensi' => 'required|string',
-            'judul' => 'required|string',
-            'lokasi' => 'required|string',
-            'instruktur' => 'required|string',
-            'sifat' => 'required|string',
-            'kompetensi_wajib' => 'required|string',
-            'materi_global' => 'required|string',
+            'kode_pelatihan'        => 'required|string|unique:surat_pengajuan_pelatihans,kode_pelatihan',
+            'kompetensi'            => 'required|string',
+            'judul'                 => 'required|string',
+            'lokasi'                => 'required|string',
+            'instruktur'            => 'required|string',
+            'sifat'                 => 'required|string',
+            'kompetensi_wajib'      => 'required|string',
+            'materi_global'         => 'required|string',
             'program_pelatihan_ksp' => 'required|string',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'durasi' => 'required|integer|min:1',
-            'tempat' => 'required|string',
-            'penyelenggara' => 'required|string',
-            'biaya' => 'required|string',
-            'per_paket_or_orang' => 'required|string',
-            'keterangan' => 'nullable|string',
-            'participants' => 'required|array|min:1',
-            'participants.*' => 'exists:users,registration_id',
-            'parafs' => 'nullable|array|max:3',
-            'parafs.*' => 'exists:users,registration_id',
-            'signatures' => 'required|array|min:1',
-            'signatures.*' => 'exists:users,registration_id',
-            'signature2' => 'nullable|array|max:1',
-            'signature2.*' => 'exists:users,registration_id',
-            'signature3' => 'nullable|array|max:1',
-            'signature3.*' => 'exists:users,registration_id',
+            'tanggal_mulai'         => 'required|date',
+            'tanggal_selesai'       => 'required|date|after_or_equal:tanggal_mulai',
+            'durasi'                => 'required|integer|min:1',
+            'tempat'                => 'required|string',
+            'penyelenggara'         => 'required|string',
+            'biaya'                 => 'required|string',
+            'per_paket_or_orang'    => 'required|string',
+            'keterangan'            => 'nullable|string',
+
+            'participants'          => 'required|array|min:1',
+            'participants.*'        => 'exists:users,registration_id',
+
+            'parafs'                => 'nullable|array|max:3',
+            'parafs.*'              => 'exists:users,registration_id',
+
+            'signatures'            => 'required|array|min:1',
+            'signatures.*'          => 'exists:users,registration_id',
+
+            'signature2'            => 'nullable|array|max:1',
+            'signature2.*'          => 'exists:users,registration_id',
+
+            'signature3'            => 'nullable|array|max:1',
+            'signature3.*'          => 'exists:users,registration_id',
         ]);
 
         DB::beginTransaction();
 
         try {
             $surat = SuratPengajuanPelatihan::create([
-                'created_by' => auth()->id(),
-                'kode_pelatihan' => $validated['kode_pelatihan'],
-                'kompetensi' => $validated['kompetensi'],
-                'judul' => $validated['judul'],
-                'lokasi' => $validated['lokasi'],
-                'instruktur' => $validated['instruktur'],
-                'sifat' => $validated['sifat'],
-                'kompetensi_wajib' => $validated['kompetensi_wajib'],
-                'materi_global' => $validated['materi_global'],
+                'created_by'            => auth()->id(),
+                'kode_pelatihan'        => $validated['kode_pelatihan'],
+                'kompetensi'            => $validated['kompetensi'],
+                'judul'                 => $validated['judul'],
+                'lokasi'                => $validated['lokasi'],
+                'instruktur'            => $validated['instruktur'],
+                'sifat'                 => $validated['sifat'],
+                'kompetensi_wajib'      => $validated['kompetensi_wajib'],
+                'materi_global'         => $validated['materi_global'],
                 'program_pelatihan_ksp' => $validated['program_pelatihan_ksp'],
-                'tanggal_mulai' => $validated['tanggal_mulai'],
-                'tanggal_selesai' => $validated['tanggal_selesai'],
-                'durasi' => $validated['durasi'],
-                'tempat' => $validated['tempat'],
-                'penyelenggara' => $validated['penyelenggara'],
-                'biaya' => $validated['biaya'],
-                'per_paket_or_orang' => $validated['per_paket_or_orang'],
-                'keterangan' => $validated['keterangan'],
+                'tanggal_mulai'         => $validated['tanggal_mulai'],
+                'tanggal_selesai'       => $validated['tanggal_selesai'],
+                'durasi'                => $validated['durasi'],
+                'tempat'                => $validated['tempat'],
+                'penyelenggara'         => $validated['penyelenggara'],
+                'biaya'                 => $validated['biaya'],
+                'per_paket_or_orang'    => $validated['per_paket_or_orang'],
+                'keterangan'            => $validated['keterangan'],
             ]);
 
+            // Participants
             foreach ($validated['participants'] as $registrationId) {
-                $user = User::where('registration_id', $registrationId)->first();
-                if ($user) {
+                if ($user = User::where('registration_id', $registrationId)->first()) {
                     TrainingParticipant::create([
-                        'pelatihan_id' => $surat->id,
-                        'user_id' => $user->id,
+                        'pelatihan_id'   => $surat->id,
+                        'user_id'        => $user->id,
                         'kode_pelatihan' => $surat->kode_pelatihan,
-                        'registration_id' => $user->registration_id,
-                        'jabatan_id' => $user->jabatan_id,
-                        'department_id' => $user->department_id,
-                        'superior_id' => $user->superior_id,
+                        'registration_id'=> $user->registration_id,
+                        'jabatan_id'     => $user->jabatan_id,
+                        'department_id'  => $user->department_id,
+                        'superior_id'    => $user->superior_id,
                     ]);
                 }
             }
 
+            // Approval chain
             $sequence = 1;
-            $round = 1;
+            $round    = 1;
 
+            // Parafs
             foreach ($validated['parafs'] ?? [] as $registrationId) {
-                $user = User::where('registration_id', $registrationId)->first();
-                if ($user) {
+                if ($user = User::where('registration_id', $registrationId)->first()) {
                     SuratPengajuanPelatihanSignatureAndParaf::create([
-                        'pelatihan_id' => $surat->id,
-                        'user_id' => $user->id,
-                        'kode_pelatihan' => $surat->kode_pelatihan,
+                        'pelatihan_id'    => $surat->id,
+                        'user_id'         => $user->id,
+                        'kode_pelatihan'  => $surat->kode_pelatihan,
                         'registration_id' => $user->registration_id,
-                        'round' => $round,
-                        'sequence' => $sequence++,
-                        'type' => 'paraf',
-                        'status' => 'pending',
+                        'round'           => $round,
+                        'sequence'        => $sequence++,
+                        'type'            => 'paraf',
+                        'status'          => 'pending',
                     ]);
                 }
             }
 
+            // Signatures (could be up to 3 buckets)
             foreach (['signatures', 'signature2', 'signature3'] as $key) {
                 foreach ($validated[$key] ?? [] as $registrationId) {
-                    $user = User::where('registration_id', $registrationId)->first();
-                    if ($user) {
+                    if ($user = User::where('registration_id', $registrationId)->first()) {
                         SuratPengajuanPelatihanSignatureAndParaf::create([
-                            'pelatihan_id' => $surat->id,
-                            'user_id' => $user->id,
-                            'kode_pelatihan' => $surat->kode_pelatihan,
+                            'pelatihan_id'    => $surat->id,
+                            'user_id'         => $user->id,
+                            'kode_pelatihan'  => $surat->kode_pelatihan,
                             'registration_id' => $user->registration_id,
-                            'round' => $round,
-                            'sequence' => $sequence++,
-                            'type' => 'signature',
-                            'status' => 'pending',
+                            'round'           => $round,
+                            'sequence'        => $sequence++,
+                            'type'            => 'signature',
+                            'status'          => 'pending',
                         ]);
                     }
                 }
             }
 
             DB::commit();
-
-            return redirect()->route('training.suratpengajuan.index')->with('success', 'Surat pengajuan pelatihan berhasil disimpan.');
+            return redirect()
+                ->route('training.suratpengajuan.index')
+                ->with('success', 'Surat pengajuan pelatihan berhasil disimpan.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan saat menyimpan surat: ' . $e->getMessage());
         }
     }
 
+    /* -----------------------------------------------------------------
+     | Edit
+     |----------------------------------------------------------------- */
     public function edit($id)
     {
-    $surat = SuratPengajuanPelatihan::with([
-        'creator',
-        'participants.user',
-        'approvals.user'
-    ])->findOrFail($id);
+        $surat = SuratPengajuanPelatihan::with([
+            'creator',
+            'participants.user',
+            'approvals.user',
+        ])->findOrFail($id);
 
-    // Only allow creator to edit if last round is rejected
-    if (auth()->id() !== $surat->created_by) {
-        abort(403);
+        // Only creator
+        if ((int)auth()->id() !== (int)$surat->created_by) {
+            abort(403);
+        }
+
+        $latestRound     = $surat->approvals->max('round');
+        $latestRejection = $surat->approvals
+            ->where('round', $latestRound)
+            ->firstWhere('status', 'rejected');
+
+        $users = User::all();
+
+        return view('pages.training.suratpengajuan.edit', compact('surat', 'users', 'latestRejection'));
     }
 
-    $latestRound = $surat->approvals->max('round');
-    $latestRejection = $surat->approvals
-        ->where('round', $latestRound)
-        ->firstWhere('status', 'rejected');
-
-    $users = User::all();
-
-    return view('pages.training.suratpengajuan.edit', compact('surat', 'users', 'latestRejection'));
-    }
-
-
+    /* -----------------------------------------------------------------
+     | Preview  (Browser)
+     |----------------------------------------------------------------- */
     public function preview($id)
     {
         $surat = SuratPengajuanPelatihan::with([
@@ -188,101 +206,80 @@ class SuratPengajuanPelatihanController extends Controller
             'approvals.user',
         ])->findOrFail($id);
 
-        foreach ($surat->approvals as $approval) {
-            $registrationId = $approval->registration_id;
-
-            $sigRecord = DB::table('signature_and_parafs')
-                ->where('registration_id', $registrationId)
-                ->first();
-
-            if ($sigRecord) {
-                if ($approval->type === 'paraf') {
-                    $approval->image_path = str_replace('storage/', '', $sigRecord->paraf_path);
-                } elseif ($approval->type === 'signature') {
-                    $approval->image_path = str_replace('storage/', '', $sigRecord->signature_path);
-                }
-            } else {
-                $approval->image_path = null;
-            }
-        }
+        // hydrate preview_url & pdf_path on each approval
+        $this->hydrateApprovalImages($surat);
 
         return view('pages.training.suratpengajuan.preview', compact('surat'));
     }
 
+    /* -----------------------------------------------------------------
+     | Download PDF  (DomPDF)
+     |----------------------------------------------------------------- */
     public function downloadPDF($id)
     {
-        // 1. Ambil data surat (logikanya sama persis dengan method preview Anda)
         $surat = SuratPengajuanPelatihan::with([
             'creator',
             'participants.user',
             'approvals.user',
         ])->findOrFail($id);
 
-        foreach ($surat->approvals as $approval) {
-            $registrationId = $approval->registration_id;
-            $sigRecord = DB::table('signature_and_parafs')
-                ->where('registration_id', $registrationId)
-                ->first();
+        // hydrate preview_url & pdf_path on each approval
+        $this->hydrateApprovalImages($surat);
 
-            if ($sigRecord) {
-                if ($approval->type === 'paraf') {
-                    $approval->image_path = str_replace('storage/', '', $sigRecord->paraf_path);
-                } elseif ($approval->type === 'signature') {
-                    $approval->image_path = str_replace('storage/', '', $sigRecord->signature_path);
-                }
-            } else {
-                $approval->image_path = null;
-            }
-        }
+        $pdf = Pdf::loadView('pages.training.suratpengajuan.pdf_view', compact('surat'));
 
-        // 2. Load view 'preview' Anda yang sudah ada dengan data surat
-        $pdf = PDF::loadView('pages.training.suratpengajuan.preview', compact('surat'));
-
-        // 3. Buat nama file dan unduh
         $filename = Str::slug($surat->judul) . '.pdf';
         return $pdf->download($filename);
     }
 
+    /* -----------------------------------------------------------------
+     | Update (after rejection)
+     |----------------------------------------------------------------- */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'kompetensi' => 'required|string',
-            'judul' => 'required|string',
-            'lokasi' => 'required|string',
-            'instruktur' => 'required|string',
-            'sifat' => 'required|string',
-            'kompetensi_wajib' => 'required|string',
-            'materi_global' => 'required|string',
+            'kompetensi'            => 'required|string',
+            'judul'                 => 'required|string',
+            'lokasi'                => 'required|string',
+            'instruktur'            => 'required|string',
+            'sifat'                 => 'required|string',
+            'kompetensi_wajib'      => 'required|string',
+            'materi_global'         => 'required|string',
             'program_pelatihan_ksp' => 'required|string',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'durasi' => 'required|integer|min:1',
-            'tempat' => 'required|string',
-            'penyelenggara' => 'required|string',
-            'biaya' => 'required|string',
-            'per_paket_or_orang' => 'required|string',
-            'keterangan' => 'nullable|string',
-            'participants' => 'required|array|min:1',
-            'participants.*' => 'exists:users,registration_id',
-            'parafs' => 'nullable|array|max:3',
-            'parafs.*' => 'exists:users,registration_id',
-            'signatures' => 'required|array|min:1',
-            'signatures.*' => 'exists:users,registration_id',
-            'signature2' => 'nullable|array|max:1',
-            'signature2.*' => 'exists:users,registration_id',
-            'signature3' => 'nullable|array|max:1',
-            'signature3.*' => 'exists:users,registration_id',
+            'tanggal_mulai'         => 'required|date',
+            'tanggal_selesai'       => 'required|date|after_or_equal:tanggal_mulai',
+            'durasi'                => 'required|integer|min:1',
+            'tempat'                => 'required|string',
+            'penyelenggara'         => 'required|string',
+            'biaya'                 => 'required|string',
+            'per_paket_or_orang'    => 'required|string',
+            'keterangan'            => 'nullable|string',
+
+            'participants'          => 'required|array|min:1',
+            'participants.*'        => 'exists:users,registration_id',
+
+            'parafs'                => 'nullable|array|max:3',
+            'parafs.*'              => 'exists:users,registration_id',
+
+            'signatures'            => 'required|array|min:1',
+            'signatures.*'          => 'exists:users,registration_id',
+
+            'signature2'            => 'nullable|array|max:1',
+            'signature2.*'          => 'exists:users,registration_id',
+
+            'signature3'            => 'nullable|array|max:1',
+            'signature3.*'          => 'exists:users,registration_id',
         ]);
 
         $surat = SuratPengajuanPelatihan::findOrFail($id);
 
-        if (auth()->id() !== $surat->created_by) {
+        if ((int)auth()->id() !== (int)$surat->created_by) {
             abort(403);
         }
 
         $latestRound = $surat->approvals()->max('round') ?? 1;
 
-        // Check if latest round contains any rejection
+        // must have at least one rejection in latest round
         $rejected = $surat->approvals()
             ->where('round', $latestRound)
             ->where('status', 'rejected')
@@ -295,85 +292,86 @@ class SuratPengajuanPelatihanController extends Controller
         DB::beginTransaction();
 
         try {
-            // Update surat fields
+            // Update surat
             $surat->update($validated);
 
             // Replace participants
             $surat->participants()->delete();
             foreach ($validated['participants'] as $registrationId) {
-                $user = User::where('registration_id', $registrationId)->first();
-                if ($user) {
+                if ($user = User::where('registration_id', $registrationId)->first()) {
                     TrainingParticipant::create([
-                        'pelatihan_id' => $surat->id,
-                        'user_id' => $user->id,
+                        'pelatihan_id'   => $surat->id,
+                        'user_id'        => $user->id,
                         'kode_pelatihan' => $surat->kode_pelatihan,
-                        'registration_id' => $user->registration_id,
-                        'jabatan_id' => $user->jabatan_id,
-                        'department_id' => $user->department_id,
-                        'superior_id' => $user->superior_id,
+                        'registration_id'=> $user->registration_id,
+                        'jabatan_id'     => $user->jabatan_id,
+                        'department_id'  => $user->department_id,
+                        'superior_id'    => $user->superior_id,
                     ]);
                 }
             }
 
-            // Create a new round
+            // New round
             $nextRound = $latestRound + 1;
-            $sequence = 1;
+            $sequence  = 1;
 
+            // Parafs
             foreach ($validated['parafs'] ?? [] as $registrationId) {
-                $user = User::where('registration_id', $registrationId)->first();
-                if ($user) {
+                if ($user = User::where('registration_id', $registrationId)->first()) {
                     SuratPengajuanPelatihanSignatureAndParaf::create([
-                        'pelatihan_id' => $surat->id,
-                        'user_id' => $user->id,
-                        'kode_pelatihan' => $surat->kode_pelatihan,
+                        'pelatihan_id'    => $surat->id,
+                        'user_id'         => $user->id,
+                        'kode_pelatihan'  => $surat->kode_pelatihan,
                         'registration_id' => $user->registration_id,
-                        'round' => $nextRound,
-                        'sequence' => $sequence++,
-                        'type' => 'paraf',
-                        'status' => 'pending',
+                        'round'           => $nextRound,
+                        'sequence'        => $sequence++,
+                        'type'            => 'paraf',
+                        'status'          => 'pending',
                     ]);
                 }
             }
 
+            // Signatures (1..3 buckets)
             foreach (['signatures', 'signature2', 'signature3'] as $key) {
                 foreach ($validated[$key] ?? [] as $registrationId) {
-                    $user = User::where('registration_id', $registrationId)->first();
-                    if ($user) {
+                    if ($user = User::where('registration_id', $registrationId)->first()) {
                         SuratPengajuanPelatihanSignatureAndParaf::create([
-                            'pelatihan_id' => $surat->id,
-                            'user_id' => $user->id,
-                            'kode_pelatihan' => $surat->kode_pelatihan,
+                            'pelatihan_id'    => $surat->id,
+                            'user_id'         => $user->id,
+                            'kode_pelatihan'  => $surat->kode_pelatihan,
                             'registration_id' => $user->registration_id,
-                            'round' => $nextRound,
-                            'sequence' => $sequence++,
-                            'type' => 'signature',
-                            'status' => 'pending',
+                            'round'           => $nextRound,
+                            'sequence'        => $sequence++,
+                            'type'            => 'signature',
+                            'status'          => 'pending',
                         ]);
                     }
                 }
             }
 
-            // ❗Optional cleanup: mark all still pending approvals in previous round as rejected
+            // Mark any still-pending approvals from old round as rejected (optional)
             $surat->approvals()
                 ->where('round', $latestRound)
                 ->where('status', 'pending')
                 ->update([
-                    'status' => 'rejected',
+                    'status'           => 'rejected',
                     'rejection_reason' => 'Auto rejected by resubmission.',
-                    'signed_at' => now(),
+                    'signed_at'        => now(),
                 ]);
 
             DB::commit();
-            return redirect()->route('training.suratpengajuan.index')->with('success', 'Surat berhasil diperbarui dan diajukan ulang.');
+            return redirect()
+                ->route('training.suratpengajuan.index')
+                ->with('success', 'Surat berhasil diperbarui dan diajukan ulang.');
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal menyimpan surat: ' . $e->getMessage());
         }
     }
 
-
-
-
+    /* -----------------------------------------------------------------
+     | Approve / Reject
+     |----------------------------------------------------------------- */
     public function approve($suratId, $approvalId)
     {
         $approval = SuratPengajuanPelatihanSignatureAndParaf::where('id', $approvalId)
@@ -382,7 +380,7 @@ class SuratPengajuanPelatihanController extends Controller
             ->where('status', 'pending')
             ->firstOrFail();
 
-        // ⛔ Check if this is the first pending in sequence
+        // enforce sequence
         $minPending = SuratPengajuanPelatihanSignatureAndParaf::where('pelatihan_id', $suratId)
             ->where('round', $approval->round)
             ->where('status', 'pending')
@@ -395,12 +393,12 @@ class SuratPengajuanPelatihanController extends Controller
 
         DB::transaction(function () use ($approval, $suratId) {
             $approval->update([
-                'status' => 'approved',
+                'status'    => 'approved',
                 'signed_at' => now(),
             ]);
 
-            $surat = SuratPengajuanPelatihan::with('approvals')->findOrFail($suratId);
-            $currentRound = $approval->round;
+            $surat       = SuratPengajuanPelatihan::with('approvals')->findOrFail($suratId);
+            $currentRound= $approval->round;
 
             $allCompleted = $surat->approvals()
                 ->where('round', $currentRound)
@@ -412,16 +410,16 @@ class SuratPengajuanPelatihanController extends Controller
 
                 if (!$alreadyExists) {
                     \App\Models\SuratTugasPelatihan::create([
-                        'pelatihan_id' => $surat->id,
-                        'kode_pelatihan' => $surat->kode_pelatihan,
-                        'judul' => $surat->judul,
-                        'tanggal' => now()->toDateString(),
-                        'tempat' => $surat->tempat,
+                        'pelatihan_id'      => $surat->id,
+                        'kode_pelatihan'    => $surat->kode_pelatihan,
+                        'judul'             => $surat->judul,
+                        'tanggal'           => now()->toDateString(),
+                        'tempat'            => $surat->tempat,
                         'tanggal_pelatihan' => $surat->tanggal_mulai,
-                        'durasi' => $surat->durasi,
-                        'created_by' => auth()->id(),
-                        'status' => 'draft',
-                        'is_accepted' => false,
+                        'durasi'            => $surat->durasi,
+                        'created_by'        => auth()->id(),
+                        'status'            => 'draft',
+                        'is_accepted'       => false,
                     ]);
                 }
             }
@@ -429,7 +427,6 @@ class SuratPengajuanPelatihanController extends Controller
 
         return back()->with('success', 'Surat telah disetujui.');
     }
-
 
     public function reject(Request $request, $suratId, $approvalId)
     {
@@ -443,7 +440,7 @@ class SuratPengajuanPelatihanController extends Controller
             ->where('status', 'pending')
             ->firstOrFail();
 
-        // ⛔ Check sequence enforcement
+        // enforce sequence
         $minPending = SuratPengajuanPelatihanSignatureAndParaf::where('pelatihan_id', $suratId)
             ->where('round', $approval->round)
             ->where('status', 'pending')
@@ -456,8 +453,8 @@ class SuratPengajuanPelatihanController extends Controller
 
         DB::transaction(function () use ($approval, $request) {
             $approval->update([
-                'status' => 'rejected',
-                'signed_at' => now(),
+                'status'           => 'rejected',
+                'signed_at'        => now(),
                 'rejection_reason' => $request->rejection_reason,
             ]);
 
@@ -467,8 +464,8 @@ class SuratPengajuanPelatihanController extends Controller
                 ->where('sequence', '>', $approval->sequence)
                 ->where('status', 'pending')
                 ->update([
-                    'status' => 'rejected',
-                    'signed_at' => now(),
+                    'status'           => 'rejected',
+                    'signed_at'        => now(),
                     'rejection_reason' => 'Auto rejected due to earlier rejection',
                 ]);
         });
@@ -476,5 +473,86 @@ class SuratPengajuanPelatihanController extends Controller
         return back()->with('danger', 'Surat telah ditolak dan dikembalikan ke pembuat.');
     }
 
+    /* -----------------------------------------------------------------
+     | Helpers
+     |----------------------------------------------------------------- */
 
+    /**
+     * Build preview (URL) + pdf (abs path) from the raw DB path fragment.
+     *
+     * Accepts things like:
+     *   signatures/ADM01.png
+     *   parafs/ADM01.png
+     *   storage/signatures/ADM01.png
+     *   public/storage/signatures/ADM01.png
+     *
+     * Returns [ $previewUrl, $absPath ].
+     */
+    protected function normalizeSignaturePaths(?string $raw): array
+    {
+        if (!$raw) {
+            return [null, null];
+        }
+
+        $path = str_replace('\\', '/', $raw);
+        $path = ltrim($path, '/');
+
+        // strip leading public/
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, 7);
+        }
+
+        // ensure "storage/" prefix (public/storage symlink)
+        if (!str_starts_with($path, 'storage/')) {
+            $path = 'storage/' . $path;
+        }
+
+        // public URL for browser preview
+        $previewUrl = asset($path);
+
+        // absolute filesystem path for DomPDF
+        $absPath = public_path($path);
+
+        return [$previewUrl, $absPath];
+    }
+
+    /**
+     * For every approval in the given SuratPengajuanPelatihan instance,
+     * attach $approval->preview_url and $approval->pdf_path
+     * (resolving via the signature_and_parafs table if needed).
+     */
+    protected function hydrateApprovalImages(SuratPengajuanPelatihan $surat): void
+    {
+        // get all unique registration_ids from approvals
+        $regIds = $surat->approvals->pluck('registration_id')->filter()->unique()->values();
+
+        // load signatures once
+        $sigRecords = DB::table('signature_and_parafs')
+            ->whereIn('registration_id', $regIds)
+            ->get()
+            ->keyBy('registration_id');
+
+        foreach ($surat->approvals as $approval) {
+            $raw = null;
+
+            if ($approval->image_path) {
+                // legacy field already set (maybe by older code)
+                $raw = $approval->image_path;
+            } else {
+                // fallback from signature_and_parafs table
+                $sigRecord = $sigRecords[$approval->registration_id] ?? null;
+                if ($sigRecord) {
+                    if ($approval->type === 'paraf') {
+                        $raw = $sigRecord->paraf_path;
+                    } else { // signature
+                        $raw = $sigRecord->signature_path;
+                    }
+                }
+            }
+
+            [$previewUrl, $absPath] = $this->normalizeSignaturePaths($raw);
+            $approval->preview_url = $previewUrl;
+            $approval->pdf_path    = $absPath;
+        }
+    }
 }

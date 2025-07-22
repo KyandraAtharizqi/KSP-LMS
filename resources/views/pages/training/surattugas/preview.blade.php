@@ -1,6 +1,5 @@
 @extends('layout.main')
 
-{{-- Menambahkan sedikit CSS untuk garis tabel agar mirip dengan di kertas --}}
 @push('styles')
 <style>
     .table-bordered-custom,
@@ -16,11 +15,34 @@
     .header-logo {
         height: 50px;
     }
+    /* Let signature blocks size themselves; reserve minimum vertical space */
     .signature-space {
-        height: 80px;
+        min-height: 50px;   /* was 80; adjust as needed */
+        line-height: 0;      /* avoid extra whitespace */
+    }
+    .signature-space img {
+        max-height: 60px;    /* hard cap */
+        max-width: 100%;     /* responsive shrink */
+        width: auto;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        object-fit: contain; /* preserve aspect ratio inside cap */
     }
     .no-border, .no-border tr, .no-border td {
         border: none;
+    }
+    /* We’ll not rely on .sign-img height any more */
+    .sign-img { display:block; margin:0 auto; }
+    .sign-meta {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 5px;
+        margin-bottom: 25px; /* Increased spacing between signature blocks */
+        line-height: 1.2;
+    }
+    .signature-block {
+        margin-bottom: 10px; /* small safety margin; main spacing handled by .sign-meta */
     }
 </style>
 @endpush
@@ -35,21 +57,17 @@
     </div>
 
     <div class="card">
-        {{-- Penambahan style="color: black;" untuk memastikan semua teks berwarna hitam --}}
         <div class="card-body px-5 py-4" style="color: black;">
             
             {{-- BAGIAN KOP SURAT --}}
             <div class="row mb-4 align-items-center">
                 <div class="col-3">
-                    {{-- Ganti 'path/to/logo_ksp.png' dengan path logo Anda --}}
                     <img src="{{ asset('logoksp.png') }}" alt="Logo" style="height: 40px;">
                 </div>
                 <div class="col-6 text-center">
                     <h4 class="mb-0"><strong>SURAT TUGAS PELATIHAN</strong></h4>
-                    {{-- Ganti dengan variabel nomor surat jika ada --}}
                 </div>
                 <div class="col-3 text-end">
-                    {{-- Ganti 'path/to/logo_ykan.png' dengan path logo Anda --}}
                     <img src="{{ asset('path/to/logo_ykan.png') }}" alt="Logo YKAN" class="header-logo">
                 </div>
             </div>
@@ -65,7 +83,6 @@
                         <ol class="mb-0 ps-3">
                             @forelse ($surat->pelatihan->participants ?? [] as $participant)
                                 <li>
-                                    {{-- Menggabungkan nama, jabatan, dan departemen dalam satu baris --}}
                                     {{ $participant->user->name }} 
                                     ({{ $participant->user->department->name ?? '-' }})
                                 </li>
@@ -110,7 +127,6 @@
                 </tr>
                 <tr>
                     <td><strong>Waktu Pelaksanaan Pelatihan</strong></td>
-                    {{-- Ganti dengan variabel waktu jika ada --}}
                     <td>09:00 - 17:00 WIB</td>
                 </tr>
                 <tr>
@@ -150,30 +166,69 @@
                         <li>Arsip</li>
                     </ul>
                 </div>
+
                 <div class="col-5 text-center">
                     <p>Cilegon, {{ $surat->tanggal?->format('d F Y') }}</p>
-                    <p>Dibuat Oleh,</p>
 
+                    @php
+                        // Load all signature & paraf file paths once
+                        $sapMap = DB::table('signature_and_parafs')
+                            ->whereIn('registration_id', $surat->signaturesAndParafs->pluck('user.registration_id')->filter()->unique())
+                            ->get()
+                            ->keyBy('registration_id');
 
-                    @foreach ($surat->signatures as $sig)
-                        <div class="mb-3">
-                            <p class="mb-0"><strong>{{ $sig->user->jabatan?->nama ?? ucfirst($sig->type) }}</strong></p>
-                            
+                        $parafs = $surat->signaturesAndParafs->where('type', 'paraf')->sortBy('sequence');
+                        $signatures = $surat->signaturesAndParafs->where('type', 'signature')->sortBy('sequence');
+                    @endphp
+
+                    {{-- Tampilkan Paraf --}}
+                    @foreach ($parafs as $paraf)
+                        @php
+                            $reg = $paraf->user?->registration_id;
+                            $filePath = ($paraf->status === 'approved' && $reg && isset($sapMap[$reg]))
+                                ? $sapMap[$reg]->paraf_path
+                                : null;
+                        @endphp
+                        <div class="signature-block text-center">
                             <div class="signature-space">
-                                @if ($sig->status === 'approved' && $sig->signed_at && $sig->user?->signature_path)
-                                    <img src="{{ asset('storage/signatures/' . $sig->user->signature_path) }}" alt="Tanda Tangan" style="height: 80px;">
-                                @elseif ($sig->status === 'rejected')
-                                    {{-- Kelas 'text-danger' dihapus --}}
-                                    <p>(Ditolak)</p>
+                                @if ($filePath)
+                                    <img src="{{ asset('storage/'.$filePath) }}" alt="Paraf" class="sign-img">
                                 @else
-                                    {{-- Kelas 'text-muted' dihapus --}}
+                                    <p>(Menunggu Paraf)</p>
+                                @endif
+                            </div>
+                            <div class="sign-meta">
+                                <strong>{{ $paraf->user->name }}</strong><br>
+                                {{ $paraf->user->registration_id }}<br>
+                                {{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}
+                            </div>
+                        </div>
+                    @endforeach
+
+                    {{-- Tampilkan Tanda Tangan --}}
+                    @foreach ($signatures as $signature)
+                        @php
+                            $reg = $signature->user?->registration_id;
+                            $filePath = ($signature->status === 'approved' && $reg && isset($sapMap[$reg]))
+                                ? $sapMap[$reg]->signature_path
+                                : null;
+                        @endphp
+                        <div class="signature-block text-center">
+                            <div class="signature-space">
+                                @if ($filePath)
+                                    <img src="{{ asset('storage/'.$filePath) }}" alt="Tanda Tangan" class="sign-img">
+                                @else
                                     <p>(Menunggu Tanda Tangan)</p>
                                 @endif
                             </div>
-
-                            <p><strong><u>{{ $sig->user->name }}</u></strong></p>
+                            <div class="sign-meta">
+                                <strong>{{ $signature->user->name }}</strong><br>
+                                {{ $signature->user->registration_id }}<br>
+                                {{ $signature->user->jabatan_full ?? ($signature->user->jabatan->name ?? '-') }}
+                            </div>
                         </div>
                     @endforeach
+
                 </div>
             </div>
 

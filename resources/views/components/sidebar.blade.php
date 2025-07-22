@@ -25,7 +25,7 @@
             <span class="menu-header-text">{{ __('menu.header.main_menu') }}</span>
         </li>
 
-        <!-- 👇 NEW: Training Menu -->
+        <!-- 👇 Training Menu -->
         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-brain"></i>
@@ -42,8 +42,15 @@
                         <div data-i18n="Surat Tugas Pelatihan">Surat Tugas Pelatihan</div>
                     </a>
                 </li>
+                <!-- ✅ New: Daftar Hadir -->
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.daftarhadirpelatihan.index') ? 'active' : '' }}">
+                    <a href="{{ route('training.daftarhadirpelatihan.index') }}" class="menu-link">
+                        <div data-i18n="Daftar Hadir">Daftar Hadir</div>
+                    </a>
+                </li>
             </ul>
         </li>
+
 
 
         <!-- Other Menu -->

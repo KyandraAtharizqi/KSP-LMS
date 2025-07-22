@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Surat Pengajuan Pelatihan</title>
     <style>
+        @page { margin: 20px 25px; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: DejaVu Sans, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 0;
+            font-size: 12px;
+            color: #000;
         }
         .form-container {
-            background-color: #ffffff;
+            background-color: #fff;
             border: 2px solid #333;
+            width: 100%;
             max-width: 800px;
             margin: 0 auto;
         }
@@ -26,7 +30,7 @@
         }
         .title-bar {
             background-color: #333;
-            color: #ffffff;
+            color: #fff;
             text-align: center;
             padding: 8px;
             font-weight: bold;
@@ -40,7 +44,7 @@
             margin-bottom: 0;
         }
         .section-header {
-            background-color: #ffffff;
+            background-color: #fff;
             padding: 6px 10px;
             font-weight: bold;
             font-size: 12px;
@@ -68,7 +72,7 @@
         .field-value {
             border: 1px solid #999;
             padding: 5px 8px;
-            background-color: #ffffff;
+            background-color: #fff;
             min-height: 18px;
             font-size: 12px;
         }
@@ -80,6 +84,11 @@
             border-bottom: 1px solid #eee;
             font-size: 12px;
         }
+        table.schedule-table td {
+            vertical-align: top;
+        }
+
+        /* Signature grid */
         .sign-grid-header {
             font-size: 10px;
             color: #888;
@@ -102,6 +111,7 @@
         .sign-meta {
             font-size: 12px;
             margin-top: 4px;
+            line-height: 1.2;
         }
         .sign-meta small {
             display: block;
@@ -115,9 +125,9 @@
 </head>
 <body>
     <div class="form-container">
-        {{-- Header / Logo --}}
+        {{-- Header --}}
         <div class="header">
-            <img src="{{ asset('logoksp.png') }}" alt="Logo" style="height: 40px;">
+            <img src="{{ public_path('logoksp.png') }}" alt="Logo" style="height: 40px;">
         </div>
 
         {{-- Title --}}
@@ -130,7 +140,7 @@
                 <div class="section-header">Kompetensi : {{ $surat->kompetensi }}</div>
             </div>
 
-            {{-- Judul + quick fields --}}
+            {{-- Judul & quick fields --}}
             <div class="form-section">
                 <div class="section-header">Judul Pelatihan : {{ $surat->judul }}</div>
                 <div class="section-content">
@@ -160,7 +170,7 @@
                 <div class="section-header">Materi Global : {{ $surat->materi_global }}</div>
             </div>
 
-            {{-- Program Pelatihan --}}
+            {{-- Program --}}
             <div class="form-section">
                 <div class="section-header">
                     Pelatihan ini <strong>{{ $surat->program_pelatihan_ksp }}</strong> dalam Program Pelatihan PT. KSP
@@ -245,12 +255,14 @@
                             <tr>
                                 @foreach($parafs as $paraf)
                                     @php
-                                        $showImg = $paraf->status === 'approved' && !empty($paraf->preview_url);
+                                        // show only if approved & pdf_path exists & readable
+                                        $pdfPath  = $paraf->pdf_path ?? null;
+                                        $showImg  = $paraf->status === 'approved' && $pdfPath && is_readable($pdfPath);
                                     @endphp
                                     <td class="sign-cell">
                                         <div class="sign-image-box">
                                             @if($showImg)
-                                                <img src="{{ $paraf->preview_url }}" alt="Paraf">
+                                                <img src="{{ $pdfPath }}" alt="Paraf">
                                             @else
                                                 <div class="sign-blank"></div>
                                             @endif
@@ -272,7 +284,7 @@
                     @if($sigs->count())
                         <div style="font-weight:bold; font-size:13px; margin:25px 0 8px;">Tanda Tangan</div>
                         <table style="width:100%; text-align:center;">
-                            {{-- Optional fixed labels row; comment out if not wanted --}}
+                            {{-- Optional labels row; comment/remove if undesired --}}
                             <tr class="sign-grid-header">
                                 <td>Mengusulkan</td>
                                 <td>Mengetahui</td>
@@ -281,12 +293,13 @@
                             <tr>
                                 @foreach($sigs as $signature)
                                     @php
-                                        $showImg = $signature->status === 'approved' && !empty($signature->preview_url);
+                                        $pdfPath = $signature->pdf_path ?? null;
+                                        $showImg = $signature->status === 'approved' && $pdfPath && is_readable($pdfPath);
                                     @endphp
                                     <td class="sign-cell">
                                         <div class="sign-image-box">
                                             @if($showImg)
-                                                <img src="{{ $signature->preview_url }}" alt="Signature">
+                                                <img src="{{ $pdfPath }}" alt="Signature">
                                             @else
                                                 <div class="sign-blank"></div>
                                             @endif

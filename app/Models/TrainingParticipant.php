@@ -45,4 +45,10 @@ class TrainingParticipant extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+
+    public function attendances()
+    {
+        return $this->hasMany(DaftarHadirPelatihan::class, 'participant_id');
+    }
+
 }

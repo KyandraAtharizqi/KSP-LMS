@@ -25,8 +25,8 @@
                 </p>
             </div>
 
-            {{-- Form untuk mengirim data persetujuan --}}
-            <form action="{{ route('training.surattugas.approve.submit', ['id' => $surat->id, 'approvalId' => $approval->id]) }}" method="POST">
+            {{-- Form persetujuan --}}
+            <form action="{{ route('training.surattugas.approve', ['id' => $surat->id, 'approval' => $approval->id]) }}" method="POST">
                 @csrf
                 <div class="d-flex justify-content-end">
                     <a href="{{ route('training.surattugas.index') }}" class="btn btn-secondary me-2">Batal</a>

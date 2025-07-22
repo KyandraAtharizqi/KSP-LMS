@@ -111,4 +111,15 @@ class SuratPengajuanPelatihan extends Model
     return $this->hasMany(SuratTugasPelatihanSignatureAndParaf::class, 'surat_tugas_id');
     }
 
+    public function daftarHadir()
+    {
+        return $this->hasMany(DaftarHadirPelatihan::class, 'pelatihan_id');
+    }
+
+    public function daftarHadirStatus()
+    {
+        return $this->hasMany(DaftarHadirPelatihanStatus::class, 'pelatihan_id');
+    }
+
+
 }

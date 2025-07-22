@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\SuratTugasPelatihanSignatureAndParaf;
 
 class SuratTugasPelatihan extends Model
 {
@@ -31,7 +30,10 @@ class SuratTugasPelatihan extends Model
         'is_accepted' => 'boolean',
     ];
 
-    // --- Relationships ---
+    /* -----------------------------------------------------------------
+     | Relationships
+     | -----------------------------------------------------------------
+     */
 
     public function pelatihan()
     {
@@ -43,16 +45,39 @@ class SuratTugasPelatihan extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function signatures()
+    /**
+     * All approvals (parafs and signatures), sorted by sequence.
+     */
+    public function signaturesAndParafs()
     {
-        return $this->hasMany(SuratTugasPelatihanSignatureAndParaf::class, 'surat_tugas_id');
+        return $this->hasMany(SuratTugasPelatihanSignatureAndParaf::class, 'surat_tugas_id')
+                    ->orderBy('sequence');
     }
 
-    // --- Approval Status Helper ---
+    /**
+     * Shortcut to only signatures
+     */
+    public function signatures()
+    {
+        return $this->signaturesAndParafs()->where('type', 'signature');
+    }
+
+    /**
+     * Shortcut to only parafs
+     */
+    public function parafs()
+    {
+        return $this->signaturesAndParafs()->where('type', 'paraf');
+    }
+
+    /* -----------------------------------------------------------------
+     | Approval Status Helper
+     | -----------------------------------------------------------------
+     */
 
     public function getApprovalStatus()
     {
-        $approvals = $this->signatures;
+        $approvals = $this->signaturesAndParafs;
 
         if ($approvals->isEmpty()) {
             return [
@@ -87,9 +112,14 @@ class SuratTugasPelatihan extends Model
         ];
     }
 
-        // This is the missing relation your view needs:
-    public function signaturesAndParafs()
+    /* -----------------------------------------------------------------
+     | Model Events (Cascade Delete)
+     | -----------------------------------------------------------------
+     */
+    protected static function booted()
     {
-        return $this->hasMany(SuratTugasPelatihanSignatureAndParaf::class, 'surat_tugas_id');
+        static::deleting(function (self $model) {
+            $model->signaturesAndParafs()->delete();
+        });
     }
 }
