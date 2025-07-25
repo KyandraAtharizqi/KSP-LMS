@@ -8,15 +8,13 @@ use App\Models\DaftarHadirPelatihanStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
 class DaftarHadirPelatihanController extends Controller
 {
     /* ===============================================================
-     |  INDEX – list pelatihans eligible for attendance
-     |  Only show pelatihans whose Surat Tugas has been fully accepted.
+     | INDEX – list pelatihans eligible for attendance
      * ===============================================================*/
     public function index(Request $request)
     {
@@ -26,10 +24,12 @@ class DaftarHadirPelatihanController extends Controller
             ->with(['suratTugas', 'participants.user'])
             ->whereHas('suratTugas', fn($st) => $st->where('is_accepted', 1));
 
+        // Non-admins only see pelatihans they participate in.
         if (!$this->userCanSeeAll($user)) {
             $q->whereHas('participants', fn($p) => $p->where('user_id', $user->id));
         }
 
+        // Search (kode / judul)
         if ($s = trim($request->q ?? '')) {
             $q->where(function ($w) use ($s) {
                 $w->where('kode_pelatihan', 'like', "%{$s}%")
@@ -43,16 +43,14 @@ class DaftarHadirPelatihanController extends Controller
     }
 
     /* ===============================================================
-     |  SHOW – training-level page (list all days)
+     | SHOW – training-level page (list all days, presenter per day)
      * ===============================================================*/
     public function show($pelatihanId)
     {
         $user = Auth::user();
 
-        $pelatihan = SuratPengajuanPelatihan::with([
-            'suratTugas',
-            'daftarHadirStatus',
-        ])->findOrFail($pelatihanId);
+        $pelatihan = SuratPengajuanPelatihan::with(['suratTugas', 'daftarHadirStatus'])
+            ->findOrFail($pelatihanId);
 
         if (!$this->isSuratTugasAccepted($pelatihan)) {
             abort(Response::HTTP_FORBIDDEN, 'Daftar hadir belum dapat diisi: Surat Tugas belum disetujui.');
@@ -69,18 +67,14 @@ class DaftarHadirPelatihanController extends Controller
     }
 
     /* ===============================================================
-     |  DAY – detailed attendance editor for a specific date
+     | DAY – main attendance editor (locked if finalized)
      * ===============================================================*/
     public function day($pelatihanId, $date)
     {
         $user = Auth::user();
 
-        $pelatihan = SuratPengajuanPelatihan::with([
-            'suratTugas',
-            'participants.user',
-            'participants.jabatan',
-            'participants.department',
-        ])->findOrFail($pelatihanId);
+        $pelatihan = SuratPengajuanPelatihan::with(['suratTugas', 'participants.user'])
+            ->findOrFail($pelatihanId);
 
         if (!$this->isSuratTugasAccepted($pelatihan)) {
             abort(Response::HTTP_FORBIDDEN, 'Daftar hadir belum dapat diisi: Surat Tugas belum disetujui.');
@@ -110,74 +104,122 @@ class DaftarHadirPelatihanController extends Controller
     }
 
     /* ===============================================================
-     |  IMPORT – parse CSV and directly save to DB
+     | IMPORT – CSV batch update (NOT finalize)
      * ===============================================================*/
     public function import(Request $request, $pelatihanId, $date)
     {
         $user = Auth::user();
-        $pelatihan = SuratPengajuanPelatihan::with(['suratTugas', 'participants.user'])->findOrFail($pelatihanId);
+        $pelatihan = SuratPengajuanPelatihan::with('participants.user')->findOrFail($pelatihanId);
 
         if (!$this->isSuratTugasAccepted($pelatihan)) {
-            return redirect()
-                ->route('training.daftarhadirpelatihan.day', [$pelatihan->id, $date])
-                ->with('error', 'Surat Tugas belum disetujui; tidak dapat impor daftar hadir.');
+            return back()->with('error', 'Surat Tugas belum disetujui; tidak dapat impor daftar hadir.');
         }
 
         if (!$this->userCanManageAttendance($user, $pelatihan)) {
             abort(Response::HTTP_FORBIDDEN);
         }
 
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt',
-        ]);
-
+        $request->validate(['file' => 'required|file|mimes:csv,txt']);
         $day = Carbon::parse($date)->toDateString();
 
-        DaftarHadirPelatihanStatus::firstOrCreate([
+        $status = DaftarHadirPelatihanStatus::firstOrCreate([
             'pelatihan_id' => $pelatihan->id,
             'date'         => $day,
         ]);
+
+        if ($status->is_submitted) {
+            return back()->with('error', 'Hari ini sudah disubmit; import dinonaktifkan.');
+        }
 
         $participantsByReg = $pelatihan->participants
             ->filter(fn($p) => $p->registration_id)
             ->mapWithKeys(fn($p) => [trim($p->registration_id) => $p]);
 
-        $rows = $this->parseAttendanceFile($request->file('file'));
+        [$rows, $mode] = $this->parseAttendanceFile($request->file('file'));
 
-        [$importedCount, $skippedCount, $preview] = $this->buildImportPreviewArray(
-            $rows,
-            $pelatihan,
-            $day,
-            $participantsByReg
-        );
+        $updated = 0;
+        $skipped = 0;
 
-        DB::transaction(function () use ($preview, $pelatihan, $participantsByReg, $day) {
-            foreach ($preview as $reg => $data) {
+        DB::transaction(function () use ($rows, $mode, $participantsByReg, $pelatihan, $day, &$updated, &$skipped) {
+            foreach ($rows as $r) {
+                $reg = trim($r['registration_id'] ?? '');
+                if ($reg === '' || !isset($participantsByReg[$reg])) {
+                    $skipped++;
+                    continue;
+                }
+
                 $participant = $participantsByReg[$reg];
                 $att = DaftarHadirPelatihan::firstOrNew([
-                    'pelatihan_id'   => $pelatihan->id,
-                    'participant_id' => $participant->id,
-                    'date'           => $day,
+                    'pelatihan_id' => $pelatihan->id,
+                    'user_id'      => $participant->user_id,
+                    'date'         => $day,
                 ]);
 
-                $att->status              = $data['status'] ?? 'hadir';
-                $att->check_in_time       = $data['check_in_time'] ?? null;
-                $att->check_in_timestamp  = $data['check_in_timestamp'] ?? null;
-                $att->check_in_photo      = $data['check_in_photo'] ?? null;
-                $att->check_out_time      = $data['check_out_time'] ?? null;
-                $att->check_out_timestamp = $data['check_out_timestamp'] ?? null;
-                $att->check_out_photo     = $data['check_out_photo'] ?? null;
+                $att->registration_id = $participant->registration_id;
+
+                if ($mode === 'event') {
+                    $checkType  = trim((string)($r['check_type'] ?? ''));
+                    $isCheckIn  = strcasecmp($checkType, 'Check In') === 0;
+                    $isCheckOut = strcasecmp($checkType, 'Check Out') === 0;
+
+                    $ts  = $this->parseGoogleTimestamp($r['timestamp'] ?? null);
+                    $tim = $this->normalizeTime($r['waktu'] ?? null) ?? ($ts ? $ts->format('H:i:s') : null);
+                    $ph  = $r['photo'] ?? null;
+                    $nt  = $r['note'] ?? null;
+
+                    if ($isCheckIn) {
+                        if ($tim) $att->check_in_time       = $tim;
+                        if ($ts)  $att->check_in_timestamp  = $ts;
+                        if ($ph)  $att->check_in_photo      = $ph;
+                    } elseif ($isCheckOut) {
+                        if ($tim) $att->check_out_time      = $tim;
+                        if ($ts)  $att->check_out_timestamp = $ts;
+                        if ($ph)  $att->check_out_photo     = $ph;
+                    }
+
+                    if ($nt !== null && $nt !== '') {
+                        $att->note = $nt;
+                    }
+
+                    $att->status = 'hadir';
+
+                } else {
+                    if (!empty($r['status'])) {
+                        $att->status = $this->normalizeStatus($r['status']);
+                    }
+                    if (!empty($r['check_in_time'])) {
+                        $att->check_in_time = $this->normalizeTime($r['check_in_time']);
+                    }
+                    if (!empty($r['check_out_time'])) {
+                        $att->check_out_time = $this->normalizeTime($r['check_out_time']);
+                    }
+                    if (!empty($r['note'])) {
+                        $att->note = $r['note'];
+                    }
+                    if (!empty($r['check_in_photo'])) {
+                        $att->check_in_photo = $r['check_in_photo'];
+                    }
+                    if (!empty($r['check_out_photo'])) {
+                        $att->check_out_photo = $r['check_out_photo'];
+                    }
+                }
+
+                if (!$att->status) {
+                    $att->status = 'absen';
+                }
+
                 $att->save();
+                $updated++;
             }
         });
 
         return redirect()
             ->route('training.daftarhadirpelatihan.day', [$pelatihan->id, $day])
-            ->with('success', "Impor selesai. Disimpan: {$importedCount}, Dilewati: {$skippedCount}.");
+            ->with('success', "Import selesai. Diupdate: {$updated}, Dilewati: {$skipped}.");
     }
 
     /* ===============================================================
-     |  SAVE – persist manual edits
+     | SAVE – manual edits; optional finalize via action=finalize
      * ===============================================================*/
     public function save(Request $request, $pelatihanId, $date)
     {
@@ -188,33 +230,47 @@ class DaftarHadirPelatihanController extends Controller
             abort(Response::HTTP_FORBIDDEN);
         }
 
-        $day     = Carbon::parse($date)->toDateString();
+        $day = Carbon::parse($date)->toDateString();
+
+        $status = DaftarHadirPelatihanStatus::firstOrCreate([
+            'pelatihan_id' => $pelatihan->id,
+            'date'         => $day,
+        ]);
+
+        if ($status->is_submitted) {
+            return redirect()
+                ->route('training.daftarhadirpelatihan.day', [$pelatihan->id, $day])
+                ->with('error', 'Hari ini sudah disubmit; perubahan diblokir.');
+        }
+
         $payload = $request->input('attendance', []);
-        $validPart = $pelatihan->participants;
-        $validIdsFlip = $validPart->pluck('id')->flip();
-        $participantsById = $validPart->keyBy('id');
+        $participantsByUser = $pelatihan->participants->keyBy('user_id');
+        $count = 0;
 
-        DB::transaction(function () use ($payload, $participantsById, $validIdsFlip, $day, $pelatihan) {
-            foreach ($payload as $participantId => $data) {
-                if (!$validIdsFlip->has($participantId)) continue;
+        DB::transaction(function () use ($payload, $participantsByUser, $pelatihan, $day, &$count) {
+            foreach ($payload as $userId => $data) {
+                if (!$participantsByUser->has($userId)) continue;
+                $participant = $participantsByUser[$userId];
 
-                $status  = $data['status'] ?? 'absen';
+                $att = DaftarHadirPelatihan::firstOrNew([
+                    'pelatihan_id' => $pelatihan->id,
+                    'user_id'      => $userId,
+                    'date'         => $day,
+                ]);
+
+                $att->registration_id = $participant->registration_id;
+
+                $status  = $this->normalizeStatus($data['status'] ?? 'absen');
                 $note    = $data['note'] ?? null;
                 $inTime  = $data['check_in_time']  ?? null;
                 $outTime = $data['check_out_time'] ?? null;
-
-                $att = DaftarHadirPelatihan::firstOrNew([
-                    'pelatihan_id'   => $pelatihan->id,
-                    'participant_id' => $participantId,
-                    'date'           => $day,
-                ]);
 
                 $att->status = $status;
                 $att->note   = $note;
 
                 if ($status === 'hadir') {
-                    $att->check_in_time  = $inTime ? $this->normalizeTime($inTime) : $att->check_in_time;
-                    $att->check_out_time = $outTime ? $this->normalizeTime($outTime) : $att->check_out_time;
+                    $att->check_in_time  = $inTime  ? $this->normalizeTime($inTime)  : null;
+                    $att->check_out_time = $outTime ? $this->normalizeTime($outTime) : null;
                 } else {
                     $att->check_in_time       = null;
                     $att->check_in_timestamp  = null;
@@ -223,17 +279,30 @@ class DaftarHadirPelatihanController extends Controller
                     $att->check_out_timestamp = null;
                     $att->check_out_photo     = null;
                 }
+
                 $att->save();
+                $count++;
             }
         });
 
+        if ($request->input('action') === 'finalize') {
+            $status->is_submitted = true;
+            $status->submitted_at = now();
+            $status->submitted_by = $user->id;
+            $status->save();
+
+            return redirect()
+                ->route('training.daftarhadirpelatihan.show', $pelatihan->id)
+                ->with('success', "Data disimpan & hari {$day} ditandai selesai.");
+        }
+
         return redirect()
             ->route('training.daftarhadirpelatihan.day', [$pelatihan->id, $day])
-            ->with('success', "Daftar hadir untuk {$day} disimpan.");
+            ->with('success', "Disimpan ({$count}) baris.");
     }
 
     /* ===============================================================
-     |  MARK COMPLETE – lock/submit a day
+     | MARK COMPLETE – legacy endpoint (JS call; still supported)
      * ===============================================================*/
     public function markComplete(Request $request, $pelatihanId, $date)
     {
@@ -252,7 +321,6 @@ class DaftarHadirPelatihanController extends Controller
                 'is_submitted' => true,
                 'submitted_at' => now(),
                 'submitted_by' => $user->id,
-                'note'         => $request->input('note'),
             ]
         );
 
@@ -262,7 +330,35 @@ class DaftarHadirPelatihanController extends Controller
     }
 
     /* ===============================================================
-     |  EXPORT – CSV per day
+     | SET PRESENTER
+     * ===============================================================*/
+    public function setPresenterDay(Request $request, $pelatihanId, $statusId)
+    {
+        $user = Auth::user();
+        $pelatihan = SuratPengajuanPelatihan::findOrFail($pelatihanId);
+
+        if (!$this->userCanManageAttendance($user, $pelatihan)) {
+            abort(Response::HTTP_FORBIDDEN);
+        }
+
+        $request->validate(['presenter' => 'required|string|max:255']);
+
+        $status = DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihan->id)
+            ->where('id', $statusId)
+            ->firstOrFail();
+
+        if ($status->is_submitted) {
+            return back()->with('error', 'Tidak dapat mengubah presenter: hari sudah disubmit.');
+        }
+
+        $status->presenter = $request->presenter;
+        $status->save();
+
+        return back()->with('success', 'Presenter berhasil disimpan.');
+    }
+
+    /* ===============================================================
+     | EXPORT – CSV per day
      * ===============================================================*/
     public function export($pelatihanId, $date)
     {
@@ -278,11 +374,11 @@ class DaftarHadirPelatihanController extends Controller
         $attRows = DaftarHadirPelatihan::where('pelatihan_id', $pelatihan->id)
             ->whereDate('date', $day)
             ->get()
-            ->keyBy('participant_id');
+            ->keyBy('user_id');
 
         $rows = [];
         foreach ($pelatihan->participants as $p) {
-            $att = $attRows->get($p->id);
+            $att = $attRows->get($p->user_id);
             $rows[] = [
                 'kode_pelatihan'      => $pelatihan->kode_pelatihan,
                 'date'                => $day,
@@ -307,20 +403,7 @@ class DaftarHadirPelatihanController extends Controller
 
         $callback = function () use ($rows) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, array_keys($rows[0] ?? [
-                'kode_pelatihan'      => '',
-                'date'                => '',
-                'registration_id'     => '',
-                'participant_name'    => '',
-                'status'              => '',
-                'check_in_time'       => '',
-                'check_in_timestamp'  => '',
-                'check_in_photo'      => '',
-                'check_out_time'      => '',
-                'check_out_timestamp' => '',
-                'check_out_photo'     => '',
-                'note'                => '',
-            ]));
+            fputcsv($out, array_keys($rows[0] ?? []));
             foreach ($rows as $r) {
                 fputcsv($out, $r);
             }
@@ -331,9 +414,8 @@ class DaftarHadirPelatihanController extends Controller
     }
 
     /* ===============================================================
-     |  INTERNAL HELPERS
+     | INTERNAL HELPERS
      * ===============================================================*/
-
     protected function userCanSeeAll($user): bool
     {
         return $user->role === 'admin'
@@ -370,133 +452,122 @@ class DaftarHadirPelatihanController extends Controller
         }
     }
 
-    protected function buildImportPreviewArray(
-        array $rows,
-        SuratPengajuanPelatihan $pelatihan,
-        string $day,
-        $participantsByReg
-    ): array {
-        $imported = 0;
-        $skipped  = 0;
-        $preview  = [];
-
-        foreach ($rows as $r) {
-            $kodeFile = trim($r['kode_pelatihan'] ?? '');
-            if ($kodeFile !== '' && strcasecmp($kodeFile, $pelatihan->kode_pelatihan) !== 0) {
-                $skipped++;
-                continue;
-            }
-
-            $reg = trim($r['registration_id'] ?? '');
-            if ($reg === '') {
-                $skipped++;
-                continue;
-            }
-
-            $tsRaw = $r['timestamp'] ?? null;
-            if (!$tsRaw) {
-                $skipped++;
-                continue;
-            }
-            try {
-                $ts = Carbon::parse($tsRaw);
-            } catch (\Throwable $e) {
-                $skipped++;
-                continue;
-            }
-
-            if ($ts->toDateString() !== $day) {
-                continue;
-            }
-
-            $participant = $participantsByReg[$reg] ?? null;
-            if (!$participant) {
-                $skipped++;
-                continue;
-            }
-
-            $actRaw     = strtolower(trim($r['presensi'] ?? ''));
-            $isCheckOut = $this->isCheckOutString($actRaw);
-            $isCheckIn  = !$isCheckOut;
-
-            $inptTime = $r['waktu'] ?? null;
-            $normTime = $this->normalizeTime($inptTime) ?? $ts->format('H:i:s');
-            $photo    = $r['photo'] ?? null;
-
-            if (!isset($preview[$reg])) {
-                $preview[$reg] = [
-                    'status'              => 'hadir',
-                    'check_in_time'       => null,
-                    'check_in_timestamp'  => null,
-                    'check_in_photo'      => null,
-                    'check_out_time'      => null,
-                    'check_out_timestamp' => null,
-                    'check_out_photo'     => null,
-                ];
-            }
-
-            if ($isCheckIn) {
-                if (
-                    empty($preview[$reg]['check_in_timestamp']) ||
-                    $ts->lt(Carbon::parse($preview[$reg]['check_in_timestamp']))
-                ) {
-                    $preview[$reg]['check_in_timestamp'] = $ts->toDateTimeString();
-                    $preview[$reg]['check_in_time']      = $normTime;
-                    if ($photo) $preview[$reg]['check_in_photo'] = $photo;
-                }
-            } else {
-                if (
-                    empty($preview[$reg]['check_out_timestamp']) ||
-                    $ts->gt(Carbon::parse($preview[$reg]['check_out_timestamp']))
-                ) {
-                    $preview[$reg]['check_out_timestamp'] = $ts->toDateTimeString();
-                    $preview[$reg]['check_out_time']      = $normTime;
-                    if ($photo) $preview[$reg]['check_out_photo'] = $photo;
-                }
-            }
-
-            $imported++;
-        }
-
-        return [$imported, $skipped, $preview];
-    }
-
     protected function parseAttendanceFile($file): array
     {
         $rows = [];
-        if (!$file || !$file->isValid()) return $rows;
+        $mode = 'row'; 
+        if (!$file || !$file->isValid()) return [$rows, $mode];
 
         $fh = fopen($file->getRealPath(), 'r');
         $header = null;
-        while (($data = fgetcsv($fh, 1000, ',')) !== false) {
+        $map = [];
+
+        while (($data = fgetcsv($fh, 2048, ',')) !== false) {
             if (!$header) {
                 $header = array_map('trim', $data);
+
+                foreach ($header as $idx => $col) {
+                    $lc = strtolower(trim($col));
+
+                    if (str_contains($lc, 'presensi')) $mode = 'event';
+
+                    if (preg_match('/timestamp/i', $lc))       $map['timestamp']        = $idx;
+                    if (preg_match('/kode/i', $lc))            $map['kode_pelatihan']   = $idx;
+                    if (preg_match('/registrasi|nik|reg id/i', $lc)) 
+                                                              $map['registration_id']  = $idx;
+                    if (preg_match('/presensi/i', $lc))        $map['check_type']       = $idx;
+                    if (preg_match('/waktu/i', $lc))           $map['waktu']            = $idx;
+                    if (preg_match('/foto|photo/i', $lc))      $map['photo']            = $idx;
+                    if (preg_match('/note|catatan/i', $lc))    $map['note']             = $idx;
+                    if (preg_match('/status/i', $lc))          $map['status']           = $idx;
+                    if (preg_match('/check in/i', $lc))        $map['check_in_time']    = $idx;
+                    if (preg_match('/check out/i', $lc))       $map['check_out_time']   = $idx;
+                    if (preg_match('/in photo/i', $lc))        $map['check_in_photo']   = $idx;
+                    if (preg_match('/out photo/i', $lc))       $map['check_out_photo']  = $idx;
+                }
                 continue;
             }
-            $row = [];
-            foreach ($header as $idx => $col) {
-                $row[strtolower($col)] = $data[$idx] ?? null;
-            }
+
+            $row = [
+                'timestamp'        => isset($map['timestamp'])        ? ($data[$map['timestamp']] ?? null)        : null,
+                'kode_pelatihan'   => isset($map['kode_pelatihan'])   ? ($data[$map['kode_pelatihan']] ?? null)   : null,
+                'registration_id'  => isset($map['registration_id'])  ? trim($data[$map['registration_id']] ?? ''): null,
+                'check_type'       => isset($map['check_type'])       ? ($data[$map['check_type']] ?? null)       : null,
+                'waktu'            => isset($map['waktu'])            ? ($data[$map['waktu']] ?? null)            : null,
+                'photo'            => isset($map['photo'])            ? ($data[$map['photo']] ?? null)            : null,
+                'note'             => isset($map['note'])             ? ($data[$map['note']] ?? null)             : null,
+                'status'           => isset($map['status'])           ? ($data[$map['status']] ?? null)           : null,
+                'check_in_time'    => isset($map['check_in_time'])    ? ($data[$map['check_in_time']] ?? null)    : null,
+                'check_out_time'   => isset($map['check_out_time'])   ? ($data[$map['check_out_time']] ?? null)   : null,
+                'check_in_photo'   => isset($map['check_in_photo'])   ? ($data[$map['check_in_photo']] ?? null)   : null,
+                'check_out_photo'  => isset($map['check_out_photo'])  ? ($data[$map['check_out_photo']] ?? null)  : null,
+            ];
+
             $rows[] = $row;
         }
+
         fclose($fh);
-        return $rows;
+        return [$rows, $mode];
     }
 
-    protected function isCheckOutString(string $s): bool
+    protected function normalizeStatus(?string $status): string
     {
-        return str_contains($s, 'out') || str_contains($s, 'pulang');
+        $s = strtolower(trim($status ?? ''));
+        return in_array($s, ['hadir','izin','sakit','absen']) ? $s : 'absen';
     }
 
-    protected function normalizeTime($val): ?string
+    protected function normalizeTime($time): ?string
     {
-        if (!$val) return null;
-        $val = trim($val);
-        if (preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $val)) {
-            return strlen($val) === 5 ? ($val . ':00') : $val;
+        if ($time === null) return null;
+        $time = trim((string)$time);
+        if ($time === '') return null;
+
+        if (preg_match('/^\d{1,2}:\d{2}$/', $time)) {
+            [$h,$m] = explode(':', $time);
+            return sprintf('%02d:%02d:00', $h, $m);
         }
+
+        if (preg_match('/^\d{1,2}:\d{2}:\d{2}$/', $time)) {
+            [$h,$m,$s] = explode(':', $time);
+            return sprintf('%02d:%02d:%02d', $h, $m, $s);
+        }
+
         try {
-            return Carbon::parse($val)->format('H:i:s');
+            return Carbon::parse($time)->format('H:i:s');
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    protected function parseGoogleTimestamp($str): ?Carbon
+    {
+        if ($str === null) return null;
+        $str = trim((string)$str);
+        if ($str === '') return null;
+
+        $formats = [
+            'n/j/Y H:i',
+            'n/j/Y H:i:s',
+            'm/d/Y H:i',
+            'm/d/Y H:i:s',
+            'd/m/Y H:i',
+            'd/m/Y H:i:s',
+            'Y-m-d H:i',
+            'Y-m-d H:i:s',
+            'Y/m/d H:i',
+            'Y/m/d H:i:s',
+        ];
+
+        foreach ($formats as $fmt) {
+            try {
+                return Carbon::createFromFormat($fmt, $str);
+            } catch (\Throwable $e) {
+                // try next
+            }
+        }
+
+        try {
+            return Carbon::parse($str);
         } catch (\Throwable $e) {
             return null;
         }

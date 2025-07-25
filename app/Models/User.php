@@ -152,4 +152,9 @@ class User extends Authenticatable
     {
     return $this->role === $role;
     }
+
+    public function positionHistories()
+    {
+    return $this->hasMany(UserPositionHistory::class)->orderByDesc('effective_date');
+    }
 }

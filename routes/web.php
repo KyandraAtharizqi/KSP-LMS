@@ -1,6 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Controllers
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SuratPengajuanPelatihanController;
@@ -14,6 +20,13 @@ use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LetterStatusController;
 use App\Http\Controllers\ProfileController;
 
+/* 👇 NEW Evaluation controllers (create these) */
+use App\Http\Controllers\TrainingEvaluation1Controller;
+use App\Http\Controllers\TrainingEvaluation2Controller;
+use App\Http\Controllers\TrainingEvaluationAtasanController;
+use App\Http\Controllers\TrainingEvaluationRekapController;
+
+
 Route::middleware(['auth'])->group(function () {
 
     /*
@@ -22,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    // Surat Pengajuan Pelatihan download
+    // Surat Pengajuan Pelatihan PDF download
     Route::get('/surat-pengajuan/{id}/download', [SuratPengajuanPelatihanController::class, 'downloadPDF'])
         ->name('surat.pengajuan.download');
 
@@ -32,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Home
     Route::get('/', [PageController::class, 'index'])->name('home');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -47,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('users.import.csv')
         ->middleware(['role:admin,department_admin,division_admin']);
 
+
     /*
     |--------------------------------------------------------------------------
     | Profile
@@ -61,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/upload-signature', [PageController::class, 'uploadSignature'])->name('profile.upload.signature');
     Route::post('/profile/upload-paraf', [PageController::class, 'uploadParaf'])->name('profile.upload.paraf');
 
+
     /*
     |--------------------------------------------------------------------------
     | Settings (Admin)
@@ -69,11 +85,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings', [PageController::class, 'settings'])
         ->name('settings.show')
         ->middleware(['role:admin']);
+
     Route::put('settings', [PageController::class, 'settingsUpdate'])
         ->name('settings.update')
         ->middleware(['role:admin']);
 
     Route::delete('attachment', [PageController::class, 'removeAttachment'])->name('attachment.destroy');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -85,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('outgoing', OutgoingLetterController::class);
         Route::resource('{letter}/disposition', DispositionController::class)->except(['show']);
     });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -98,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('outgoing/print', [OutgoingLetterController::class, 'print'])->name('outgoing.print');
     });
 
+
     /*
     |--------------------------------------------------------------------------
     | Gallery
@@ -107,6 +127,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('incoming', [LetterGalleryController::class, 'incoming'])->name('incoming');
         Route::get('outgoing', [LetterGalleryController::class, 'outgoing'])->name('outgoing');
     });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -118,23 +139,25 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('status', LetterStatusController::class)->except(['show', 'create', 'edit']);
     });
 
+
     /*
     |--------------------------------------------------------------------------
     | Surat Pengajuan Pelatihan
     |--------------------------------------------------------------------------
     */
     Route::prefix('training/suratpengajuan')->as('training.suratpengajuan.')->group(function () {
-        Route::get('/', [SuratPengajuanPelatihanController::class, 'index'])->name('index');
-        Route::get('/create', [SuratPengajuanPelatihanController::class, 'create'])->name('create');
-        Route::post('/', [SuratPengajuanPelatihanController::class, 'store'])->name('store');
+        Route::get('/',        [SuratPengajuanPelatihanController::class, 'index'])->name('index');
+        Route::get('/create',  [SuratPengajuanPelatihanController::class, 'create'])->name('create');
+        Route::post('/',       [SuratPengajuanPelatihanController::class, 'store'])->name('store');
 
         Route::get('/{id}/preview', [SuratPengajuanPelatihanController::class, 'preview'])->name('preview');
-        Route::get('/{id}/edit', [SuratPengajuanPelatihanController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [SuratPengajuanPelatihanController::class, 'update'])->name('update');
+        Route::get('/{id}/edit',    [SuratPengajuanPelatihanController::class, 'edit'])->name('edit');
+        Route::put('/{id}',         [SuratPengajuanPelatihanController::class, 'update'])->name('update');
 
         Route::post('/{id}/approval/{approval}/approve', [SuratPengajuanPelatihanController::class, 'approve'])->name('approve');
-        Route::post('/{id}/approval/{approval}/reject', [SuratPengajuanPelatihanController::class, 'reject'])->name('reject');
+        Route::post('/{id}/approval/{approval}/reject',  [SuratPengajuanPelatihanController::class, 'reject'])->name('reject');
     });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -142,19 +165,20 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('training/surattugas')->as('training.surattugas.')->group(function () {
-        Route::get('/', [SuratTugasPelatihanController::class, 'index'])->name('index');
+        Route::get('/',          [SuratTugasPelatihanController::class, 'index'])->name('index');
         Route::get('/{id}/preview', [SuratTugasPelatihanController::class, 'preview'])->name('preview');
 
         // Assign signers/parafs
         Route::get('/{id}/assign', [SuratTugasPelatihanController::class, 'assignView'])->name('assign.view');
-        Route::post('/assign', [SuratTugasPelatihanController::class, 'assignSave'])->name('assign.submit');
+        Route::post('/assign',     [SuratTugasPelatihanController::class, 'assignSave'])->name('assign.submit');
 
         // Approve / reject
         Route::get('/{id}/approve/{approval}', [SuratTugasPelatihanController::class, 'approveView'])->name('approve.view');
-        Route::post('/{id}/approve/{approval}', [SuratTugasPelatihanController::class, 'approve'])->name('approve');
-        Route::get('/{id}/reject/{approval}', [SuratTugasPelatihanController::class, 'rejectView'])->name('reject.view');
+        Route::post('/{id}/approve/{approval}',[SuratTugasPelatihanController::class, 'approve'])->name('approve');
+        Route::get('/{id}/reject/{approval}',  [SuratTugasPelatihanController::class, 'rejectView'])->name('reject.view');
         Route::post('/{id}/reject/{approval}', [SuratTugasPelatihanController::class, 'reject'])->name('reject');
     });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -162,34 +186,88 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('training/daftar-hadir-pelatihan')->as('training.daftarhadirpelatihan.')->group(function () {
+
         // Index: list pelatihans with approved Surat Tugas
         Route::get('/', [DaftarHadirPelatihanController::class, 'index'])->name('index');
 
-        // Show: training-level overview
+        // Show: training-level overview (all days)
         Route::get('/{pelatihan}', [DaftarHadirPelatihanController::class, 'show'])
             ->whereNumber('pelatihan')
             ->name('show');
 
         // Day-level routes
         Route::get('/{pelatihan}/day/{date}', [DaftarHadirPelatihanController::class, 'day'])
-            ->where(['pelatihan' => '[0-9]+', 'date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}'])
+            ->where([
+                'pelatihan' => '[0-9]+',
+                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+            ])
             ->name('day');
 
         Route::post('/{pelatihan}/day/{date}/import', [DaftarHadirPelatihanController::class, 'import'])
-            ->where(['pelatihan' => '[0-9]+', 'date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}'])
+            ->where([
+                'pelatihan' => '[0-9]+',
+                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+            ])
             ->name('import');
 
         Route::get('/{pelatihan}/day/{date}/export', [DaftarHadirPelatihanController::class, 'export'])
-            ->where(['pelatihan' => '[0-9]+', 'date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}'])
+            ->where([
+                'pelatihan' => '[0-9]+',
+                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+            ])
             ->name('export');
 
         Route::post('/{pelatihan}/day/{date}/save', [DaftarHadirPelatihanController::class, 'save'])
-            ->where(['pelatihan' => '[0-9]+', 'date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}'])
+            ->where([
+                'pelatihan' => '[0-9]+',
+                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+            ])
             ->name('save');
 
+        // Legacy complete endpoint (kept for backward compatibility)
         Route::post('/{pelatihan}/day/{date}/complete', [DaftarHadirPelatihanController::class, 'markComplete'])
-            ->where(['pelatihan' => '[0-9]+', 'date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}'])
+            ->where([
+                'pelatihan' => '[0-9]+',
+                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+            ])
             ->name('complete');
+
+        /*
+         * Presenter per day (status row)
+         * Used in show.blade per-row inline form.
+         */
+        Route::post('/{pelatihan}/status/{status}/presenter', [DaftarHadirPelatihanController::class, 'setPresenterDay'])
+            ->whereNumber(['pelatihan','status'])
+            ->name('set_presenter');
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Evaluation (Training Follow-up)
+    | Placeholder routes – implement controllers as needed.
+    |--------------------------------------------------------------------------
+    */
+
+    // Evaluation 1 (Peserta) – e.g., immediate reaction / feedback
+    Route::prefix('training/evaluation1')->as('training.evaluation1.')->group(function () {
+        Route::get('/', [TrainingEvaluation1Controller::class, 'index'])->name('index');
+        // Add other routes (store, show, etc.) as needed
+    });
+
+    // Evaluation 2 (Peserta) – e.g., post-training learning assessment
+    Route::prefix('training/evaluation2')->as('training.evaluation2.')->group(function () {
+        Route::get('/', [TrainingEvaluation2Controller::class, 'index'])->name('index');
+    });
+
+    // Evaluation Atasan (manager follow‑up on behavior/transfer)
+    Route::prefix('training/evaluation/atasan')->as('training.evaluation.atasan.')->group(function () {
+        Route::get('/', [TrainingEvaluationAtasanController::class, 'index'])->name('index');
+    });
+
+    // Rekapitulasi Jam (hours accumulation / summary across trainings)
+    Route::prefix('training/evaluation/rekap')->as('training.evaluation.rekap.')->group(function () {
+        Route::get('/', [TrainingEvaluationRekapController::class, 'index'])->name('index');
     });
 
 });

@@ -45,6 +45,7 @@
                 <thead>
                     <tr>
                         <th>Tanggal</th>
+                        <th>Presenter</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -53,6 +54,18 @@
                     @forelse($pelatihan->daftarHadirStatus as $status)
                         <tr>
                             <td>{{ $status->formattedDate() }}</td>
+                            <td>
+                                @if($status->presenter)
+                                    <span>{{ $status->presenter }}</span>
+                                @else
+                                    <form action="{{ route('training.daftarhadirpelatihan.set_presenter', [$pelatihan->id, $status->id]) }}" 
+                                          method="POST" class="d-flex">
+                                        @csrf
+                                        <input type="text" name="presenter" class="form-control form-control-sm me-1" placeholder="Nama Presenter" required>
+                                        <button type="submit" class="btn btn-sm btn-success">Simpan</button>
+                                    </form>
+                                @endif
+                            </td>
                             <td>
                                 <span class="badge bg-{{ $status->is_submitted ? 'success' : 'warning' }}">
                                     {{ $status->submittedLabel() }}
@@ -67,7 +80,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="text-center">Belum ada daftar hadir.</td>
+                            <td colspan="4" class="text-center">Belum ada daftar hadir.</td>
                         </tr>
                     @endforelse
                 </tbody>

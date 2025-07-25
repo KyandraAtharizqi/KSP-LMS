@@ -21,7 +21,7 @@ class DaftarHadirPelatihanStatus extends Model
         'is_submitted',
         'submitted_at',
         'submitted_by',
-        'note',
+        'presenter', 
     ];
 
     protected $casts = [

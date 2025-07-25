@@ -61,6 +61,7 @@ class UpdateUserRequest extends FormRequest
             'address' => 'Alamat',
             'golongan' => 'Golongan',
             'role' => 'Peran',
+            'effective_date' => 'Tanggal Efektif', // ✅ Added here
         ];
     }
 
@@ -79,10 +80,11 @@ class UpdateUserRequest extends FormRequest
             'superior_registration_id' => ['nullable', 'exists:users,registration_id'],
             'nik' => ['nullable', 'string'],
             'address' => ['nullable', 'string'],
-            'golongan' => ['nullable', 'string'], // ✅ Added here
+            'golongan' => ['nullable', 'string'],
             'is_active' => ['nullable'],
             'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
             'profile_picture' => 'nullable|image|mimes:jpg,gif,png|max:800',
+            'effective_date' => ['nullable', 'date'], // ✅ Added here
         ];
     }
 

@@ -12,9 +12,11 @@ use App\Models\Department;
 use App\Models\Directorate;
 use App\Models\User;
 use App\Models\Division;
+use App\Models\UserPositionHistory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -33,9 +35,18 @@ class UserController extends Controller
             ->orderByRaw('CAST(golongan AS UNSIGNED) ASC')
             ->pluck('golongan');
 
-
         $users = User::query()
-            ->with(['department.division', 'department.directorate', 'directorate', 'division', 'jabatan'])
+            ->with([
+                'department.division',
+                'department.directorate',
+                'directorate',
+                'division',
+                'jabatan',
+                'positionHistories.jabatan',
+                'positionHistories.department',
+                'positionHistories.division',
+                'positionHistories.directorate'
+            ])
             ->when($request->search, fn($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
@@ -101,9 +112,19 @@ class UserController extends Controller
                 $newUser['directorate_id'] = Department::find($newUser['department_id'])?->directorate_id;
             }
 
-            User::create($newUser);
-            return back()->with('success', __('menu.general.success'));
+            $user = User::create($newUser);
 
+            UserPositionHistory::create([
+                'user_id'       => $user->id,
+                'jabatan_id'    => $user->jabatan_id,
+                'department_id' => $user->department_id,
+                'division_id'   => $user->division_id,
+                'directorate_id'=> $user->directorate_id,
+                'is_active'     => true,
+                'effective_date'=> $request->filled('effective_date') ? Carbon::parse($request->effective_date) : Carbon::now(),
+            ]);
+
+            return back()->with('success', __('menu.general.success'));
         } catch (\Throwable $exception) {
             return back()->with('error', $exception->getMessage());
         }
@@ -134,9 +155,32 @@ class UserController extends Controller
                 $newUser['password'] = Hash::make(Config::getValueByCode(ConfigEnum::DEFAULT_PASSWORD));
             }
 
-            $user->update($newUser);
-            return back()->with('success', __('menu.general.success'));
+            $positionChanged = (
+                $user->jabatan_id     !== $newUser['jabatan_id'] ||
+                $user->department_id  !== $newUser['department_id'] ||
+                $user->division_id    !== $newUser['division_id'] ||
+                $user->directorate_id !== $newUser['directorate_id']
+            );
 
+            $user->update($newUser);
+
+            if ($positionChanged) {
+                UserPositionHistory::where('user_id', $user->id)
+                    ->where('is_active', true)
+                    ->update(['is_active' => false]);
+
+                UserPositionHistory::create([
+                    'user_id'       => $user->id,
+                    'jabatan_id'    => $user->jabatan_id,
+                    'department_id' => $user->department_id,
+                    'division_id'   => $user->division_id,
+                    'directorate_id'=> $user->directorate_id,
+                    'is_active'     => true,
+                    'effective_date'=> $request->filled('effective_date') ? Carbon::parse($request->effective_date) : Carbon::now(),
+                ]);
+            }
+
+            return back()->with('success', __('menu.general.success'));
         } catch (\Throwable $exception) {
             return back()->with('error', $exception->getMessage());
         }
@@ -161,20 +205,18 @@ class UserController extends Controller
         try {
             $path = $request->file('csv_file')->getRealPath();
             $file = fopen($path, 'r');
-
-            $header = fgetcsv($file); // Skip header row
+            $header = fgetcsv($file);
 
             while (($row = fgetcsv($file)) !== false) {
-                $registration_id = trim($row[0]); // Registration_ID
-                $name            = trim($row[1]); // Nama
-                $jabatan_full    = trim($row[2]); // Jabatan_Full
-                $golongan        = trim($row[3]); // Golongan
-                $masa_golongan   = trim($row[4]); // Masa Golongan (ignored)
-                $directorateName = trim($row[5]); // Direktorat
-                $jabatanName     = trim($row[6]); // Jabatan
-                $divisionName    = trim($row[7]); // Divisi
-                $departmentName  = trim($row[8]); // Departemen
-                $address         = trim($row[9]); // Alamat
+                $registration_id = trim($row[0]);
+                $name            = trim($row[1]);
+                $jabatan_full    = trim($row[2]);
+                $golongan        = trim($row[3]);
+                $directorateName = trim($row[5]);
+                $jabatanName     = trim($row[6]);
+                $divisionName    = trim($row[7]);
+                $departmentName  = trim($row[8]);
+                $address         = trim($row[9]);
 
                 if (!$registration_id || !$name) continue;
 
@@ -193,7 +235,7 @@ class UserController extends Controller
                     $department->save();
                 }
 
-                User::updateOrCreate(
+                $user = User::updateOrCreate(
                     ['registration_id' => $registration_id],
                     [
                         'name'           => $name,
@@ -203,7 +245,7 @@ class UserController extends Controller
                         'division_id'    => $department?->division_id ?? $division?->id,
                         'department_id'  => $department?->id,
                         'jabatan_id'     => $jabatan?->id,
-                        'email'          => strtolower($registration_id).'@yourdomain.com',
+                        'email'          => strtolower($registration_id) . '@yourdomain.com',
                         'address'        => $address,
                         'password'       => Hash::make(Config::getValueByCode(ConfigEnum::DEFAULT_PASSWORD)),
                         'is_active'      => true,

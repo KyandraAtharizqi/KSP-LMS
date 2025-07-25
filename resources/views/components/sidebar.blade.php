@@ -42,16 +42,43 @@
                         <div data-i18n="Surat Tugas Pelatihan">Surat Tugas Pelatihan</div>
                     </a>
                 </li>
-                <!-- ✅ New: Daftar Hadir -->
+                <!-- ✅ Daftar Hadir -->
                 <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.daftarhadirpelatihan.index') ? 'active' : '' }}">
                     <a href="{{ route('training.daftarhadirpelatihan.index') }}" class="menu-link">
                         <div data-i18n="Daftar Hadir">Daftar Hadir</div>
                     </a>
                 </li>
+
+                <!-- ✅ New Evaluation Submenu -->
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation*') ? 'active open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Evaluation">Evaluation</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation1.index') ? 'active' : '' }}">
+                            <a href="{{ route('training.evaluation1.index') }}" class="menu-link">
+                                <div data-i18n="Evaluation 1">Evaluation 1 (Peserta)</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation2.index') ? 'active' : '' }}">
+                            <a href="{{ route('training.evaluation2.index') }}" class="menu-link">
+                                <div data-i18n="Evaluation 2">Evaluation 2 (Peserta)</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation.atasan.index') ? 'active' : '' }}">
+                            <a href="{{ route('training.evaluation.atasan.index') }}" class="menu-link">
+                                <div data-i18n="Evaluation Atasan">Evaluation Atasan</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation.rekap.index') ? 'active' : '' }}">
+                            <a href="{{ route('training.evaluation.rekap.index') }}" class="menu-link">
+                                <div data-i18n="Rekapitulasi Jam">Rekapitulasi Jam</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </li>
-
-
 
         <!-- Other Menu -->
         <li class="menu-header small text-uppercase">

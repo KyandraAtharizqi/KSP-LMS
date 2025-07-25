@@ -14,7 +14,8 @@ class DaftarHadirPelatihan extends Model
 
     protected $fillable = [
         'pelatihan_id',
-        'participant_id',
+        'user_id',
+        'registration_id',
         'date',
         'check_in_time',
         'check_in_timestamp',
@@ -47,9 +48,9 @@ class DaftarHadirPelatihan extends Model
         return $this->belongsTo(SuratPengajuanPelatihan::class, 'pelatihan_id');
     }
 
-    public function participant()
+    public function user()
     {
-        return $this->belongsTo(TrainingParticipant::class, 'participant_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /*
