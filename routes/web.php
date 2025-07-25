@@ -252,7 +252,8 @@ Route::middleware(['auth'])->group(function () {
     // Evaluation 1 (Peserta) – e.g., immediate reaction / feedback
     Route::prefix('training/evaluation1')->as('training.evaluation1.')->group(function () {
         Route::get('/', [TrainingEvaluation1Controller::class, 'index'])->name('index');
-        // Add other routes (store, show, etc.) as needed
+        Route::post('/{id}', [TrainingEvaluation1Controller::class, 'store'])->name('store');
+        Route::get('/{id}', [TrainingEvaluation1Controller::class, 'show'])->name('show');
     });
 
     // Evaluation 2 (Peserta) – e.g., post-training learning assessment
