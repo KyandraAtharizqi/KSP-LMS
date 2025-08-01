@@ -28,19 +28,19 @@
                         @php
                             $userApproval = $example->approvals
                                 ->where('user_id', auth()->id())
-                                ->where('status', 'pending')
+                                ->where('status', 'menunggu')
                                 ->first();
 
                             $latestRound = $example->approvals->max('round');
-                            $rejectedInLatestRound = $example->approvals
+                            $ditolakInLatestRound = $example->approvals
                                 ->where('round', $latestRound)
-                                ->contains(fn($item) => $item->status === 'rejected');
+                                ->contains(fn($item) => $item->status === 'ditolak');
 
                             $isCreator = auth()->id() === $example->created_by;
 
-                            $minPendingApproval = $example->approvals
+                            $minMenungguApproval = $example->approvals
                                 ->where('round', $latestRound)
-                                ->where('status', 'pending')
+                                ->where('status', 'menunggu')
                                 ->sortBy('sequence')
                                 ->first();
                         @endphp
@@ -53,18 +53,26 @@
                             <td>
                                 @if ($userApproval)
                                     <span class="badge bg-warning">Menunggu {{ ucfirst($userApproval->type) }}</span>
-                                @elseif ($rejectedInLatestRound)
+                                @elseif ($ditolakInLatestRound)
                                     <span class="badge bg-danger">Ditolak</span>
                                 @else
                                     @php
-                                        $statuses = $example->approvals
-                                            ->pluck('status')
-                                            ->unique()
-                                            ->implode(', ');
+                                        $statuses = $example->approvals->pluck('status')->unique();
                                     @endphp
-                                    <span class="badge bg-secondary">
-                                        {{ ucfirst($statuses ?: 'Belum ditentukan') }}
-                                    </span>
+                                    @foreach ($statuses as $status)
+                                        @php $statusLower = strtolower($status); @endphp
+
+                                        @if ($statusLower === 'approved')
+                                            <span class="badge bg-success me-1">DISETUJUI</span>
+                                        @elseif ($statusLower === 'rejected')
+                                            <span class="badge bg-danger me-1">DITOLAK</span>
+                                        @elseif ($statusLower === 'pending')
+                                            <span class="badge bg-warning text-dark me-1">MENUNGGU</span>
+                                        @else
+                                            <span class="badge bg-secondary me-1">{{ strtoupper($status) }}</span>
+                                        @endif
+                                    @endforeach
+
                                 @endif
                             </td>
 
@@ -73,19 +81,19 @@
                                     Lihat Surat
                                 </a>
 
-                                <a href="{{ route('surat.pengajuan.download', ['id' => $example->id]) }}" class="btn btn-sm btn-success mb-1">
+                                <a href="{{ route('surat.pengajuan.download', ['id' => $example->id]) }}" class="btn btn-sm btn-info mb-1">
                                     Unduh PDF
                                 </a>
 
                                 <button class="btn btn-sm btn-outline-secondary mb-1" data-bs-toggle="modal" data-bs-target="#trackerModal-{{ $example->id }}">
-                                    🔍 Tracking
+                                    🔍 Lihat Status
                                 </button>
 
                                 @if (
                                     $userApproval &&
-                                    $userApproval->status === 'pending' &&
+                                    $userApproval->status === 'menunggu' &&
                                     $userApproval->round === $latestRound &&
-                                    $userApproval->id === $minPendingApproval?->id
+                                    $userApproval->id === $minMenungguApproval?->id
                                 )
                                     <form action="{{ route('training.suratpengajuan.approve', [$example->id, $userApproval->id]) }}" method="POST" class="d-inline">
                                         @csrf
@@ -99,7 +107,7 @@
                                     </button>
                                 @endif
 
-                                @if ($isCreator && $rejectedInLatestRound)
+                                @if ($isCreator && $ditolakInLatestRound)
                                     <a href="{{ route('training.suratpengajuan.edit', $example->id) }}" class="btn btn-sm btn-outline-warning mb-1">
                                         ✏️ Edit & Ajukan Ulang
                                     </a>
@@ -138,12 +146,12 @@
                                     </strong>
                                 </div>
                                 <small>Round {{ $step->round }}, Step {{ $step->sequence }}</small><br>
-                                @if ($step->status === 'approved')
+                                @if ($step->status === 'disetujui')
                                     <span class="badge bg-success">
                                         ✅ Disetujui -
                                         {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
                                     </span>
-                                @elseif ($step->status === 'rejected')
+                                @elseif ($step->status === 'ditolak')
                                     <span class="badge bg-danger">
                                         ❌ Ditolak -
                                         {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
@@ -170,21 +178,21 @@
     @php
         $userApproval = $example->approvals
             ->where('user_id', auth()->id())
-            ->where('status', 'pending')
+            ->where('status', 'menunggu')
             ->first();
 
         $latestRound = $example->approvals->max('round');
-        $minPendingApproval = $example->approvals
+        $minMenungguApproval = $example->approvals
             ->where('round', $latestRound)
-            ->where('status', 'pending')
+            ->where('status', 'menunggu')
             ->sortBy('sequence')
             ->first();
     @endphp
     @if (
         $userApproval &&
-        $userApproval->status === 'pending' &&
+        $userApproval->status === 'menunggu' &&
         $userApproval->round === $latestRound &&
-        $userApproval->id === $minPendingApproval?->id
+        $userApproval->id === $minMenungguApproval?->id
     )
     <div class="modal fade" id="rejectModal-{{ $userApproval->id }}" tabindex="-1" aria-labelledby="rejectLabel-{{ $userApproval->id }}" aria-hidden="true">
         <div class="modal-dialog">
