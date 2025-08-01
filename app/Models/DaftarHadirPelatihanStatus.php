@@ -79,4 +79,10 @@ class DaftarHadirPelatihanStatus extends Model
             ? $this->date->format($format)
             : Carbon::parse($this->date)->format($format);
     }
+
+    
+        public function presenters()
+    {
+        return $this->hasMany(PelatihanPresenter::class, 'pelatihan_id', 'pelatihan_id');
+    }
 }

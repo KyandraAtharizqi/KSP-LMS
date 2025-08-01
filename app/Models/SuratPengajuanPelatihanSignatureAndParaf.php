@@ -37,4 +37,5 @@ class SuratPengajuanPelatihanSignatureAndParaf extends Model
     {
         return $this->belongsTo(SuratPengajuanPelatihan::class, 'pelatihan_id');
     }
+    
 }

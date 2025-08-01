@@ -324,6 +324,31 @@ class DaftarHadirPelatihanController extends Controller
             ]
         );
 
+        // ✅ Check if all dates for this pelatihan are submitted
+        $totalDates = DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihan->id)->count();
+        $submittedDates = DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihan->id)
+            ->where('is_submitted', true)
+            ->count();
+
+        if ($totalDates > 0 && $totalDates === $submittedDates) {
+            // 🔁 Insert evaluation records for each participant
+            $participants = $pelatihan->participants; // assuming `participants` relationship exists
+
+            foreach ($participants as $participant) {
+                \App\Models\EvaluasiLevel1::firstOrCreate(
+                    [
+                        'pelatihan_id' => $pelatihan->id,
+                        'user_id' => $participant->id,
+                    ],
+                    [
+                        'jabatan_id' => $participant->pivot->jabatan_id ?? $participant->jabatan_id,
+                        'department_id' => $participant->pivot->department_id ?? $participant->department_id,
+                        'superior_id' => $participant->pivot->superior_id ?? $participant->superior_id,
+                    ]
+                );
+            }
+        }
+
         return redirect()
             ->route('training.daftarhadirpelatihan.day', [$pelatihan->id, $day])
             ->with('success', "Hari {$day} ditandai selesai.");

@@ -116,4 +116,6 @@ class DaftarHadirPelatihan extends Model
             return '00:00:00';
         }
     }
+
+
 }

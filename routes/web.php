@@ -19,6 +19,7 @@ use App\Http\Controllers\LetterGalleryController;
 use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LetterStatusController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DaftarHadirPelatihanPresenterController;
 
 /* 👇 NEW Evaluation controllers (create these) */
 use App\Http\Controllers\TrainingEvaluation1Controller;
@@ -182,12 +183,11 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Daftar Hadir Pelatihan
+    | Daftar Hadir Pelatihan Routes 
     |--------------------------------------------------------------------------
     */
     Route::prefix('training/daftar-hadir-pelatihan')->as('training.daftarhadirpelatihan.')->group(function () {
-
-        // Index: list pelatihans with approved Surat Tugas
+        // Index: List pelatihans with approved Surat Tugas
         Route::get('/', [DaftarHadirPelatihanController::class, 'index'])->name('index');
 
         // Show: training-level overview (all days)
@@ -195,79 +195,62 @@ Route::middleware(['auth'])->group(function () {
             ->whereNumber('pelatihan')
             ->name('show');
 
-        // Day-level routes
+        // View daftar hadir for a specific day
         Route::get('/{pelatihan}/day/{date}', [DaftarHadirPelatihanController::class, 'day'])
             ->where([
                 'pelatihan' => '[0-9]+',
-                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
+                'date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
             ])
             ->name('day');
 
-        Route::post('/{pelatihan}/day/{date}/import', [DaftarHadirPelatihanController::class, 'import'])
-            ->where([
-                'pelatihan' => '[0-9]+',
-                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
-            ])
-            ->name('import');
-
-        Route::get('/{pelatihan}/day/{date}/export', [DaftarHadirPelatihanController::class, 'export'])
-            ->where([
-                'pelatihan' => '[0-9]+',
-                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
-            ])
-            ->name('export');
-
-        Route::post('/{pelatihan}/day/{date}/save', [DaftarHadirPelatihanController::class, 'save'])
-            ->where([
-                'pelatihan' => '[0-9]+',
-                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
-            ])
-            ->name('save');
-
-        // Legacy complete endpoint (kept for backward compatibility)
-        Route::post('/{pelatihan}/day/{date}/complete', [DaftarHadirPelatihanController::class, 'markComplete'])
-            ->where([
-                'pelatihan' => '[0-9]+',
-                'date'      => '[0-9]{4}-[0-9]{2}-[0-9]{2}',
-            ])
-            ->name('complete');
+        Route::post('/{pelatihan}/day/{date}/import', [DaftarHadirPelatihanController::class, 'import'])->name('import');
+        Route::get('/{pelatihan}/day/{date}/export', [DaftarHadirPelatihanController::class, 'export'])->name('export');
+        Route::post('/{pelatihan}/day/{date}/save', [DaftarHadirPelatihanController::class, 'save'])->name('save');
+        Route::post('/{pelatihan}/day/{date}/complete', [DaftarHadirPelatihanController::class, 'markComplete'])->name('complete');
 
         /*
-         * Presenter per day (status row)
-         * Used in show.blade per-row inline form.
-         */
-        Route::post('/{pelatihan}/status/{status}/presenter', [DaftarHadirPelatihanController::class, 'setPresenterDay'])
-            ->whereNumber(['pelatihan','status'])
-            ->name('set_presenter');
+        |--------------------------------------------------------------------------
+        | Presenter Assignment (Per Pelatihan, Across Days)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/{pelatihan}/presenter', [DaftarHadirPelatihanPresenterController::class, 'index'])->name('presenter.index');
+        Route::post('/{pelatihan}/presenter/{date}', [DaftarHadirPelatihanPresenterController::class, 'update'])->name('presenter.update');
+        Route::post('/presenter/store-inline', [DaftarHadirPelatihanPresenterController::class, 'storeInlinePresenter'])->name('presenter.storeInline');
+        Route::delete('/{pelatihan}/presenter', [DaftarHadirPelatihanPresenterController::class, 'destroy'])->name('presenter.destroy');
+        Route::post('/presenter/store-external', [DaftarHadirPelatihanPresenterController::class, 'storeExternalPresenter']) ->name('presenter.storeExternal');
+        Route::post('/training/{pelatihan}/presenter/submit/{date}', [DaftarHadirPelatihanPresenterController::class, 'submitFinal'])
+        ->name('presenter.submit');
+
     });
 
 
     /*
-    |--------------------------------------------------------------------------
-    | Evaluation (Training Follow-up)
-    | Placeholder routes – implement controllers as needed.
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Evaluation (Training Follow-up)
+        | Placeholder routes – implement controllers as needed.
+        |--------------------------------------------------------------------------
+        */
 
-    // Evaluation 1 (Peserta) – e.g., immediate reaction / feedback
-    Route::prefix('training/evaluation1')->as('training.evaluation1.')->group(function () {
-        Route::get('/', [TrainingEvaluation1Controller::class, 'index'])->name('index');
-        // Add other routes (store, show, etc.) as needed
-    });
+        // Evaluation 1 (Peserta) – e.g., immediate reaction / feedback
+        Route::prefix('training/evaluation1')->as('training.evaluation1.')->group(function () {
+            Route::get('/', [TrainingEvaluation1Controller::class, 'index'])->name('index');
+            Route::post('/{id}', [TrainingEvaluation1Controller::class, 'store'])->name('store');
+            Route::get('/{id}/form', [TrainingEvaluation1Controller::class, 'form'])->name('form');
+            Route::get('/{id}', [TrainingEvaluation1Controller::class, 'show'])->name('show');
+        });
 
-    // Evaluation 2 (Peserta) – e.g., post-training learning assessment
-    Route::prefix('training/evaluation2')->as('training.evaluation2.')->group(function () {
-        Route::get('/', [TrainingEvaluation2Controller::class, 'index'])->name('index');
-    });
+        // Evaluation 2 (Peserta) – e.g., post-training learning assessment
+        Route::prefix('training/evaluation2')->as('training.evaluation2.')->group(function () {
+            Route::get('/', [TrainingEvaluation2Controller::class, 'index'])->name('index');
+        });
 
-    // Evaluation Atasan (manager follow‑up on behavior/transfer)
-    Route::prefix('training/evaluation/atasan')->as('training.evaluation.atasan.')->group(function () {
-        Route::get('/', [TrainingEvaluationAtasanController::class, 'index'])->name('index');
-    });
+        // Evaluation Atasan (manager follow‑up on behavior/transfer)
+        Route::prefix('training/evaluation/atasan')->as('training.evaluation.atasan.')->group(function () {
+            Route::get('/', [TrainingEvaluationAtasanController::class, 'index'])->name('index');
+        });
 
-    // Rekapitulasi Jam (hours accumulation / summary across trainings)
-    Route::prefix('training/evaluation/rekap')->as('training.evaluation.rekap.')->group(function () {
-        Route::get('/', [TrainingEvaluationRekapController::class, 'index'])->name('index');
-    });
-
+        // Rekapitulasi Jam (hours accumulation / summary across trainings)
+        Route::prefix('training/evaluation/rekap')->as('training.evaluation.rekap.')->group(function () {
+            Route::get('/', [TrainingEvaluationRekapController::class, 'index'])->name('index');
+        });
 });

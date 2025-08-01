@@ -121,5 +121,16 @@ class SuratPengajuanPelatihan extends Model
         return $this->hasMany(DaftarHadirPelatihanStatus::class, 'pelatihan_id');
     }
 
+    public function presenters()
+    {
+        return $this->hasMany(PelatihanPresenter::class, 'pelatihan_id');
+    }
+
+        public function evaluasiLevel1()
+    {
+        return $this->hasMany(EvaluasiLevel1::class, 'pelatihan_id');
+    }
+
+
 
 }
