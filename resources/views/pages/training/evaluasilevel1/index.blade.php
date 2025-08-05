@@ -29,6 +29,7 @@
                     @forelse ($pelatihans as $pelatihan)
                         @php
                             $evaluasi = $pelatihan->evaluasiLevel1->firstWhere('user_id', auth()->id());
+                            $isParticipant = $pelatihan->participants->contains('user_id', auth()->id());
                         @endphp
                         <tr>
                             <td>{{ $pelatihan->kode_pelatihan }}</td>
@@ -38,13 +39,23 @@
                             <td>{{ $pelatihan->penyelenggara }}</td>
                             <td class="text-center">
                                 @if ($evaluasi)
-                                    <a href="{{ route('training.evaluation1.show', $pelatihan->id) }}" class="btn btn-sm btn-outline-secondary">
-                                        Lihat Detail
-                                    </a>
-                                @else
-                                    <a href="{{ route('training.evaluation1.form', $pelatihan->id) }}" class="btn btn-sm btn-primary">
+                                    @if (!$evaluasi->is_submitted && $evaluasi->user_id === auth()->id())
+                                        <a href="{{ route('training.evaluasilevel1.create', $pelatihan->id) }}" class="btn btn-sm btn-primary">
+                                            Isi Evaluasi
+                                        </a>
+                                    @elseif ($evaluasi->is_submitted)
+                                        <a href="{{ route('training.evaluasilevel1.show', $pelatihan->id) }}" class="btn btn-sm btn-outline-secondary">
+                                            Lihat Detail
+                                        </a>
+                                    @else
+                                        <span class="text-muted">Belum Tersedia</span>
+                                    @endif
+                                @elseif ($isParticipant)
+                                    <a href="{{ route('training.evaluasilevel1.create', $pelatihan->id) }}" class="btn btn-sm btn-primary">
                                         Isi Evaluasi
                                     </a>
+                                @else
+                                    <span class="text-muted">Belum Tersedia</span>
                                 @endif
                             </td>
                         </tr>

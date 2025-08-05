@@ -9,28 +9,32 @@ class EvaluasiLevel1 extends Model
 {
     use HasFactory;
 
-    protected $table = 'evaluasi_level_1';
+    protected $table = 'evaluasi_level_1s';
 
     protected $fillable = [
-        'ringkasan',
         'pelatihan_id',
         'user_id',
-        'materi',
-        'ide_saran',
-        'penyelenggaraan',  
-        'sarana',
-        'instruktur',
-        'komentar',
+        'registration_id',
+        'kode_pelatihan',
+        'nama_pelatihan',
+        'tanggal_pelaksanaan',
+        'tempat',
+        'name',
+        'department',
+        'jabatan_full',
+        'superior_id',
+        'ringkasan_isi_materi',
+        'ide_saran_pengembangan',
+        'komplain_saran_masukan',
+        'is_submitted', // ✅ Add this
     ];
 
-    // app/Models/EvaluasiLevel1.php
     protected $casts = [
-        'materi' => 'array',
-        'penyelenggaraan' => 'array',
-        'sarana' => 'array',
-        'instruktur' => 'array',
+        'tanggal_pelaksanaan' => 'date',
+        'is_submitted' => 'boolean', // ✅ Cast it as boolean
     ];
 
+    // Relationships
 
     public function pelatihan()
     {
@@ -40,5 +44,30 @@ class EvaluasiLevel1 extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function superior()
+    {
+        return $this->belongsTo(User::class, 'superior_id')->withDefault();
+    }
+
+    public function penyelenggaraan()
+    {
+        return $this->hasOne(EvaluasiLevel1Penyelenggaraan::class, 'evaluasi_level_1_id');
+    }
+
+    public function sarana()
+    {
+        return $this->hasOne(EvaluasiLevel1Sarana::class, 'evaluasi_level_1_id');
+    }
+
+    public function instrukturs()
+    {
+        return $this->hasMany(EvaluasiLevel1Instruktur::class, 'evaluasi_level_1_id');
+    }
+
+    public function materi()
+    {
+        return $this->hasOne(EvaluasiLevel1Materi::class, 'evaluasi_level_1_id');
     }
 }

@@ -10,7 +10,7 @@
 <div class="container">
     <h2 class="mb-4">Kelola Presenter - {{ $pelatihan->judul }}</h2>
 
-    @foreach ($pelatihan->daftarHadirStatuses as $status)
+    @foreach ($pelatihan->daftarHadirStatus as $status)
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Tanggal: {{ $status->formattedDate() }}</strong>

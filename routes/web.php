@@ -22,7 +22,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DaftarHadirPelatihanPresenterController;
 
 /* 👇 NEW Evaluation controllers (create these) */
-use App\Http\Controllers\TrainingEvaluation1Controller;
+use App\Http\Controllers\EvaluasiLevel1Controller;
 use App\Http\Controllers\TrainingEvaluation2Controller;
 use App\Http\Controllers\TrainingEvaluationAtasanController;
 use App\Http\Controllers\TrainingEvaluationRekapController;
@@ -232,11 +232,17 @@ Route::middleware(['auth'])->group(function () {
         */
 
         // Evaluation 1 (Peserta) – e.g., immediate reaction / feedback
-        Route::prefix('training/evaluation1')->as('training.evaluation1.')->group(function () {
-            Route::get('/', [TrainingEvaluation1Controller::class, 'index'])->name('index');
-            Route::post('/{id}', [TrainingEvaluation1Controller::class, 'store'])->name('store');
-            Route::get('/{id}/form', [TrainingEvaluation1Controller::class, 'form'])->name('form');
-            Route::get('/{id}', [TrainingEvaluation1Controller::class, 'show'])->name('show');
+        Route::prefix('training/evaluasi-level-1')->as('training.evaluasilevel1.')->group(function () {
+            Route::get('/', [EvaluasiLevel1Controller::class, 'index'])->name('index');
+            
+            // Show the form for a specific pelatihan
+            Route::get('/{pelatihan}/create', [EvaluasiLevel1Controller::class, 'create'])->name('create');
+            
+            // Store the submitted evaluation
+            Route::post('/', [EvaluasiLevel1Controller::class, 'store'])->name('store');
+            
+            // Show a filled evaluation (optional)
+            Route::get('/{pelatihan}/show', [EvaluasiLevel1Controller::class, 'show'])->name('show');
         });
 
         // Evaluation 2 (Peserta) – e.g., post-training learning assessment

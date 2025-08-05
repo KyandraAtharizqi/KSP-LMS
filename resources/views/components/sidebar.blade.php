@@ -55,9 +55,9 @@
                         <div data-i18n="Evaluation">Evaluation</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation1.index') ? 'active' : '' }}">
-                            <a href="{{ route('training.evaluation1.index') }}" class="menu-link">
-                                <div data-i18n="Evaluation 1">Evaluation 1 (Peserta)</div>
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('evaluasi_level_1.index') ? 'active' : '' }}">
+                            <a href="{{ route('training.evaluasilevel1.index') }}" class="menu-link">
+                                <div data-i18n="Evaluation 1">Evaluasi Level 1 (Peserta)</div>
                             </a>
                         </li>
                         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation2.index') ? 'active' : '' }}">

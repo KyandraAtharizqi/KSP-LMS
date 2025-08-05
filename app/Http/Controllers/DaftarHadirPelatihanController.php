@@ -224,7 +224,12 @@ class DaftarHadirPelatihanController extends Controller
     public function save(Request $request, $pelatihanId, $date)
     {
         $user = Auth::user();
-        $pelatihan = SuratPengajuanPelatihan::with('participants')->findOrFail($pelatihanId);
+        $pelatihan = SuratPengajuanPelatihan::with([
+            'participants.user.department',
+            'participants.user.jabatan',
+            'participants.department',
+            'participants.jabatan',
+        ])->findOrFail($pelatihanId);
 
         if (!$this->userCanManageAttendance($user, $pelatihan)) {
             abort(Response::HTTP_FORBIDDEN);
@@ -285,11 +290,44 @@ class DaftarHadirPelatihanController extends Controller
             }
         });
 
+        // Finalize logic
         if ($request->input('action') === 'finalize') {
             $status->is_submitted = true;
             $status->submitted_at = now();
             $status->submitted_by = $user->id;
             $status->save();
+
+            // Check if all days for this pelatihan are submitted
+            $allSubmitted = DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihan->id)
+                ->where('is_submitted', false)
+                ->count() === 0;
+
+            if ($allSubmitted) {
+                foreach ($pelatihan->participants as $participant) {
+                    $userId = $participant->user_id;
+
+                    $alreadyExists = \App\Models\EvaluasiLevel1::where('user_id', $userId)
+                        ->where('pelatihan_id', $pelatihan->id)
+                        ->exists();
+
+                    if (!$alreadyExists) {
+                        \App\Models\EvaluasiLevel1::create([
+                            'user_id'             => $userId,
+                            'registration_id'     => $participant->registration_id,
+                            'pelatihan_id'        => $pelatihan->id,
+                            'kode_pelatihan'      => $pelatihan->kode_pelatihan,
+                            'nama_pelatihan'      => $pelatihan->judul,
+                            'tanggal_pelaksanaan' => $pelatihan->tanggal_mulai,
+                            'tempat'              => $pelatihan->tempat,
+                            'name'                => $participant->user->name,
+                            'department'          => $participant->department->name ?? '-',
+                            'jabatan_full'        => $participant->jabatan->name ?? '-',
+                            'superior_id'         => $participant->superior_id,
+                            'is_submitted'        => false,
+                        ]);
+                    }
+                }
+            }
 
             return redirect()
                 ->route('training.daftarhadirpelatihan.show', $pelatihan->id)
@@ -300,6 +338,7 @@ class DaftarHadirPelatihanController extends Controller
             ->route('training.daftarhadirpelatihan.day', [$pelatihan->id, $day])
             ->with('success', "Disimpan ({$count}) baris.");
     }
+
 
     /* ===============================================================
      | MARK COMPLETE – legacy endpoint (JS call; still supported)

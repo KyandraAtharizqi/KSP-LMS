@@ -53,7 +53,7 @@ class TrainingEvaluation1Controller extends Controller
             ->isNotEmpty();
 
         if (! $sudahHadir) {
-            return redirect()->route('training.evaluation1.index')
+            return redirect()->route('training.evaluasilevel1.index')
                 ->with('error', 'Anda belum hadir di pelatihan ini, tidak dapat mengisi evaluasi.');
         }
 
@@ -89,7 +89,7 @@ class TrainingEvaluation1Controller extends Controller
             ]
         );
 
-        return redirect()->route('training.evaluation1.index')->with('success', 'Evaluasi berhasil dikirim.');
+        return redirect()->route('training.evaluasilevel1.index')->with('success', 'Evaluasi berhasil dikirim.');
     }
 
     public function show($id)
