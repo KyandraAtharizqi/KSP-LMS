@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'made_by' => 'dibuat dengan 🫶 oleh',
+    'made_by' => 'dibuat oleh',
 ];

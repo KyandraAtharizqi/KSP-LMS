@@ -20,6 +20,7 @@ use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LetterStatusController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DaftarHadirPelatihanPresenterController;
+use App\Http\Controllers\NotaDinasController;
 
 /* 👇 NEW Evaluation controllers (create these) */
 use App\Http\Controllers\EvaluasiLevel1Controller;
@@ -259,4 +260,27 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('training/evaluation/rekap')->as('training.evaluation.rekap.')->group(function () {
             Route::get('/', [TrainingEvaluationRekapController::class, 'index'])->name('index');
         });
+
+    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nota Dinas
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('knowledge')->name('knowledge.')->group(function () {
+        Route::prefix('notadinas')->name('notadinas.')->group(function () {
+            Route::get('/', [NotaDinasController::class, 'index'])->name('index');          // GET /knowledge/notadinas
+            Route::get('/create', [NotaDinasController::class, 'create'])->name('create');  // GET /knowledge/notadinas/create
+            Route::post('/', [NotaDinasController::class, 'store'])->name('store');         // POST /knowledge/notadinas
+            Route::get('/{id}', [NotaDinasController::class, 'show'])->name('show');        // GET /knowledge/notadinas/{id}
+            Route::get('/{id}/edit', [NotaDinasController::class, 'edit'])->name('edit');   // GET /knowledge/notadinas/{id}/edit
+            Route::put('/{id}', [NotaDinasController::class, 'update'])->name('update');    // PUT /knowledge/notadinas/{id}
+            Route::delete('/{id}', [NotaDinasController::class, 'destroy'])->name('destroy'); // DELETE /knowledge/notadinas/{id}
+            Route::get('/{id}/download', [NotaDinasController::class, 'download'])->name('download');
+        });
+    });
+
+
+
 });

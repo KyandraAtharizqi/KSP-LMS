@@ -74,7 +74,10 @@ class ProfileController extends Controller
         // Simpan atau update path di tabel signature_and_parafs
         SignatureAndParaf::updateOrCreate(
             ['registration_id' => $user->registration_id],
-            ['signature_path' => $filename]
+            [
+                'user_id' => $user->id, // <--- ini yang ditambahkan
+                'signature_path' => $filename
+            ]
         );
 
         return back()->with('success', 'Tanda tangan berhasil disimpan.');
@@ -106,7 +109,10 @@ class ProfileController extends Controller
         // Simpan atau update path di tabel signature_and_parafs
         SignatureAndParaf::updateOrCreate(
             ['registration_id' => $user->registration_id],
-            ['paraf_path' => $filename]
+            [
+                'user_id' => $user->id, // <--- ini juga ditambahkan
+                'paraf_path' => $filename
+            ]
         );
 
         return back()->with('success', 'Paraf berhasil disimpan.');

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 16, 2025 at 04:04 AM
+-- Generation Time: Aug 07, 2025 at 01:18 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -88,6 +88,66 @@ INSERT INTO `configs` (`id`, `code`, `value`, `created_at`, `updated_at`) VALUES
 (7, 'institution_email', 'admin@admin.com', NULL, NULL),
 (8, 'language', 'id', NULL, NULL),
 (9, 'pic', 'M. Iqbal Effendi', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `daftar_hadir_pelatihan`
+--
+
+CREATE TABLE `daftar_hadir_pelatihan` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date` date NOT NULL,
+  `check_in_time` time DEFAULT NULL,
+  `check_in_timestamp` timestamp NULL DEFAULT NULL,
+  `check_in_photo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `check_out_time` time DEFAULT NULL,
+  `check_out_timestamp` timestamp NULL DEFAULT NULL,
+  `check_out_photo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `note` text COLLATE utf8mb4_unicode_ci,
+  `status` enum('hadir','izin','sakit','absen') COLLATE utf8mb4_unicode_ci DEFAULT 'absen',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `daftar_hadir_pelatihan`
+--
+
+INSERT INTO `daftar_hadir_pelatihan` (`id`, `pelatihan_id`, `kode_pelatihan`, `user_id`, `registration_id`, `date`, `check_in_time`, `check_in_timestamp`, `check_in_photo`, `check_out_time`, `check_out_timestamp`, `check_out_photo`, `note`, `status`, `created_at`, `updated_at`) VALUES
+(15, 2, NULL, 71, 'MAN019', '2025-07-10', '08:00:00', '2025-07-21 06:56:00', 'https://drive.google.com/open?id=18uoqmKn0lRqTAaKUTLTsWYpAqmvvQrIU', '16:00:00', '2025-07-21 06:57:00', 'https://drive.google.com/open?id=1_ZGGk9RDXVvlki3gzxakN0y5H6Lki0TC', 'MAN019', 'hadir', '2025-07-23 05:03:17', '2025-07-23 06:00:00'),
+(16, 2, NULL, 72, 'MAN020', '2025-07-10', '08:00:00', '2025-07-21 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-07-21 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'MAN020', 'hadir', '2025-07-23 05:05:33', '2025-07-23 06:00:00'),
+(17, 2, NULL, 71, 'MAN019', '2025-07-11', '08:00:00', '2025-07-21 06:56:00', 'https://drive.google.com/open?id=18uoqmKn0lRqTAaKUTLTsWYpAqmvvQrIU', '16:00:00', '2025-07-21 06:57:00', 'https://drive.google.com/open?id=1_ZGGk9RDXVvlki3gzxakN0y5H6Lki0TC', 'MAN019', 'hadir', '2025-07-23 08:23:55', '2025-07-23 08:39:09'),
+(18, 2, NULL, 72, 'MAN020', '2025-07-11', '08:00:00', '2025-07-21 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-07-21 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'MAN020', 'hadir', '2025-07-23 08:23:55', '2025-07-23 08:39:09');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `daftar_hadir_pelatihan_status`
+--
+
+CREATE TABLE `daftar_hadir_pelatihan_status` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `date` date NOT NULL,
+  `is_submitted` tinyint(1) NOT NULL DEFAULT '0',
+  `submitted_at` timestamp NULL DEFAULT NULL,
+  `submitted_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `daftar_hadir_pelatihan_status`
+--
+
+INSERT INTO `daftar_hadir_pelatihan_status` (`id`, `pelatihan_id`, `date`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
+(7, 2, '2025-07-10', 1, '2025-07-31 09:03:54', 1, '2025-07-31 08:25:30', '2025-07-31 09:03:54'),
+(8, 2, '2025-07-11', 1, '2025-08-04 09:19:43', 1, '2025-07-31 08:25:30', '2025-08-04 09:19:43');
 
 -- --------------------------------------------------------
 
@@ -195,6 +255,172 @@ CREATE TABLE `divisions` (
 INSERT INTO `divisions` (`id`, `name`, `directorate_id`, `created_at`, `updated_at`) VALUES
 (1, 'Commercial Property', 2, NULL, NULL),
 (2, 'Hotel', 2, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_1`
+--
+
+CREATE TABLE `evaluasi_level_1` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(100) DEFAULT NULL,
+  `kode_pelatihan` varchar(100) DEFAULT NULL,
+  `nama_pelatihan` varchar(255) DEFAULT NULL,
+  `tanggal_pelaksanaan` date DEFAULT NULL,
+  `tempat` varchar(255) DEFAULT NULL,
+  `nama_peserta` varchar(255) DEFAULT NULL,
+  `unit_kerja` varchar(255) DEFAULT NULL,
+  `full_jabatan` varchar(255) DEFAULT NULL,
+  `nama_atasan_langsung` varchar(255) DEFAULT NULL,
+  `ringkasan_isi_materi` text,
+  `ide_saran_pengembangan` text,
+  `komplain_saran_masukan` text,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_1s`
+--
+
+CREATE TABLE `evaluasi_level_1s` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(100) DEFAULT NULL,
+  `kode_pelatihan` varchar(100) DEFAULT NULL,
+  `nama_pelatihan` varchar(255) DEFAULT NULL,
+  `tanggal_pelaksanaan` date DEFAULT NULL,
+  `tempat` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `jabatan_full` varchar(255) DEFAULT NULL,
+  `superior_id` bigint UNSIGNED DEFAULT NULL,
+  `ringkasan_isi_materi` text,
+  `ide_saran_pengembangan` text,
+  `komplain_saran_masukan` text,
+  `is_submitted` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `evaluasi_level_1s`
+--
+
+INSERT INTO `evaluasi_level_1s` (`id`, `pelatihan_id`, `user_id`, `registration_id`, `kode_pelatihan`, `nama_pelatihan`, `tanggal_pelaksanaan`, `tempat`, `name`, `department`, `jabatan_full`, `superior_id`, `ringkasan_isi_materi`, `ide_saran_pengembangan`, `komplain_saran_masukan`, `is_submitted`, `created_at`, `updated_at`) VALUES
+(1, 2, 71, 'MAN019', 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-10', 'Jakarta', 'Manager Front Office', 'Front Office', 'Manager', 1, 'wasdasdads', 'dsadsadssadsadad', 'asdadsada', 1, '2025-08-04 09:19:43', '2025-08-06 04:44:18'),
+(2, 2, 72, 'MAN020', 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-10', 'Jakarta', 'Manager Housekeeping', 'Housekeeping', 'Manager', 1, NULL, NULL, NULL, 0, '2025-08-04 09:19:43', '2025-08-04 09:19:43');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_1_instrukturs`
+--
+
+CREATE TABLE `evaluasi_level_1_instrukturs` (
+  `id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_1_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `presenter_id` bigint UNSIGNED DEFAULT NULL,
+  `type` enum('internal','external') NOT NULL,
+  `instruktur_penguasaan` tinyint UNSIGNED DEFAULT NULL,
+  `instruktur_teknik` tinyint UNSIGNED DEFAULT NULL,
+  `instruktur_sistematika` tinyint UNSIGNED DEFAULT NULL,
+  `instruktur_waktu` tinyint UNSIGNED DEFAULT NULL,
+  `instruktur_proses` tinyint UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `evaluasi_level_1_instrukturs`
+--
+
+INSERT INTO `evaluasi_level_1_instrukturs` (`id`, `evaluasi_level_1_id`, `user_id`, `presenter_id`, `type`, `instruktur_penguasaan`, `instruktur_teknik`, `instruktur_sistematika`, `instruktur_waktu`, `instruktur_proses`, `created_at`, `updated_at`) VALUES
+(1, 1, 786, NULL, 'internal', 5, 5, 5, 5, 5, '2025-08-06 04:44:19', '2025-08-06 04:44:19'),
+(2, 1, NULL, 3, 'external', 5, 5, 5, 5, 5, '2025-08-06 04:44:19', '2025-08-06 04:44:19'),
+(3, 1, NULL, 2, 'external', 5, 5, 5, 5, 5, '2025-08-06 04:44:19', '2025-08-06 04:44:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_1_materis`
+--
+
+CREATE TABLE `evaluasi_level_1_materis` (
+  `id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_1_id` bigint UNSIGNED NOT NULL,
+  `materi_sistematika` enum('1','2','3','4','5') DEFAULT NULL,
+  `materi_pemahaman` enum('1','2','3','4','5') DEFAULT NULL,
+  `materi_pengetahuan` enum('1','2','3','4','5') DEFAULT NULL,
+  `materi_manfaat` enum('1','2','3','4','5') DEFAULT NULL,
+  `materi_tujuan` enum('1','2','3','4','5') DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `evaluasi_level_1_materis`
+--
+
+INSERT INTO `evaluasi_level_1_materis` (`id`, `evaluasi_level_1_id`, `materi_sistematika`, `materi_pemahaman`, `materi_pengetahuan`, `materi_manfaat`, `materi_tujuan`, `created_at`, `updated_at`) VALUES
+(14, 1, '5', '5', '5', '5', '5', '2025-08-06 04:44:19', '2025-08-06 04:44:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_1_penyelenggaraans`
+--
+
+CREATE TABLE `evaluasi_level_1_penyelenggaraans` (
+  `id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_1_id` bigint UNSIGNED NOT NULL,
+  `penyelenggaraan_pengelolaan` enum('1','2','3','4','5') DEFAULT NULL,
+  `penyelenggaraan_jadwal` enum('1','2','3','4','5') DEFAULT NULL,
+  `penyelenggaraan_persiapan` enum('1','2','3','4','5') DEFAULT NULL,
+  `penyelenggaraan_pelayanan` enum('1','2','3','4','5') DEFAULT NULL,
+  `penyelenggaraan_koordinasi` enum('1','2','3','4','5') DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `evaluasi_level_1_penyelenggaraans`
+--
+
+INSERT INTO `evaluasi_level_1_penyelenggaraans` (`id`, `evaluasi_level_1_id`, `penyelenggaraan_pengelolaan`, `penyelenggaraan_jadwal`, `penyelenggaraan_persiapan`, `penyelenggaraan_pelayanan`, `penyelenggaraan_koordinasi`, `created_at`, `updated_at`) VALUES
+(1, 1, '5', '5', '5', '5', '5', '2025-08-06 04:44:19', '2025-08-06 04:44:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_1_saranas`
+--
+
+CREATE TABLE `evaluasi_level_1_saranas` (
+  `id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_1_id` bigint UNSIGNED NOT NULL,
+  `sarana_media` enum('1','2','3','4','5') DEFAULT NULL,
+  `sarana_kit` enum('1','2','3','4','5') DEFAULT NULL,
+  `sarana_kenyamanan` enum('1','2','3','4','5') DEFAULT NULL,
+  `sarana_kesesuaian` enum('1','2','3','4','5') DEFAULT NULL,
+  `sarana_belajar` enum('1','2','3','4','5') DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `evaluasi_level_1_saranas`
+--
+
+INSERT INTO `evaluasi_level_1_saranas` (`id`, `evaluasi_level_1_id`, `sarana_media`, `sarana_kit`, `sarana_kenyamanan`, `sarana_kesesuaian`, `sarana_belajar`, `created_at`, `updated_at`) VALUES
+(1, 1, '5', '5', '5', '5', '5', '2025-08-06 04:44:19', '2025-08-06 04:44:19');
 
 -- --------------------------------------------------------
 
@@ -331,7 +557,16 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (27, '2025_07_09_105015_create_training_participants_table', 13),
 (28, '2025_07_09_110122_create_surat_pengajuan_pelatihan_signatures_and_parafs_table', 14),
 (29, '2025_07_11_115559_add_golongan_to_users_table', 15),
-(33, '2025_07_15_120446_create_surat_tugas_pelatihans_table', 16);
+(33, '2025_07_15_120446_create_surat_tugas_pelatihans_table', 16),
+(34, '2025_07_21_095727_create_daftar_hadir_pelatihan_status_table', 17),
+(35, '2025_07_21_095754_create_daftar_hadir_pelatihan_table', 18),
+(36, '2025_07_24_113756_create_user_histories_table', 19),
+(38, '2025_07_24_122214_create_user_position_histories_table', 20),
+(39, '2025_07_29_120248_create_presenters_table', 21),
+(40, '2025_07_29_120258_create_pelatihan_presenters_table', 22),
+(41, '2025_07_29_125207_add_presenter_type_to_pelatihan_presenters_table', 23),
+(42, '2025_07_29_162729_create_presenters_table', 24),
+(44, '2025_07_29_161926_create_pelatihan_presenters_table', 25);
 
 -- --------------------------------------------------------
 
@@ -344,6 +579,37 @@ CREATE TABLE `password_resets` (
   `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pelatihan_presenters`
+--
+
+CREATE TABLE `pelatihan_presenters` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `presenter_id` bigint UNSIGNED DEFAULT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `type` enum('internal','external') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date` date NOT NULL,
+  `check_in_time` time DEFAULT NULL,
+  `check_out_time` time DEFAULT NULL,
+  `is_submitted` tinyint(1) DEFAULT NULL,
+  `submitted_at` datetime DEFAULT NULL,
+  `submitted_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `pelatihan_presenters`
+--
+
+INSERT INTO `pelatihan_presenters` (`id`, `pelatihan_id`, `presenter_id`, `user_id`, `type`, `date`, `check_in_time`, `check_out_time`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
+(21, 2, NULL, 786, 'internal', '2025-07-10', '08:00:00', '16:00:00', 1, '2025-07-31 15:58:43', 1, '2025-07-31 08:58:02', '2025-07-31 08:58:43'),
+(22, 2, 3, NULL, 'external', '2025-07-10', '08:00:00', '16:00:00', 1, '2025-07-31 15:58:43', 1, '2025-07-31 08:58:02', '2025-07-31 08:58:43'),
+(23, 2, 2, NULL, 'external', '2025-07-11', '08:00:00', '16:00:00', 1, '2025-08-04 13:09:00', 1, '2025-08-04 06:08:02', '2025-08-04 06:09:00');
 
 -- --------------------------------------------------------
 
@@ -367,11 +633,37 @@ CREATE TABLE `personal_access_tokens` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `presenters`
+--
+
+CREATE TABLE `presenters` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `institution` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `presenters`
+--
+
+INSERT INTO `presenters` (`id`, `name`, `institution`, `email`, `phone`, `notes`, `created_at`, `updated_at`) VALUES
+(2, 'Ansori', 'LIA', 'ansori@gmail.com', '019213021381', 'Instruktur LIA', '2025-07-30 08:14:07', '2025-07-30 08:14:07'),
+(3, 'Ambari', 'LIA', 'ambari@gmail.com', '02190318230198301', 'temennya ansori', '2025-07-30 08:18:20', '2025-07-30 08:18:20');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `signature_and_parafs`
 --
 
 CREATE TABLE `signature_and_parafs` (
   `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
   `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `signature_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `paraf_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -383,10 +675,13 @@ CREATE TABLE `signature_and_parafs` (
 -- Dumping data for table `signature_and_parafs`
 --
 
-INSERT INTO `signature_and_parafs` (`id`, `registration_id`, `signature_path`, `paraf_path`, `created_at`, `updated_at`) VALUES
-(1, 'ADM01', 'storage/signatures/ADM01.png', 'storage/parafs/ADM01.png', '2025-07-08 03:29:25', '2025-07-08 05:03:16'),
-(2, 'MAN019', 'storage/signatures/MAN019.png', 'storage/parafs/MAN019.png', '2025-07-08 10:09:43', '2025-07-08 10:09:54'),
-(3, 'EA001', 'storage/signatures/EA001.png', 'storage/parafs/EA001.png', '2025-07-10 08:12:34', '2025-07-10 08:12:43');
+INSERT INTO `signature_and_parafs` (`id`, `user_id`, `registration_id`, `signature_path`, `paraf_path`, `created_at`, `updated_at`) VALUES
+(1, 1, 'ADM01', 'signatures/ADM01.png', 'parafs/ADM01.png', '2025-07-08 03:29:25', '2025-07-17 02:39:17'),
+(2, 71, 'MAN019', 'signatures/MAN019.png', 'parafs/MAN019.png', '2025-07-08 10:09:43', '2025-07-08 10:09:54'),
+(3, 52, 'EA001', 'signatures/EA001.png', 'parafs/EA001.png', '2025-07-10 08:12:34', '2025-07-17 05:36:23'),
+(4, 51, 'GM002', 'signatures/GM002.png', 'parafs/GM002.png', '2025-07-17 04:11:56', '2025-07-17 04:12:08'),
+(5, 631, '2000216', 'signatures/2000216.png', 'parafs/2000216.png', '2025-07-17 08:59:54', '2025-07-17 09:00:03'),
+(6, 552, '2000045', 'signatures/2000045.png', 'parafs/2000045.png', '2025-07-17 10:19:38', '2025-07-17 10:19:43');
 
 -- --------------------------------------------------------
 
@@ -515,7 +810,7 @@ CREATE TABLE `surat_tugas_pelatihans` (
 --
 
 INSERT INTO `surat_tugas_pelatihans` (`id`, `pelatihan_id`, `kode_pelatihan`, `judul`, `tanggal`, `tempat`, `tanggal_pelatihan`, `durasi`, `created_by`, `status`, `is_accepted`, `created_at`, `updated_at`) VALUES
-(1, 2, 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-15', 'Jakarta', '2025-07-10', 2, 51, 'draft', 0, '2025-07-15 07:04:42', '2025-07-15 07:04:42');
+(1, 2, 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-15', 'Jakarta', '2025-07-10', 2, 51, 'draft', 1, '2025-07-15 07:04:42', '2025-07-23 03:42:41');
 
 -- --------------------------------------------------------
 
@@ -526,14 +821,25 @@ INSERT INTO `surat_tugas_pelatihans` (`id`, `pelatihan_id`, `kode_pelatihan`, `j
 CREATE TABLE `surat_tugas_pelatihan_signatures_and_parafs` (
   `id` bigint UNSIGNED NOT NULL,
   `surat_tugas_id` bigint UNSIGNED NOT NULL,
+  `kode_pelatihan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `type` enum('paraf','signature') COLLATE utf8mb4_unicode_ci NOT NULL,
   `sequence` int NOT NULL,
   `round` int NOT NULL DEFAULT '1',
   `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `signed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `surat_tugas_pelatihan_signatures_and_parafs`
+--
+
+INSERT INTO `surat_tugas_pelatihan_signatures_and_parafs` (`id`, `surat_tugas_id`, `kode_pelatihan`, `user_id`, `registration_id`, `type`, `sequence`, `round`, `status`, `signed_at`, `created_at`, `updated_at`) VALUES
+(9, 1, 'Pelatihan 1', 631, '2000216', 'paraf', 1, 1, 'approved', '2025-07-21 05:00:29', '2025-07-18 09:46:13', '2025-07-21 05:00:29'),
+(10, 1, 'Pelatihan 1', 552, '2000045', 'signature', 2, 1, 'approved', '2025-07-23 03:42:41', '2025-07-18 09:46:13', '2025-07-23 03:42:41');
 
 -- --------------------------------------------------------
 
@@ -606,7 +912,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `registration_id`, `name`, `email`, `email_verified_at`, `password`, `two_factor_secret`, `two_factor_recovery_codes`, `phone`, `address`, `signature_path`, `paraf_path`, `role`, `is_active`, `profile_picture`, `remember_token`, `created_at`, `updated_at`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`, `nik`) VALUES
-(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, 'jzyCVYXuzwZVgP3uJqwOYCtzvi8UESKwBlV0E5EwYeqwSHVla4F40LNrtjmz', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, '2rEYiFcGZCbEwQTzhT6xVpapfesps9k7GfcxycDjWxgPGB0qxVifvt1jORSP', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (48, 'DIR001', 'Dewi Director', 'TEST@GMAIL.COM', NULL, '$2y$10$DjeExht8y6bI2lMEYJP1UOmGqacRPa4jL.hf1A/NjiBDBa3pX6iR2', NULL, NULL, '08111111001', 'Jl. Direksi No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:04', 1, NULL, NULL, 1, NULL, NULL, '00', '3173000000000001'),
 (49, 'ASDIR001', 'Arief Assistant', 'asdir@gmail.com', NULL, '$2y$10$BhayvALSwTi.vUXmICMK9eYkNoZCYzCQubfU7zwSrKN8z8MZ.9rHO', NULL, NULL, '08111111002', 'Jl. HC No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:20', 2, NULL, NULL, 1, NULL, 48, '01', '3173000000000002'),
 (50, 'GM001', 'Gita GM CP', NULL, NULL, '$2y$10$.0rbg1iVgUFkDZKfec3uUOV2jIyujakIsd2iRCNs4z4BJjYuPY/YS', NULL, NULL, '08111111003', 'Jl. Komersial No.1', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-07 06:13:17', 3, NULL, NULL, 2, 1, NULL, NULL, '3173000000000003'),
@@ -630,8 +936,8 @@ INSERT INTO `users` (`id`, `registration_id`, `name`, `email`, `email_verified_a
 (68, 'MAN016', 'Manager Real Estate', NULL, NULL, '$2y$10$O5cjG7HmtjFCF1TI7hrmN.iIysgw/vj9DNiOLKDA.VrrcN06Q03yy', NULL, NULL, '08111110116', 'Jl. Real Estate', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 06:13:18', 5, NULL, 16, 2, 1, NULL, NULL, '31730000000000021'),
 (69, 'MAN017', 'Manager Golf & Sport Center Manager', NULL, NULL, '$2y$10$A5sTYwa2Z9cxN.DPw3H63enco5EcAd4q9fw91KD0jLWQN/tReYwEa', NULL, NULL, '08111110117', 'Jl. Golf & Sport Center Manager', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 06:13:18', 5, NULL, 17, 2, 1, NULL, NULL, '31730000000000022'),
 (70, 'MAN018', 'Manager Executive Marketing & Sales Hotel', NULL, NULL, '$2y$10$abZZs2jq3IrKMoVWVTPsM.6B5.ilb1TIs3r0FESPYfoRcY7l78r8.', NULL, NULL, '08111110118', 'Jl. Executive Marketing & Sales Hotel', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 06:13:18', 5, NULL, 18, 2, 2, NULL, NULL, '31730000000000023'),
-(71, 'MAN019', 'Manager Front Office', 'managerfrontoffice@manager.com', NULL, '$2y$10$JRVFx8HaQmTdkWzdsN9q8O/GPLkv2CntW9c0JndAzhccNAOQrolYq', NULL, NULL, '08111110119', 'Jl. Front Offices', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 09:08:36', 5, NULL, 19, 2, NULL, NULL, NULL, '31730000000000024'),
-(72, 'MAN020', 'Manager Housekeeping', NULL, NULL, '$2y$10$6Y5DWYpZA.CpuHCBp2v0DOyZO3KT6GSHS/tL2a8jYknb4FYY19SGe', NULL, NULL, '08111110120', 'Jl. Housekeeping', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 06:13:18', 5, NULL, 20, 2, 2, NULL, NULL, '31730000000000025'),
+(71, 'MAN019', 'Manager Front Office', 'managerfrontoffice@manager.com', NULL, '$2y$10$JRVFx8HaQmTdkWzdsN9q8O/GPLkv2CntW9c0JndAzhccNAOQrolYq', NULL, NULL, '08111110119', 'Jl. Front Offices', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-24 08:25:07', 5, 'MANAGER FRONT OFFICE', 19, 2, NULL, 51, NULL, '31730000000000024'),
+(72, 'MAN020', 'Manager Housekeeping', 'managerhousekeeping@manager.com', NULL, '$2y$10$6Y5DWYpZA.CpuHCBp2v0DOyZO3KT6GSHS/tL2a8jYknb4FYY19SGe', NULL, NULL, '08111110120', 'Jl. Housekeeping', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-24 08:26:13', 5, 'MANAGER HOUSEKEEPING', 20, 2, 2, 51, NULL, '31730000000000025'),
 (73, 'MAN021', 'Manager Food & Beverage', NULL, NULL, '$2y$10$4Cf4SI.b8IS4kNIKJlxBRepqMZE1qpVH0rxmPGmMdd1qZ29GhhUgK', NULL, NULL, '08111110121', 'Jl. Food & Beverage', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 06:13:18', 5, NULL, 21, 2, 2, NULL, NULL, '31730000000000026'),
 (74, 'MAN022', 'Manager Executive Chef', NULL, NULL, '$2y$10$tHJ2JvTxWgEJGk/EKIP7quiYsYKR2/liuuGFZvzc7cpAZrp1HHmq2', NULL, NULL, '08111110122', 'Jl. Executive Chef', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 06:13:18', 5, NULL, 22, 2, 2, NULL, NULL, '31730000000000027'),
 (75, 'MAN023', 'Manager Engineering', NULL, NULL, '$2y$10$qEbq2obOJAsBI7cQReqz5unfF33/BCe/AsNRyPboBQsR//0NSML72', NULL, NULL, '08111110123', 'Jl. Engineering', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:18', '2025-07-07 06:13:18', 5, NULL, 23, 2, 2, NULL, NULL, '31730000000000028'),
@@ -872,7 +1178,327 @@ INSERT INTO `users` (`id`, `registration_id`, `name`, `email`, `email_verified_a
 (782, '2900036', 'KARTIKA APRILIANI', '2900036@yourdomain.com', NULL, '$2y$10$zC0xYYmolBeQb2R31ckAwObvJ8yrcrk6QHQF2PB05tcdYfQ2AaQHy', NULL, NULL, NULL, 'LINK KUBANG WELUT RT RW 005 004 KEL SEMANGRAYA CILEGON', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 11, 'SALES & MARKETING GOLF & SC OFFICER', 17, 2, 1, NULL, '4', NULL),
 (783, '2900037', 'ABDUL LUTHFI MADJID', '2900037@yourdomain.com', NULL, '$2y$10$Nv3HvGcas77IFlPnw.m8SeX6G3y0uhjQmguL5v2YeGbztU1qwVNQi', NULL, NULL, NULL, 'KOMP PURI TANJUNG SARI NO 41 MEDAN', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 9, 'COURSE MAINTENANCE SUPERVISOR', 17, 2, 1, NULL, '4', NULL),
 (784, '2900038', 'ANUNG NUGROHO', '2900038@yourdomain.com', NULL, '$2y$10$Q8AlOPdSSJIxasxNJ.2d5OZtRyHiHYMPfvFAZyrvQ79VAQ842XCMG', NULL, NULL, NULL, 'JL. ARJUNA NO 139 KAV BLOK J CILEGON', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 9, 'COURSE MAINTENANCE SUPERVISOR', 17, 2, 1, NULL, '4', NULL),
-(785, '2900039', 'ABDUL RIFAI', '2900039@yourdomain.com', NULL, '$2y$10$0qLBrKkv2Zfd6wQShTDlB.j8RJ0hcQXZdsgihCRuxNqW/L5yK1.Cq', NULL, NULL, NULL, 'JL NANGKA TJ BARAT RT RW 003 006 JAKARTA SELATAN', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 9, 'CLUB MANAGEMENT SUPERVISOR', 17, 2, 1, NULL, '4', NULL);
+(785, '2900039', 'ABDUL RIFAI', '2900039@yourdomain.com', NULL, '$2y$10$0qLBrKkv2Zfd6wQShTDlB.j8RJ0hcQXZdsgihCRuxNqW/L5yK1.Cq', NULL, NULL, NULL, 'JL NANGKA TJ BARAT RT RW 003 006 JAKARTA SELATAN', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 9, 'CLUB MANAGEMENT SUPERVISOR', 17, 2, 1, NULL, '4', NULL),
+(786, '2831', 'RAFI KYANDRA ATHARIZQI', 'kyandraatharizqi@gmail.com', NULL, '$2y$10$.0do2okpR.jIMUMXykxQrua7FEwKL6fAkW8VRzfCL0if2RBYvesr2', NULL, NULL, '081389193372', 'Jalan Kitapa No.17 Lopang Cilik RT1 RW2', NULL, NULL, 'staff', 0, NULL, NULL, '2025-07-24 08:29:27', '2025-07-24 08:29:59', 6, 'HUMAN CAPITAL SUPERINTENDENT', 12, 3, NULL, 552, '05', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_histories`
+--
+
+CREATE TABLE `user_histories` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `jabatan_id` bigint UNSIGNED DEFAULT NULL,
+  `department_id` bigint UNSIGNED DEFAULT NULL,
+  `division_id` bigint UNSIGNED DEFAULT NULL,
+  `directorate_id` bigint UNSIGNED DEFAULT NULL,
+  `effective_date` date NOT NULL,
+  `changed_by` bigint UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_position_histories`
+--
+
+CREATE TABLE `user_position_histories` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `directorate_id` bigint UNSIGNED DEFAULT NULL,
+  `division_id` bigint UNSIGNED DEFAULT NULL,
+  `department_id` bigint UNSIGNED DEFAULT NULL,
+  `jabatan_id` bigint UNSIGNED DEFAULT NULL,
+  `jabatan_full` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `superior_id` bigint UNSIGNED DEFAULT NULL,
+  `golongan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `recorded_at` timestamp NULL DEFAULT NULL,
+  `effective_date` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `user_position_histories`
+--
+
+INSERT INTO `user_position_histories` (`id`, `user_id`, `registration_id`, `directorate_id`, `division_id`, `department_id`, `jabatan_id`, `jabatan_full`, `superior_id`, `golongan`, `is_active`, `recorded_at`, `effective_date`, `created_at`, `updated_at`) VALUES
+(1, 1, 'ADM01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, '2025-06-23 04:55:06', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(2, 48, 'DIR001', 1, NULL, NULL, 1, NULL, NULL, '00', 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(3, 49, 'ASDIR001', 1, NULL, NULL, 2, NULL, 48, '01', 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(4, 50, 'GM001', 2, 1, NULL, 3, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(5, 51, 'GM002', 2, 2, NULL, 3, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(6, 52, 'EA001', 2, 2, NULL, 4, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(7, 53, 'MAN001', 1, NULL, 1, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(8, 54, 'MAN002', 1, NULL, 2, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(9, 55, 'MAN003', 1, NULL, 3, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(10, 56, 'MAN004', 1, NULL, 4, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(11, 57, 'MAN005', 2, NULL, 5, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(12, 58, 'MAN006', 2, NULL, 6, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(13, 59, 'MAN007', 2, NULL, 7, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(14, 60, 'MAN008', 3, NULL, 8, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:17', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(15, 61, 'MAN009', 3, NULL, 9, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(16, 62, 'MAN010', 3, NULL, 10, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(17, 63, 'MAN011', 3, NULL, 11, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(18, 64, 'MAN012', 3, NULL, 12, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(19, 65, 'MAN013', 2, 1, 13, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(20, 66, 'MAN014', 2, 1, 14, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(21, 67, 'MAN015', 2, 1, 15, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(22, 68, 'MAN016', 2, 1, 16, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(23, 69, 'MAN017', 2, 1, 17, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(24, 70, 'MAN018', 2, 2, 18, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(25, 71, 'MAN019', 2, NULL, 19, 5, NULL, NULL, NULL, 0, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 08:25:07'),
+(26, 72, 'MAN020', 2, 2, 20, 5, NULL, NULL, NULL, 0, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 08:26:13'),
+(27, 73, 'MAN021', 2, 2, 21, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(28, 74, 'MAN022', 2, 2, 22, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(29, 75, 'MAN023', 2, 2, 23, 5, NULL, NULL, NULL, 1, '2025-07-07 06:13:18', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(30, 77, 'DIR003', 3, NULL, NULL, 1, 'DIREKTUR HUMAN CAPITAL & FINANCE', NULL, NULL, 1, '2025-07-09 08:48:46', '2024-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(31, 550, '2000021', NULL, NULL, NULL, 8, 'COR. COM SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:32:59', '1993-08-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(32, 551, '2000042', 2, 1, 15, 5, 'BUILDING MANAGEMENT &OFFICE RENT MANAGER', NULL, '2', 1, '2025-07-14 08:32:59', '1998-08-25 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(33, 552, '2000045', 3, NULL, 12, 5, 'HUMAN CAPITAL MANAGER', NULL, '2', 1, '2025-07-14 08:32:59', '1998-11-25 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(34, 553, '2000046', 2, NULL, 5, 7, 'ENGINEERING PLANNING SENIOR ENGINEER', NULL, '3', 1, '2025-07-14 08:32:59', '1998-11-25 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(35, 554, '2000048', 3, NULL, 8, NULL, 'FINANCIAL & OPERATION SENIOR AUDITOR', NULL, '3', 1, '2025-07-14 08:32:59', '1998-11-25 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(36, 555, '2000052', 2, NULL, 7, 6, 'FIRE SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:32:59', '1998-11-25 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(37, 556, '2000053', 3, NULL, 11, 11, 'MANAGEMENT SYSTEM OFFICER', NULL, '4', 1, '2025-07-14 08:32:59', '2000-01-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(38, 557, '2000055', 3, NULL, 11, 8, 'MANAGEMENT SYSTEM SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:32:59', '2000-01-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(39, 558, '2000063', 1, NULL, 3, 5, 'INTERNAL AUDIT MANAGER', NULL, '2', 1, '2025-07-14 08:32:59', '2001-03-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(40, 559, '2000064', 2, NULL, 6, 5, 'PROJECT CONTROL MANAGER', NULL, '2', 1, '2025-07-14 08:32:59', '2002-01-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(41, 560, '2000067', 1, NULL, 3, NULL, 'QUALITY ASSURANCE SENIOR AUDITOR', NULL, '3', 1, '2025-07-14 08:32:59', '2002-01-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(42, 561, '2000069', 3, NULL, 10, 8, 'PROCUREMENT SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:32:59', '2002-01-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(43, 562, '2000070', 3, NULL, 10, 5, 'PROCUREMENT MANAGER', NULL, '2', 1, '2025-07-14 08:32:59', '2002-01-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(44, 563, '2000073', 2, 1, 13, 8, 'SALES IE & HOUSING SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:32:59', '2002-05-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(45, 564, '2000075', 2, 1, 17, 5, 'GOLF & SPORT CENTER MANAGER', NULL, '2', 1, '2025-07-14 08:32:59', '2002-09-02 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(46, 565, '2000084', 2, NULL, 7, 9, 'SECURITY SECTION HOUSING AREA SUPERVISOR', NULL, '4', 1, '2025-07-14 08:32:59', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(47, 566, '2000087', 2, 1, 15, 6, 'BUILDING & OFFICE OPERATION SUPERINTEN', NULL, '3', 1, '2025-07-14 08:32:59', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(48, 567, '2000088', 2, NULL, 6, 10, 'PROJECT CONTROL ENGINEER', NULL, '4', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(49, 568, '2000090', 2, 1, 17, 9, 'MECH./ELEC./CIVIL MAINT. SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(50, 569, '2000093', 2, 1, 13, 11, 'MARKETING IE & HOUSING OFFICER', NULL, '4', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(51, 570, '2000094', 2, 1, 14, 11, 'ESTATE MANAGEMENT AREA  OFFICER', NULL, '4', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(52, 571, '2000095', NULL, NULL, NULL, 4, 'EXECUTIVE ASSISTANT MANAGEMENT HOTEL', NULL, '2', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(53, 572, '2000097', 1, NULL, 3, NULL, 'QUALITY ASSURANCE AUDITOR', NULL, '4', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(54, 573, '2000099', 2, 2, 20, 5, 'HOUSEKEEPING MANAGER', NULL, '3', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(55, 574, '2000100', 2, 1, 15, 9, 'CIVIL & HOUSEKEEPING SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(56, 575, '2000102', 3, NULL, 10, 8, 'PROCUREMENT SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(57, 576, '2000104', 3, NULL, 11, 5, 'IT & MANAGEMENT SYSTEM MANAGER', NULL, '2', 1, '2025-07-14 08:33:00', '2003-04-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(58, 577, '2000105', 2, 1, 17, 6, 'GOLF MAINTENANCE SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:00', '2003-04-28 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(59, 578, '2000106', 2, 1, 13, 5, 'MARKETING IE & HOUSING MANAGER', NULL, '2', 1, '2025-07-14 08:33:00', '2003-06-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(60, 579, '2000107', 3, NULL, 8, 5, 'FINANCE  MANAGER', NULL, '2', 1, '2025-07-14 08:33:00', '2003-06-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(61, 580, '2000108', 2, 2, 23, 5, 'ENGINEERING & BUSINESS DEV. MANAGER', NULL, '2', 1, '2025-07-14 08:33:00', '2003-07-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(62, 581, '2000109', 2, 1, 13, 8, 'MARKETING IE & HOUSING SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:00', '2003-07-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(63, 582, '2000111', 1, NULL, 1, 11, 'CORPORATE COMMUNICATION OFFICER', NULL, '4', 1, '2025-07-14 08:33:00', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(64, 583, '2000114', 2, 1, 14, 14, 'ESTATE MANAGEMENT AREA  JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:00', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(65, 584, '2000116', 3, NULL, 10, 6, 'COMMERCIAL PURCHASING SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:00', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(66, 585, '2000119', 2, 2, 22, 15, 'CHIEF STEWARD', NULL, '4', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(67, 586, '2000120', 1, NULL, 3, NULL, 'FINANCIAL & OPERATION SENIOR AUDITOR', NULL, '3', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(68, 587, '2000122', 2, 1, 15, 9, 'SECURITY SECTION BUILDING AREA SPV', NULL, '4', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(69, 588, '2000130', 2, NULL, 7, 9, 'SECURITY INDUSTRIAL AREA SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(70, 589, '2000132', 2, 2, 20, 9, 'HOUSEKEEPING FASILITIES AREA SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(71, 590, '2000137', 2, 1, 17, NULL, 'CLUB MANAGEMENT GROUP', NULL, '5', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(72, 591, '2000138', 2, 1, 14, 14, 'HOUSING MANAGEMENT JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(73, 592, '2000140', 2, 1, 14, 5, 'INDUSTRIAL ESTATE & HOUSING MANAGER', NULL, '2', 1, '2025-07-14 08:33:01', '2007-04-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(74, 593, '2000142', 2, NULL, 6, 7, 'PROJECT CONTROL SENIOR ENGINEER', NULL, '3', 1, '2025-07-14 08:33:01', '2007-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(75, 594, '2000143', 2, 1, 17, 12, 'MECHANICAL & ELECTRIC FOREMAN', NULL, '5', 1, '2025-07-14 08:33:01', '2007-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(76, 595, '2000144', 2, 1, 14, 8, 'WAREHOUSE & COM BUILDING SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:01', '2007-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(77, 596, '2000145', 2, 2, 20, 9, 'HOUSEKEEPING FASILITIES AREA SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:01', '2007-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(78, 597, '2000146', 2, 1, 16, 6, 'SALES & MARKETING RE SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:01', '2007-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(79, 598, '2000150', 1, NULL, 1, 5, 'CORPORATE SECRETARY MANAGER', NULL, '2', 1, '2025-07-14 08:33:01', '2011-07-11 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(80, 599, '2000154', 2, 1, 16, 5, 'REAL ESTATE MANAGER', NULL, '2', 1, '2025-07-14 08:33:01', '2011-07-11 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(81, 600, '2000162', 2, 1, 17, 6, 'SPORT CLUB SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:01', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(82, 601, '2000164', 3, NULL, 10, 11, 'PROCUREMENT OFFICER', NULL, '4', 1, '2025-07-14 08:33:01', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(83, 602, '2000166', 3, NULL, 12, 6, 'SECURITY SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:01', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(84, 603, '2000167', 2, 1, 14, 14, 'ESTATE MANAGEMENT AREA  JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:01', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(85, 604, '2000168', 2, 1, 14, 14, 'ESTATE MANAGEMENT AREA  JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(86, 605, '2000169', 1, NULL, 2, 11, 'LICENCES OFFICER', NULL, '4', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(87, 606, '2000171', 3, NULL, 11, 11, 'INFORMATION TECHNOLOGY OFFICER', NULL, '4', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(88, 607, '2000172', 2, 1, 14, 11, 'ESTATE MANAGEMENT AREA  OFFICER', NULL, '4', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(89, 608, '2000173', 2, NULL, 7, 9, 'SECURITY INDUSTRIAL AREA SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(90, 609, '2000176', 2, 1, 14, 14, 'HOUSING MANAGEMENT JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(91, 610, '2000177', 3, NULL, 8, 6, 'FUNDING & COLLECTION SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(92, 611, '2000179', 2, 1, 17, 6, 'GOLF CLUB SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(93, 612, '2000181', 2, 1, 13, 11, 'SALES IE & HOUSING OFFICER', NULL, '4', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(94, 613, '2000183', 2, NULL, 7, 9, 'SECURITY SECTION PATROL SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:02', '2012-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(95, 614, '2000185', 2, NULL, 6, 10, 'PROJECT CONTROL ENGINEER', NULL, '4', 1, '2025-07-14 08:33:02', '2014-01-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(96, 615, '2000186', 2, NULL, 5, 5, 'ENGINEERING MANAGER', NULL, '3', 1, '2025-07-14 08:33:02', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(97, 616, '2000187', 2, 2, 19, NULL, 'DUTY  MANAGER', NULL, '4', 1, '2025-07-14 08:33:02', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(98, 617, '2000188', 2, 1, 17, 9, 'DRIVING RANGE SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:02', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(99, 618, '2000192', 2, 2, 20, 9, 'LAUNDRY SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:02', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(100, 619, '2000193', 2, 2, 21, NULL, 'THE SUROSOWAN RESTAURANT MANAGER', NULL, '4', 1, '2025-07-14 08:33:02', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(101, 620, '2000194', 3, NULL, 12, 9, 'HUMAN CAPITAL REMUNERATION SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:02', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(102, 621, '2000196', 2, 1, 17, 9, 'RECREACTION & KRA. SPORT SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:02', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(103, 622, '2000198', 2, 2, 19, 5, 'FRONT OFFICE MANAGER', NULL, '3', 1, '2025-07-14 08:33:03', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(104, 623, '2000199', 2, 2, 20, 9, 'HOUSEKEEPING FASILITIES AREA SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:03', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(105, 624, '2000200', 3, NULL, 12, 8, 'GENERAL AFFAIR SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:03', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(106, 625, '2000201', 2, 1, 14, 11, 'ESTATE MANAGEMENT AREA  OFFICER', NULL, '4', 1, '2025-07-14 08:33:03', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(107, 626, '2000202', 3, NULL, 12, 11, 'GENERAL AFFAIR OFFICER', NULL, '4', 1, '2025-07-14 08:33:03', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(108, 627, '2000204', 2, 2, 20, NULL, 'ASSISTANT HOUSEKEEPING', NULL, '4', 1, '2025-07-14 08:33:03', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(109, 628, '2000206', 2, 2, 20, 9, 'HOUSEKEEPING HOTEL AREA SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:03', '2014-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(110, 629, '2000211', 1, NULL, 2, 5, 'LEGAL & COMPLIANCE MANAGER', NULL, '2', 1, '2025-07-14 08:33:03', '2017-09-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(111, 630, '2000213', 2, NULL, 5, 7, 'ENGINEERING PLANNING SENIOR ENGINEER', NULL, '3', 1, '2025-07-14 08:33:03', '2018-01-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(112, 631, '2000216', 3, NULL, 12, 11, 'HUMAN CAPITAL ORG. & DEV.  OFFICER', NULL, '4', 1, '2025-07-14 08:33:03', '2018-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(113, 632, '2000217', 3, NULL, 12, NULL, 'HUMAN CAPITAL REMUNERATION SUPERINTENDEN', NULL, '3', 1, '2025-07-14 08:33:03', '2019-01-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(114, 633, '2000218', 3, NULL, 12, 8, 'HUMAN CAPITAL ORG. & DEV. SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:03', '2019-01-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(115, 634, '2000223', 3, NULL, 8, 6, 'FINANCIAL ACCOUNTING SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:03', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(116, 635, '2000225', 2, NULL, 7, NULL, 'SAFETY, HEALTH & ENVIRONMENT SENIOR OFFI', NULL, '3', 1, '2025-07-14 08:33:03', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(117, 636, '2000226', 3, NULL, 11, 8, 'INFORMATION TECHNOLOGY SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:03', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(118, 637, '2000227', 1, NULL, 1, 11, 'CORPORATE COMMUNICATION OFFICER', NULL, '4', 1, '2025-07-14 08:33:03', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(119, 638, '2000229', 3, NULL, 9, 5, 'ACCOUNTING  MANAGER', NULL, '2', 1, '2025-07-14 08:33:03', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(120, 639, '2000230', 2, NULL, 6, 10, 'PROJECT CONTROL ENGINEER', NULL, '4', 1, '2025-07-14 08:33:03', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(121, 640, '2000231', 2, 1, 14, 11, 'ESTATE MANAGEMENT AREA  OFFICER', NULL, '4', 1, '2025-07-14 08:33:03', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(122, 641, '2000233', 1, NULL, 4, 8, 'BUSINESS DEVELOPMENT SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:04', '2019-09-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(123, 642, '2000234', 1, NULL, 1, 14, 'COM. DEV & CSR JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:04', '2019-09-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(124, 643, '2000235', 3, NULL, 10, 11, 'PROCUREMENT OFFICER', NULL, '4', 1, '2025-07-14 08:33:04', '2020-08-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(125, 644, '2000236', 3, NULL, 8, 9, 'FUNDING & COLLECTION SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:04', '2020-08-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(126, 645, '2002043', 2, 1, 15, 12, 'SECURITY SECTION BUILDING AREA FOREMAN', NULL, '5', 1, '2025-07-14 08:33:04', '1993-04-11 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(127, 646, '2002048', 2, 1, 15, 9, 'CIVIL & HOUSEKEEPING SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:04', '1992-11-15 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(128, 647, '2002049', 2, 1, 13, 14, 'MARKETING IE & HOUSING JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:04', '1992-11-04 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(129, 648, '2100200', 3, NULL, 12, 9, 'HUMAN CAPITAL REMUNERATION SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:04', '2023-05-21 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(130, 649, '2100202', NULL, NULL, NULL, 3, 'COMMERCIAL PROPERTY GENERAL MANAGER', NULL, '1', 1, '2025-07-14 08:33:04', '2025-05-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(131, 650, '2100214', 3, NULL, 11, 11, 'INFORMATION TECHNOLOGY OFFICER', NULL, '4', 1, '2025-07-14 08:33:04', '2023-03-14 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(132, 651, '2100256', 2, NULL, 5, 10, 'ENGINEERING PLANNING ENGINEER', NULL, '4', 1, '2025-07-14 08:33:04', '2023-03-14 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(133, 652, '2110501', 2, NULL, 7, 11, 'MNTC FIRE, SFTY EQUIPMENT & FIRE INSPCTR', NULL, '4', 1, '2025-07-14 08:33:04', '1996-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(134, 653, '2110670', 2, 1, 14, 8, 'HOUSING MANAGEMENT SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:04', '1996-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(135, 654, '2110922', 1, NULL, 1, 8, 'COM. DEV & CSR SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:04', '2023-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(136, 655, '2111267', 2, NULL, 7, 9, 'FIRE & DISASTER PREVENTION SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:04', '2010-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(137, 656, '2111268', 2, NULL, 7, 12, 'FIRE & DISASTER PREVENTION FOREMAN', NULL, '5', 1, '2025-07-14 08:33:04', '2010-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(138, 657, '2111305', 2, 1, 15, NULL, 'MECH./ELEC./CIVIL MAINT. GROUP', NULL, '5', 1, '2025-07-14 08:33:04', '2025-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(139, 658, '2111460', 2, 1, 14, 8, 'ESTATE MANAGEMENT AREA SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:04', '2011-07-25 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(140, 659, '2112079', 2, 2, 23, 9, 'ENGINEERING SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:04', '2025-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(141, 660, '2112298', 2, NULL, 7, 5, 'SECURITY, FIRE & SHE MANAGER', NULL, '2', 1, '2025-07-14 08:33:05', '2024-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(142, 661, '2112478', 2, 1, 15, 12, 'MECHANICAL & ELECTRIC FOREMAN', NULL, '5', 1, '2025-07-14 08:33:05', '2025-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(143, 662, '2112533', 2, NULL, 6, 13, 'PROJECT CONTROL JUNIOR ENGINEER', NULL, '5', 1, '2025-07-14 08:33:05', '2025-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(144, 663, '2112559', 2, 1, 14, 14, 'ESTATE MANAGEMENT AREA  JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:05', '2025-07-24 06:06:15', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(145, 664, '2112727', 2, 1, 14, 14, 'HOUSING MANAGEMENT JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:05', '2025-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(146, 665, '2113222', 2, 1, 17, 9, 'SWIMMING POOL SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:05', '2025-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(147, 666, '2113517', 2, NULL, 5, 10, 'ENGINEERING PLANNING ENGINEER', NULL, '4', 1, '2025-07-14 08:33:05', '2025-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(148, 667, '2400001', NULL, NULL, NULL, 2, 'ASSISTANT TO PRESIDENT DIRECTOR', NULL, '3', 1, '2025-07-14 08:33:05', '2002-11-29 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(149, 668, '2400002', 1, NULL, 2, 8, 'LICENCES SENIOR OFFICER', NULL, '3', 1, '2025-07-14 08:33:05', '2002-07-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(150, 669, '2400003', 2, 1, 16, 6, 'CONSTRUCTION MANAGEMENT AREA SUPERTINTEN', NULL, '3', 1, '2025-07-14 08:33:05', '2003-05-20 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(151, 670, '2400004', 3, NULL, 8, 6, 'TAX INSURANCE & INVOICING SUPERINTENDENT', NULL, '3', 1, '2025-07-14 08:33:05', '2018-08-09 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(152, 671, '2400005', 2, 1, 16, 9, 'SALES SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:05', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(153, 672, '2400006', 1, NULL, 2, 11, 'LEGAL OFFICER', NULL, '4', 1, '2025-07-14 08:33:05', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(154, 673, '2400007', NULL, NULL, NULL, 2, 'ASSISTANT TO HC & FINANCE DIRECTOR', NULL, '4', 1, '2025-07-14 08:33:05', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(155, 674, '2400008', 3, NULL, 8, 12, 'FUNDING & COLLECTION FOREMAN', NULL, '5', 1, '2025-07-14 08:33:05', '2019-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(156, 675, '2400009', 3, NULL, 12, 11, 'HUMAN CAPITAL ORG. & DEV.  OFFICER', NULL, '4', 1, '2025-07-14 08:33:05', '2020-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(157, 676, '2400010', 1, NULL, 2, 14, 'DOCUMENT CONTROL JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:05', '2022-02-28 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(158, 677, '2400011', 2, 1, 14, 11, 'ESTATE MANAGEMENT AREA  OFFICER', NULL, '4', 1, '2025-07-14 08:33:05', '2022-09-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(159, 678, '2400012', 3, NULL, 9, 9, 'FINANCIAL ACCOUNTING SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:06', '2022-09-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(160, 679, '2400013', 3, NULL, 8, 9, 'TAX, INSURANCE & INVOICING SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:06', '2022-09-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(161, 680, '2400014', 1, NULL, 1, 14, 'CORPORATE COMMUNICATION JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:06', '2022-09-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(162, 681, '2400015', 2, NULL, 6, 7, 'PROJECT CONTROL SENIOR ENGINEER', NULL, '3', 1, '2025-07-14 08:33:06', '2023-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(163, 682, '2400016', NULL, NULL, NULL, 2, 'ASSISTANT TO OPERATION DIRECTOR', NULL, '4', 1, '2025-07-14 08:33:06', '2021-06-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(164, 683, '2400017', 2, 1, 17, 11, 'SALES & MARKETING GOLF & SC OFFICER', NULL, '4', 1, '2025-07-14 08:33:06', '2023-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(165, 684, '2400018', 2, NULL, 5, 10, 'ENGINEERING PLANNING ENGINEER', NULL, '4', 1, '2025-07-14 08:33:06', '2023-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(166, 685, '2400019', 3, NULL, 9, 12, 'FINANCIAL ACCOUNTING FOREMAN', NULL, '5', 1, '2025-07-14 08:33:06', '2023-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(167, 686, '2400020', 3, NULL, 8, 12, 'TAX, INSURANCE & INVOICING FOREMAN', NULL, '5', 1, '2025-07-14 08:33:06', '2023-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(168, 687, '2400021', 3, NULL, 11, 11, 'MANAGEMENT SYSTEM OFFICER', NULL, '4', 1, '2025-07-14 08:33:06', '2024-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(169, 688, '2500010', NULL, NULL, NULL, 3, 'HOTEL GENERAL MANAGER', NULL, '1', 1, '2025-07-14 08:33:06', '2021-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(170, 689, '2500018', 2, 2, 21, 9, 'FOOperational & BEVERAGES SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:06', '2022-05-08 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(171, 690, '2600001', 2, 2, 22, NULL, 'THE SUROSOWAN RESTAURANT SOUS CHEF', NULL, '4', 1, '2025-07-14 08:33:06', '2018-08-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(172, 691, '2600002', 2, 2, 23, NULL, 'OPERATIONAL TECHNICIAN', NULL, '6', 1, '2025-07-14 08:33:06', '2018-09-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(173, 692, '2600003', 2, 2, 19, 9, 'FRONT OFFICE SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:06', '2019-04-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(174, 693, '2600005', 2, 2, 22, NULL, 'BANQUET SOUS CHEF', NULL, '4', 1, '2025-07-14 08:33:06', '2019-02-28 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(175, 694, '2600011', 2, 2, 20, 9, 'HOUSEKEEPING HOTEL AREA SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:06', '2019-08-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(176, 695, '2600017', 2, 2, 20, NULL, 'ROOM & FLOOR ATTENDANT', NULL, '6', 1, '2025-07-14 08:33:06', '2019-03-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(177, 696, '2600019', 2, 2, 20, NULL, 'ROOM & FLOOR ATTENDANT', NULL, '6', 1, '2025-07-14 08:33:07', '2019-03-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(178, 697, '2600021', 2, 2, 22, NULL, 'COOK THE KAIBON', NULL, '6', 1, '2025-07-14 08:33:07', '2019-05-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(179, 698, '2600022', 2, 2, 20, NULL, 'LAUNDRY', NULL, '6', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(180, 699, '2600023', 2, 2, 22, NULL, 'COOK BANQUET', NULL, '6', 1, '2025-07-14 08:33:07', '2019-05-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(181, 700, '2600024', 2, 2, 20, NULL, 'ROOM & FLOOR ATTENDANT', NULL, '6', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(182, 701, '2600025', 2, 2, 23, NULL, 'CIVIL TECHNICIAN', NULL, '6', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(183, 702, '2600027', 2, 2, 21, NULL, 'THE KAIBON WAITER/SS', NULL, '6', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(184, 703, '2600028', 2, 2, 23, 9, 'ENGINEERING SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(185, 704, '2600029', 2, 2, 23, 9, 'ENGINEERING SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(186, 705, '2600031', 3, NULL, 10, 12, 'COMMERCIAL PURCHASING FOREMAN', NULL, '5', 1, '2025-07-14 08:33:07', '2019-06-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(187, 706, '2600035', 2, 2, 18, NULL, 'SALES MANAGEMENT HOTEL', NULL, '4', 1, '2025-07-14 08:33:07', '2020-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(188, 707, '2600043', 2, 2, 21, NULL, 'BANQUET OPERATIONAL MANAGER', NULL, '4', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(189, 708, '2600044', 2, 2, 21, NULL, 'THE SUROSOWAN RESTAURANT MANAGER', NULL, '4', 1, '2025-07-14 08:33:07', '2019-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(190, 709, '2600046', 2, 2, 21, NULL, 'THE KAIBON WAITER/SS', NULL, '6', 1, '2025-07-14 08:33:07', '2018-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(191, 710, '2600050', 2, 2, 19, NULL, 'RESERVATION/OPERATOR', NULL, '6', 1, '2025-07-14 08:33:07', '2020-04-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(192, 711, '2600054', 2, 2, 20, NULL, 'ROOM & FLOOR ATTENDANT', NULL, '6', 1, '2025-07-14 08:33:07', '2019-03-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(193, 712, '2600055', 2, 2, 23, NULL, 'OPERATIONAL TECHNICIAN', NULL, '6', 1, '2025-07-14 08:33:07', '2019-04-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(194, 713, '2600057', 2, 2, 21, NULL, 'THE KAIBON WAITER/SS', NULL, '6', 1, '2025-07-14 08:33:07', '2019-06-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(195, 714, '2600063', 2, 2, 22, NULL, 'COOK BANQUET', NULL, '6', 1, '2025-07-14 08:33:07', '2018-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(196, 715, '2600067', 2, 2, 21, 9, 'THE KAIBON RESTAURANT SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:08', '2019-03-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(197, 716, '2600079', 2, 2, 21, NULL, 'THE KAIBON WAITER/SS', NULL, '6', 1, '2025-07-14 08:33:08', '2019-08-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(198, 717, '2600081', 2, 1, 17, NULL, 'OPERATIONAL SUPPORT GOLF', NULL, '6', 1, '2025-07-14 08:33:08', '2019-08-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(199, 718, '2600088', 3, NULL, 8, 12, 'FUNDING & COLLECTION FOREMAN', NULL, '5', 1, '2025-07-14 08:33:08', '2019-10-06 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(200, 719, '2600095', 2, 2, 22, NULL, 'COOK BANQUET', NULL, '6', 1, '2025-07-14 08:33:08', '2019-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(201, 720, '2600099', 2, 2, 22, NULL, 'COOK PASTRY', NULL, '6', 1, '2025-07-14 08:33:08', '2019-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(202, 721, '2600100', 2, 2, 22, NULL, 'COOK THE SUROSOWAN RESTAURANT', NULL, '6', 1, '2025-07-14 08:33:08', '2019-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(203, 722, '2600105', 2, 2, 22, NULL, 'COOK THE KAIBON', NULL, '6', 1, '2025-07-14 08:33:08', '2020-01-14 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(204, 723, '2600109', 2, 2, 19, 9, 'FRONT OFFICE SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:08', '2020-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(205, 724, '2600111', 3, NULL, 11, 14, 'INFORMATION TECHNOLOGY JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:08', '2020-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(206, 725, '2600112', 2, 2, 21, NULL, 'FB ADMIN', NULL, '6', 1, '2025-07-14 08:33:08', '2020-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(207, 726, '2600113', 2, 2, 22, NULL, 'STEWARD STAFF', NULL, '6', 1, '2025-07-14 08:33:08', '2020-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(208, 727, '2600115', 2, 2, 22, NULL, 'COOK THE KAIBON', NULL, '6', 1, '2025-07-14 08:33:08', '2021-02-28 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(209, 728, '2600117', 2, 2, 20, NULL, 'ROOM & FLOOR ATTENDANT', NULL, '6', 1, '2025-07-14 08:33:08', '2021-04-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(210, 729, '2600118', 2, 2, 22, NULL, 'CDP THE SUROSOWAN RESTAURANT', NULL, '5', 1, '2025-07-14 08:33:08', '2021-04-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(211, 730, '2600119', 2, 2, 20, 9, 'HOUSEKEEPING HOTEL AREA SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:08', '2021-04-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(212, 731, '2600120', 2, 2, 18, NULL, 'E-COMMERCE', NULL, '6', 1, '2025-07-14 08:33:08', '2021-05-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(213, 732, '2600121', 2, 2, 21, NULL, 'THE SUROSOWAN WAITER/SS', NULL, '6', 1, '2025-07-14 08:33:08', '2021-05-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(214, 733, '2600122', 2, 2, 19, NULL, 'FRONT DESK AGENT', NULL, '6', 1, '2025-07-14 08:33:08', '2021-05-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(215, 734, '2600123', 2, 2, 21, 5, 'FOOperational & BEVERAGE MANAGER', NULL, '3', 1, '2025-07-14 08:33:09', '2021-06-08 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(216, 735, '2600124', 2, 2, 19, 5, 'DUTY  MANAGER', NULL, '4', 1, '2025-07-14 08:33:09', '2021-06-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(217, 736, '2600129', 2, 2, 21, 9, 'BAR SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:09', '2021-12-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(218, 737, '2600135', 2, 2, 19, NULL, 'FRONT DESK AGENT', NULL, '6', 1, '2025-07-14 08:33:09', '2022-07-06 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(219, 738, '2600137', 2, 2, 18, 12, 'PR MARCOM HOTEL FOREMAN', NULL, '5', 1, '2025-07-14 08:33:09', '2023-03-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(220, 739, '2600138', 2, 2, 21, 9, 'THE SUROSOWAN RESTAURANT SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:09', '2023-04-09 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(221, 740, '2600139', 2, 2, 18, NULL, 'SALES REPRESENTATIVE HOTEL', NULL, '5', 1, '2025-07-14 08:33:09', '2023-04-04 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(222, 741, '2600141', 2, 2, 21, NULL, 'THE KAIBON WAITER/SS', NULL, '6', 1, '2025-07-14 08:33:09', '2023-04-04 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(223, 742, '2600144', 2, 2, 22, NULL, 'EXECUTIVE CHEF', NULL, '3', 1, '2025-07-14 08:33:09', '2023-09-10 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(224, 743, '2600145', 2, 2, 20, NULL, 'ROOM & FLOOR ATTENDANT', NULL, '6', 1, '2025-07-14 08:33:09', '2023-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(225, 744, '2600146', 2, 2, 23, NULL, 'OPERATIONAL TECHNICIAN', NULL, '6', 1, '2025-07-14 08:33:09', '2023-11-14 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(226, 745, '2600147', 2, 2, 22, NULL, 'THE SUROSOWAN RESTAURANT SOUS CHEF', NULL, '4', 1, '2025-07-14 08:33:09', '2024-01-02 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(227, 746, '2600148', 2, 2, 22, NULL, 'CDP THE KAIBON RESTAURANT', NULL, '5', 1, '2025-07-14 08:33:09', '2024-06-09 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(228, 747, '2600149', 2, NULL, 7, 9, 'SECURITY SECTION COMMERCIAL SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:09', '2024-08-04 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(229, 748, '2600150', 2, 1, 17, NULL, 'OPERATIONAL SUPPORT GOLF', NULL, '6', 1, '2025-07-14 08:33:09', '2024-08-11 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(230, 749, '2600151', 2, 1, 17, NULL, 'OPERATIONAL SUPPORT GOLF', NULL, '6', 1, '2025-07-14 08:33:09', '2024-08-13 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(231, 750, '2600152', 2, 1, 17, NULL, 'OPERATIONAL SUPPORT GOLF', NULL, '6', 1, '2025-07-14 08:33:09', '2024-08-11 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(232, 751, '2600153', 2, 2, 21, NULL, 'BARISTA', NULL, '6', 1, '2025-07-14 08:33:09', '2024-08-15 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(233, 752, '2600154', 2, 2, 19, NULL, 'FRONT DESK AGENT', NULL, '6', 1, '2025-07-14 08:33:10', '2024-08-15 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(234, 753, '2600155', 2, 2, 22, NULL, 'COOK THE SUROSOWAN RESTAURANT', NULL, '6', 1, '2025-07-14 08:33:10', '2024-08-15 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(235, 754, '2600156', 2, 2, 22, NULL, 'COOK THE SUROSOWAN RESTAURANT', NULL, '6', 1, '2025-07-14 08:33:10', '2024-08-15 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(236, 755, '2600157', 2, 2, 22, NULL, 'CDP THE SUROSOWAN RESTAURANT', NULL, '5', 1, '2025-07-14 08:33:10', '2024-08-18 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(237, 756, '2600158', 2, 2, 22, 9, 'THE KAIBON RESTAURANT SUPERVISOR', NULL, '5', 1, '2025-07-14 08:33:10', '2024-08-25 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(238, 757, '2600159', 2, 2, 22, NULL, 'PASTRY CHEF', NULL, '4', 1, '2025-07-14 08:33:10', '2025-04-14 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(239, 758, '2600160', 2, 2, 18, NULL, 'SALES MANAGEMENT HOTEL', NULL, '4', 1, '2025-07-14 08:33:10', '2025-04-15 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(240, 759, '2600161', 2, 2, 22, NULL, 'THE KAIBON RESTAURANT SOUS CHEF', NULL, '4', 1, '2025-07-14 08:33:10', '2025-05-04 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(241, 760, '2900004', 2, 1, 16, NULL, 'SALES AGENT', NULL, '6', 1, '2025-07-14 08:33:10', '2021-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(242, 761, '2900005', 2, 1, 16, NULL, 'SALES COORDINATOR', NULL, '5', 1, '2025-07-14 08:33:10', '2021-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(243, 762, '2900010', 2, 1, 16, NULL, 'SALES AGENT', NULL, '6', 1, '2025-07-14 08:33:10', '2022-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(244, 763, '2900012', 1, NULL, 4, NULL, 'STRATEGIC BUSINESS INITIATIVE GROUP', NULL, '2', 1, '2025-07-14 08:33:10', '2022-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(245, 764, '2900013', 2, 2, 18, NULL, 'SALES REPRESENTATIVE HOTEL', NULL, '5', 1, '2025-07-14 08:33:10', '2022-11-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(246, 765, '2900014', 2, 1, 16, 12, 'OPERATION & SERVICE AREA FOREMAN', NULL, '5', 1, '2025-07-14 08:33:10', '2023-02-28 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(247, 766, '2900016', 1, NULL, 2, 11, 'LEGAL OFFICER', NULL, '4', 1, '2025-07-14 08:33:10', '2023-03-14 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(248, 767, '2900017', NULL, NULL, NULL, 2, 'ASSISTANT TO HC & FINANCE DIRECTOR', NULL, '4', 1, '2025-07-14 08:33:10', '2023-07-12 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(249, 768, '2900018', 2, 1, 16, NULL, 'SALES AGENT', NULL, '6', 1, '2025-07-14 08:33:10', '2023-08-13 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(250, 769, '2900020', 3, NULL, 8, 12, 'FUNDING & COLLECTION FOREMAN', NULL, '5', 1, '2025-07-14 08:33:10', '2023-08-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(251, 770, '2900023', 3, NULL, 8, 9, 'TAX, INSURANCE & INVOICING SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:10', '2023-10-15 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(252, 771, '2900024', 3, NULL, 8, 9, 'FUNDING & COLLECTION SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:11', '2023-11-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(253, 772, '2900026', 2, NULL, 7, 11, 'SAFETY, HEALTH & ENVIRONMENT OFFICER', NULL, '4', 1, '2025-07-14 08:33:11', '2024-05-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(254, 773, '2900027', 2, NULL, 7, 11, 'SAFETY, HEALTH & ENVIRONMENT OFFICER', NULL, '4', 1, '2025-07-14 08:33:11', '2024-05-01 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(255, 774, '2900028', NULL, NULL, NULL, 11, 'BUSINESS DEVELOPMENT OFFICER', NULL, '4', 1, '2025-07-14 08:33:11', '2024-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(256, 775, '2900029', 3, NULL, 8, 12, 'FUNDING & COLLECTION FOREMAN', NULL, '5', 1, '2025-07-14 08:33:11', '2024-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(257, 776, '2900030', 3, NULL, 11, 14, 'INFORMATION TECHNOLOGY JUNIOR OFFICER', NULL, '5', 1, '2025-07-14 08:33:11', '2024-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(258, 777, '2900031', 3, NULL, 9, 9, 'FINANCIAL ACCOUNTING SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:11', '2024-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(259, 778, '2900032', 2, 1, 14, 11, 'ESTATE MANAGEMENT AREA  OFFICER', NULL, '4', 1, '2025-07-14 08:33:11', '2024-07-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(260, 779, '2900033', 2, 1, 16, NULL, 'SALES AGENT', NULL, '6', 1, '2025-07-14 08:33:11', '2024-09-30 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(261, 780, '2900034', 2, 1, 17, NULL, 'MECH./ELEC./CIVIL MAINT. GROUP', NULL, '5', 1, '2025-07-14 08:33:11', '2024-10-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(262, 781, '2900035', NULL, NULL, NULL, NULL, 'ADMINISTRATION SUPPORT RE', NULL, '6', 1, '2025-07-14 08:33:11', '2024-12-11 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(263, 782, '2900036', 2, 1, 17, 11, 'SALES & MARKETING GOLF & SC OFFICER', NULL, '4', 1, '2025-07-14 08:33:11', '2025-01-31 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(264, 783, '2900037', 2, 1, 17, 9, 'COURSE MAINTENANCE SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:11', '2025-02-04 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(265, 784, '2900038', 2, 1, 17, 9, 'COURSE MAINTENANCE SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:11', '2025-02-04 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(266, 785, '2900039', 2, 1, 17, 9, 'CLUB MANAGEMENT SUPERVISOR', NULL, '4', 1, '2025-07-14 08:33:11', '2025-04-07 17:00:00', '2025-07-24 05:32:42', '2025-07-24 06:06:15'),
+(267, 71, NULL, 2, NULL, 19, 5, NULL, NULL, NULL, 1, NULL, '2025-07-24 08:25:07', '2025-07-24 08:25:07', '2025-07-24 08:25:07'),
+(268, 72, NULL, 2, 2, 20, 5, NULL, NULL, NULL, 1, NULL, '2025-07-24 08:26:13', '2025-07-24 08:26:13', '2025-07-24 08:26:13'),
+(269, 786, NULL, 3, NULL, 12, 11, NULL, NULL, NULL, 0, NULL, '2025-07-23 17:00:00', '2025-07-24 08:29:27', '2025-07-24 08:29:59'),
+(270, 786, NULL, 3, NULL, 12, 6, NULL, NULL, NULL, 1, NULL, '2025-07-24 08:29:59', '2025-07-24 08:29:59', '2025-07-24 08:29:59');
 
 --
 -- Indexes for dumped tables
@@ -899,6 +1525,22 @@ ALTER TABLE `classifications`
 ALTER TABLE `configs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `configs_code_unique` (`code`);
+
+--
+-- Indexes for table `daftar_hadir_pelatihan`
+--
+ALTER TABLE `daftar_hadir_pelatihan`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `daftar_hadir_pelatihan_unique` (`pelatihan_id`,`user_id`,`date`),
+  ADD KEY `daftar_hadir_pelatihan_user_id_foreign` (`user_id`);
+
+--
+-- Indexes for table `daftar_hadir_pelatihan_status`
+--
+ALTER TABLE `daftar_hadir_pelatihan_status`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `daftar_hadir_pelatihan_status_pelatihan_id_date_unique` (`pelatihan_id`,`date`),
+  ADD KEY `daftar_hadir_pelatihan_status_submitted_by_foreign` (`submitted_by`);
 
 --
 -- Indexes for table `departments`
@@ -932,6 +1574,53 @@ ALTER TABLE `divisions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `divisions_name_unique` (`name`),
   ADD KEY `divisions_directorate_id_foreign` (`directorate_id`);
+
+--
+-- Indexes for table `evaluasi_level_1`
+--
+ALTER TABLE `evaluasi_level_1`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval1_pelatihan` (`pelatihan_id`),
+  ADD KEY `fk_eval1_user` (`user_id`);
+
+--
+-- Indexes for table `evaluasi_level_1s`
+--
+ALTER TABLE `evaluasi_level_1s`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pelatihan_id` (`pelatihan_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `superior_id` (`superior_id`);
+
+--
+-- Indexes for table `evaluasi_level_1_instrukturs`
+--
+ALTER TABLE `evaluasi_level_1_instrukturs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `presenter_id` (`presenter_id`),
+  ADD KEY `fk_eval1_instrukturs` (`evaluasi_level_1_id`);
+
+--
+-- Indexes for table `evaluasi_level_1_materis`
+--
+ALTER TABLE `evaluasi_level_1_materis`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval1_materis` (`evaluasi_level_1_id`);
+
+--
+-- Indexes for table `evaluasi_level_1_penyelenggaraans`
+--
+ALTER TABLE `evaluasi_level_1_penyelenggaraans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval1_penyelenggeraans` (`evaluasi_level_1_id`);
+
+--
+-- Indexes for table `evaluasi_level_1_saranas`
+--
+ALTER TABLE `evaluasi_level_1_saranas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval1_saranas` (`evaluasi_level_1_id`) USING BTREE;
 
 --
 -- Indexes for table `failed_jobs`
@@ -975,6 +1664,16 @@ ALTER TABLE `password_resets`
   ADD KEY `password_resets_email_index` (`email`);
 
 --
+-- Indexes for table `pelatihan_presenters`
+--
+ALTER TABLE `pelatihan_presenters`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pelatihan_presenters_pelatihan_id_foreign` (`pelatihan_id`),
+  ADD KEY `pelatihan_presenters_presenter_id_foreign` (`presenter_id`),
+  ADD KEY `pelatihan_presenters_user_id_foreign` (`user_id`),
+  ADD KEY `pelatihan_presenters_submitted_by_foreign` (`submitted_by`);
+
+--
 -- Indexes for table `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
@@ -983,10 +1682,17 @@ ALTER TABLE `personal_access_tokens`
   ADD KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`);
 
 --
+-- Indexes for table `presenters`
+--
+ALTER TABLE `presenters`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `signature_and_parafs`
 --
 ALTER TABLE `signature_and_parafs`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_signature_user` (`user_id`);
 
 --
 -- Indexes for table `surat_pengajuan_pelatihans`
@@ -1022,7 +1728,9 @@ ALTER TABLE `surat_tugas_pelatihans`
 -- Indexes for table `surat_tugas_pelatihan_signatures_and_parafs`
 --
 ALTER TABLE `surat_tugas_pelatihan_signatures_and_parafs`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_surat_tugas_id` (`surat_tugas_id`),
+  ADD KEY `fk_user_id` (`user_id`);
 
 --
 -- Indexes for table `training_participants`
@@ -1043,6 +1751,30 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `users_email_unique` (`email`),
   ADD KEY `users_directorate_id_foreign` (`directorate_id`),
   ADD KEY `users_division_id_foreign` (`division_id`);
+
+--
+-- Indexes for table `user_histories`
+--
+ALTER TABLE `user_histories`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_histories_user_id_foreign` (`user_id`),
+  ADD KEY `user_histories_jabatan_id_foreign` (`jabatan_id`),
+  ADD KEY `user_histories_department_id_foreign` (`department_id`),
+  ADD KEY `user_histories_division_id_foreign` (`division_id`),
+  ADD KEY `user_histories_directorate_id_foreign` (`directorate_id`),
+  ADD KEY `user_histories_changed_by_foreign` (`changed_by`);
+
+--
+-- Indexes for table `user_position_histories`
+--
+ALTER TABLE `user_position_histories`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_position_histories_user_id_foreign` (`user_id`),
+  ADD KEY `user_position_histories_directorate_id_foreign` (`directorate_id`),
+  ADD KEY `user_position_histories_division_id_foreign` (`division_id`),
+  ADD KEY `user_position_histories_department_id_foreign` (`department_id`),
+  ADD KEY `user_position_histories_jabatan_id_foreign` (`jabatan_id`),
+  ADD KEY `user_position_histories_superior_id_foreign` (`superior_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -1067,6 +1799,18 @@ ALTER TABLE `configs`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT for table `daftar_hadir_pelatihan`
+--
+ALTER TABLE `daftar_hadir_pelatihan`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT for table `daftar_hadir_pelatihan_status`
+--
+ALTER TABLE `daftar_hadir_pelatihan_status`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
@@ -1089,6 +1833,42 @@ ALTER TABLE `dispositions`
 --
 ALTER TABLE `divisions`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_1`
+--
+ALTER TABLE `evaluasi_level_1`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_1s`
+--
+ALTER TABLE `evaluasi_level_1s`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_1_instrukturs`
+--
+ALTER TABLE `evaluasi_level_1_instrukturs`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_1_materis`
+--
+ALTER TABLE `evaluasi_level_1_materis`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_1_penyelenggaraans`
+--
+ALTER TABLE `evaluasi_level_1_penyelenggaraans`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_1_saranas`
+--
+ALTER TABLE `evaluasi_level_1_saranas`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -1118,7 +1898,13 @@ ALTER TABLE `letter_statuses`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+
+--
+-- AUTO_INCREMENT for table `pelatihan_presenters`
+--
+ALTER TABLE `pelatihan_presenters`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
@@ -1127,10 +1913,16 @@ ALTER TABLE `personal_access_tokens`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `presenters`
+--
+ALTER TABLE `presenters`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `signature_and_parafs`
 --
 ALTER TABLE `signature_and_parafs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `surat_pengajuan_pelatihans`
@@ -1160,7 +1952,7 @@ ALTER TABLE `surat_tugas_pelatihans`
 -- AUTO_INCREMENT for table `surat_tugas_pelatihan_signatures_and_parafs`
 --
 ALTER TABLE `surat_tugas_pelatihan_signatures_and_parafs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `training_participants`
@@ -1172,7 +1964,19 @@ ALTER TABLE `training_participants`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=786;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=787;
+
+--
+-- AUTO_INCREMENT for table `user_histories`
+--
+ALTER TABLE `user_histories`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `user_position_histories`
+--
+ALTER TABLE `user_position_histories`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=271;
 
 --
 -- Constraints for dumped tables
@@ -1184,6 +1988,20 @@ ALTER TABLE `users`
 ALTER TABLE `attachments`
   ADD CONSTRAINT `attachments_letter_id_foreign` FOREIGN KEY (`letter_id`) REFERENCES `letters` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `attachments_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `daftar_hadir_pelatihan`
+--
+ALTER TABLE `daftar_hadir_pelatihan`
+  ADD CONSTRAINT `daftar_hadir_pelatihan_pelatihan_id_foreign` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `daftar_hadir_pelatihan_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `daftar_hadir_pelatihan_status`
+--
+ALTER TABLE `daftar_hadir_pelatihan_status`
+  ADD CONSTRAINT `daftar_hadir_pelatihan_status_pelatihan_id_foreign` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `daftar_hadir_pelatihan_status_submitted_by_foreign` FOREIGN KEY (`submitted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `departments`
@@ -1207,11 +2025,67 @@ ALTER TABLE `divisions`
   ADD CONSTRAINT `divisions_directorate_id_foreign` FOREIGN KEY (`directorate_id`) REFERENCES `directorates` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `evaluasi_level_1`
+--
+ALTER TABLE `evaluasi_level_1`
+  ADD CONSTRAINT `fk_eval1_pelatihan` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval1_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `evaluasi_level_1s`
+--
+ALTER TABLE `evaluasi_level_1s`
+  ADD CONSTRAINT `evaluasi_level_1s_ibfk_1` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `evaluasi_level_1s_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `evaluasi_level_1s_ibfk_3` FOREIGN KEY (`superior_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `evaluasi_level_1_instrukturs`
+--
+ALTER TABLE `evaluasi_level_1_instrukturs`
+  ADD CONSTRAINT `evaluasi_level_1_instrukturs_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `evaluasi_level_1_instrukturs_ibfk_3` FOREIGN KEY (`presenter_id`) REFERENCES `presenters` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_eval1_instrukturs` FOREIGN KEY (`evaluasi_level_1_id`) REFERENCES `evaluasi_level_1s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `evaluasi_level_1_materis`
+--
+ALTER TABLE `evaluasi_level_1_materis`
+  ADD CONSTRAINT `fk_eval1_materis` FOREIGN KEY (`evaluasi_level_1_id`) REFERENCES `evaluasi_level_1s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `evaluasi_level_1_penyelenggaraans`
+--
+ALTER TABLE `evaluasi_level_1_penyelenggaraans`
+  ADD CONSTRAINT `fk_eval1_penyelenggeraans` FOREIGN KEY (`evaluasi_level_1_id`) REFERENCES `evaluasi_level_1s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `evaluasi_level_1_saranas`
+--
+ALTER TABLE `evaluasi_level_1_saranas`
+  ADD CONSTRAINT `fk_eval1_saranas` FOREIGN KEY (`evaluasi_level_1_id`) REFERENCES `evaluasi_level_1s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `letters`
 --
 ALTER TABLE `letters`
   ADD CONSTRAINT `letters_classification_code_foreign` FOREIGN KEY (`classification_code`) REFERENCES `classifications` (`code`),
   ADD CONSTRAINT `letters_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `pelatihan_presenters`
+--
+ALTER TABLE `pelatihan_presenters`
+  ADD CONSTRAINT `pelatihan_presenters_pelatihan_id_foreign` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `pelatihan_presenters_presenter_id_foreign` FOREIGN KEY (`presenter_id`) REFERENCES `presenters` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `pelatihan_presenters_submitted_by_foreign` FOREIGN KEY (`submitted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `pelatihan_presenters_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `signature_and_parafs`
+--
+ALTER TABLE `signature_and_parafs`
+  ADD CONSTRAINT `fk_signature_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `surat_pengajuan_pelatihans`
@@ -1234,6 +2108,13 @@ ALTER TABLE `surat_tugas_pelatihans`
   ADD CONSTRAINT `surat_tugas_pelatihans_pelatihan_id_foreign` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `surat_tugas_pelatihan_signatures_and_parafs`
+--
+ALTER TABLE `surat_tugas_pelatihan_signatures_and_parafs`
+  ADD CONSTRAINT `fk_surat_tugas_id` FOREIGN KEY (`surat_tugas_id`) REFERENCES `surat_tugas_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `training_participants`
 --
 ALTER TABLE `training_participants`
@@ -1249,6 +2130,28 @@ ALTER TABLE `training_participants`
 ALTER TABLE `users`
   ADD CONSTRAINT `users_directorate_id_foreign` FOREIGN KEY (`directorate_id`) REFERENCES `directorates` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `users_division_id_foreign` FOREIGN KEY (`division_id`) REFERENCES `divisions` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `user_histories`
+--
+ALTER TABLE `user_histories`
+  ADD CONSTRAINT `user_histories_changed_by_foreign` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_histories_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_histories_directorate_id_foreign` FOREIGN KEY (`directorate_id`) REFERENCES `directorates` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_histories_division_id_foreign` FOREIGN KEY (`division_id`) REFERENCES `divisions` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_histories_jabatan_id_foreign` FOREIGN KEY (`jabatan_id`) REFERENCES `jabatans` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_histories_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `user_position_histories`
+--
+ALTER TABLE `user_position_histories`
+  ADD CONSTRAINT `user_position_histories_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_position_histories_directorate_id_foreign` FOREIGN KEY (`directorate_id`) REFERENCES `directorates` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_position_histories_division_id_foreign` FOREIGN KEY (`division_id`) REFERENCES `divisions` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_position_histories_jabatan_id_foreign` FOREIGN KEY (`jabatan_id`) REFERENCES `jabatans` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_position_histories_superior_id_foreign` FOREIGN KEY (`superior_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_position_histories_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -6,7 +6,7 @@
                 document.write(new Date().getFullYear());
             </script>
             , {{ __('footer.made_by') }}
-            <a href="https://github.com/404NotFoundIndonesia" target="_blank" class="footer-link fw-bolder">404 Not Found Indonesia</a>
+            <a href="https://github.com/KyandraAtharizqi/KSP-LMS" target="_blank" class="footer-link fw-bolder">Rafi Kyandra Atharizqi & Tria Oktaviana</a>
         </div>
     </div>
 </footer>

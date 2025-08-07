@@ -80,6 +80,21 @@
             </ul>
         </li>
 
+        <!-- 👇 Knowledge Sharing Menu -->
+        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('Knowledge Sharing.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon bx bx-book-open"></i>
+                <div data-i18n="Knowledge Sharing">Knowledge Sharing</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.notadinas.index') ? 'active' : '' }}">
+                    <a href="{{ route('knowledge.notadinas.index') }}" class="menu-link">
+                        <div data-i18n="Nota Dinas">Nota Dinas</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Other Menu -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">{{ __('menu.header.other_menu') }}</span>
