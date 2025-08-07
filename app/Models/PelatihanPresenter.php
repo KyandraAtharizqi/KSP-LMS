@@ -41,4 +41,16 @@ class PelatihanPresenter extends Model
         return $this->belongsTo(User::class, 'submitted_by');
     }
 
+
+    public function getPresenterNameAttribute()
+    {
+        if ($this->type === 'internal' && $this->user) {
+            return $this->user->name;
+        } elseif ($this->type === 'external' && $this->presenter) {
+            return $this->presenter->name;
+        }
+        return 'Unknown Presenter';
+    }
+
 }
+

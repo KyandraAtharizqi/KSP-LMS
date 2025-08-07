@@ -9,6 +9,35 @@
 </div>
 
 <div class="page-content">
+    {{-- Debug Information - Remove this in production --}}
+    @if(config('app.debug'))
+        <div class="alert alert-info">
+            <strong>Debug Info:</strong><br>
+            Presenters count: {{ count($presenters) }}<br>
+            Registration ID: {{ $registration_id ?? 'Not set' }}<br>
+            User ID: {{ auth()->id() }}
+        </div>
+    @endif
+
+    {{-- Display validation errors --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <h5>Validation Errors:</h5>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Display success message --}}
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <div class="card mb-3">
         <div class="card-header">
             <h5 class="mb-0">Informasi Pelatihan</h5>
@@ -68,10 +97,20 @@
             <div class="card-body">
                 <dl class="row mb-4">
                     <dt class="col-sm-3">Ringkasan Isi Materi</dt>
-                    <dd class="col-sm-9"><textarea name="ringkasan_isi_materi" class="form-control" rows="3" required></textarea></dd>
+                    <dd class="col-sm-9">
+                        <textarea name="ringkasan_isi_materi" class="form-control @error('ringkasan_isi_materi') is-invalid @enderror" rows="3" required>{{ old('ringkasan_isi_materi') }}</textarea>
+                        @error('ringkasan_isi_materi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </dd>
 
                     <dt class="col-sm-3">Ide/Saran untuk Pengembangan</dt>
-                    <dd class="col-sm-9"><textarea name="ide_saran_pengembangan" class="form-control" rows="3" required></textarea></dd>
+                    <dd class="col-sm-9">
+                        <textarea name="ide_saran_pengembangan" class="form-control @error('ide_saran_pengembangan') is-invalid @enderror" rows="3" required>{{ old('ide_saran_pengembangan') }}</textarea>
+                        @error('ide_saran_pengembangan')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </dd>
                 </dl>
 
                 <hr class="my-4">
@@ -90,7 +129,14 @@
                                 <tr>
                                     <td class="text-center">{{ $i + 1 }}</td>
                                     <td>{{ $label }}</td>
-                                    <td><input type="number" class="form-control" name="{{ $materiFields[$i] }}" min="1" max="5" required></td>
+                                    <td>
+                                        <input type="number" class="form-control @error($materiFields[$i]) is-invalid @enderror" 
+                                               name="{{ $materiFields[$i] }}" min="1" max="5" 
+                                               value="{{ old($materiFields[$i]) }}" required>
+                                        @error($materiFields[$i])
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -111,7 +157,14 @@
                                 <tr>
                                     <td class="text-center">{{ $i + 1 }}</td>
                                     <td>{{ $label }}</td>
-                                    <td><input type="number" class="form-control" name="penyelenggaraan_{{ $penyelenggaraanFields[$i] }}" min="1" max="5" required></td>
+                                    <td>
+                                        <input type="number" class="form-control @error('penyelenggaraan_'.$penyelenggaraanFields[$i]) is-invalid @enderror" 
+                                               name="penyelenggaraan_{{ $penyelenggaraanFields[$i] }}" min="1" max="5" 
+                                               value="{{ old('penyelenggaraan_'.$penyelenggaraanFields[$i]) }}" required>
+                                        @error('penyelenggaraan_'.$penyelenggaraanFields[$i])
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -132,7 +185,14 @@
                                 <tr>
                                     <td class="text-center">{{ $i + 1 }}</td>
                                     <td>{{ $label }}</td>
-                                    <td><input type="number" class="form-control" name="sarana_{{ $saranaFields[$i] }}" min="1" max="5" required></td>
+                                    <td>
+                                        <input type="number" class="form-control @error('sarana_'.$saranaFields[$i]) is-invalid @enderror" 
+                                               name="sarana_{{ $saranaFields[$i] }}" min="1" max="5" 
+                                               value="{{ old('sarana_'.$saranaFields[$i]) }}" required>
+                                        @error('sarana_'.$saranaFields[$i])
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -142,34 +202,84 @@
                 {{-- D. Instruktur --}}
                 <div class="mb-4">
                     <h5>D. Kemampuan Instruktur</h5>
-                    <table class="table table-bordered table-striped">
-                        <thead><tr>
-                            <th>No</th><th>Nama</th><th>Penguasaan</th><th>Teknik</th><th>Sistematika</th><th>Waktu</th><th>Proses</th>
-                        </tr></thead>
-                        <tbody>
-                            @foreach ($presenters as $i => $presenter)
-                                <tr>
-                                    <td>{{ $i + 1 }}</td>
-                                    <td>
-                                        <input type="hidden" name="instrukturs[{{ $i }}][type]" value="external">
-                                        <input type="hidden" name="instrukturs[{{ $i }}][presenter_id]" value="{{ $presenter->id }}">
-                                        <input type="text" value="{{ $presenter->name }}" class="form-control" readonly>
-                                    </td>
-                                    <td><input type="number" name="instrukturs[{{ $i }}][instruktur_penguasaan]" class="form-control" min="1" max="5" required></td>
-                                    <td><input type="number" name="instrukturs[{{ $i }}][instruktur_teknik]" class="form-control" min="1" max="5" required></td>
-                                    <td><input type="number" name="instrukturs[{{ $i }}][instruktur_sistematika]" class="form-control" min="1" max="5" required></td>
-                                    <td><input type="number" name="instrukturs[{{ $i }}][instruktur_waktu]" class="form-control" min="1" max="5" required></td>
-                                    <td><input type="number" name="instrukturs[{{ $i }}][instruktur_proses]" class="form-control" min="1" max="5" required></td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    @if(count($presenters) > 0)
+                        <table class="table table-bordered table-striped">
+                            <thead><tr>
+                                <th>No</th><th>Nama</th><th>Penguasaan</th><th>Teknik</th><th>Sistematika</th><th>Waktu</th><th>Proses</th>
+                            </tr></thead>
+                            <tbody>
+                                @foreach ($presenters as $i => $presenter)
+                                    <tr>
+                                        <td>{{ $i + 1 }}</td>
+                                        <td>
+                                            <input type="hidden" name="instrukturs[{{ $i }}][type]" value="{{ $presenter->type }}">
+                                            @if($presenter->type === 'internal')
+                                                <input type="hidden" name="instrukturs[{{ $i }}][user_id]" value="{{ $presenter->user_id }}">
+                                            @else
+                                                <input type="hidden" name="instrukturs[{{ $i }}][presenter_id]" value="{{ $presenter->presenter_id }}">
+                                            @endif
+                                            <input type="text" value="{{ $presenter->presenter_name }}" class="form-control" readonly>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="instrukturs[{{ $i }}][instruktur_penguasaan]" 
+                                                   class="form-control @error('instrukturs.'.$i.'.instruktur_penguasaan') is-invalid @enderror" 
+                                                   min="1" max="5" value="{{ old('instrukturs.'.$i.'.instruktur_penguasaan') }}" required>
+                                            @error('instrukturs.'.$i.'.instruktur_penguasaan')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input type="number" name="instrukturs[{{ $i }}][instruktur_teknik]" 
+                                                   class="form-control @error('instrukturs.'.$i.'.instruktur_teknik') is-invalid @enderror" 
+                                                   min="1" max="5" value="{{ old('instrukturs.'.$i.'.instruktur_teknik') }}" required>
+                                            @error('instrukturs.'.$i.'.instruktur_teknik')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input type="number" name="instrukturs[{{ $i }}][instruktur_sistematika]" 
+                                                   class="form-control @error('instrukturs.'.$i.'.instruktur_sistematika') is-invalid @enderror" 
+                                                   min="1" max="5" value="{{ old('instrukturs.'.$i.'.instruktur_sistematika') }}" required>
+                                            @error('instrukturs.'.$i.'.instruktur_sistematika')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input type="number" name="instrukturs[{{ $i }}][instruktur_waktu]" 
+                                                   class="form-control @error('instrukturs.'.$i.'.instruktur_waktu') is-invalid @enderror" 
+                                                   min="1" max="5" value="{{ old('instrukturs.'.$i.'.instruktur_waktu') }}" required>
+                                            @error('instrukturs.'.$i.'.instruktur_waktu')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input type="number" name="instrukturs[{{ $i }}][instruktur_proses]" 
+                                                   class="form-control @error('instrukturs.'.$i.'.instruktur_proses') is-invalid @enderror" 
+                                                   min="1" max="5" value="{{ old('instrukturs.'.$i.'.instruktur_proses') }}" required>
+                                            @error('instrukturs.'.$i.'.instruktur_proses')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @else
+                        <div class="alert alert-warning">
+                            No presenters/instructors found for this training. Please contact administrator.
+                        </div>
+                    @endif
                 </div>
 
                 <dl class="row mb-0">
                     <dt class="col-sm-3">Komplain / Masukan Lain</dt>
                     <dd class="col-sm-9">
-                        <textarea name="komplain_saran_masukan" rows="3" class="form-control" required></textarea>
+                        <textarea name="komplain_saran_masukan" rows="3" 
+                                  class="form-control @error('komplain_saran_masukan') is-invalid @enderror" 
+                                  required>{{ old('komplain_saran_masukan') }}</textarea>
+                        @error('komplain_saran_masukan')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </dd>
                 </dl>
 

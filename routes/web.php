@@ -239,7 +239,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{pelatihan}/create', [EvaluasiLevel1Controller::class, 'create'])->name('create');
             
             // Store the submitted evaluation
-            Route::post('/', [EvaluasiLevel1Controller::class, 'store'])->name('store');
+            Route::post('/{pelatihan}', [EvaluasiLevel1Controller::class, 'store'])->name('store');
             
             // Show a filled evaluation (optional)
             Route::get('/{pelatihan}/show', [EvaluasiLevel1Controller::class, 'show'])->name('show');
