@@ -223,10 +223,9 @@
                     <div class="participants-list">
                         @foreach($surat->participants as $p)
                             <div class="participant-item">
-                                {{ $p->user->name }}
-                                ({{ $p->user->registration_id }}) -
-                                {{ $p->user->jabatan->name ?? '-' }} /
-                                {{ $p->user->department->name ?? '-' }}
+                                {{ $p->user->name ?? '-' }}
+                                ({{ $p->registration_id ?? '-' }}) -
+                                {{ $p->jabatan_full ?? '-' }}
                             </div>
                         @endforeach
                     </div>
