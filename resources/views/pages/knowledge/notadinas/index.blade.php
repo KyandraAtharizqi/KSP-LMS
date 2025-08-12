@@ -38,10 +38,10 @@
                                 <td>{{ $nota->dari }}</td>
                                 <td>{{ $nota->kepada }}</td>
                                 <td>
-                                    <a href="{{ route('knowledge.notadinas.show', $nota->id) }}" class="btn btn-sm btn-info me-1 my-1">Lihat</a>
-                                    <a href="{{ route('knowledge.notadinas.edit', $nota->id) }}" class="btn btn-sm btn-warning me-1 my-1">Edit</a>
+                                    <a href="{{ route('knowledge.notadinas.show', $nota->id) }}" class="btn btn-sm btn-info me-1 my-2">Lihat</a>
+                                    <a href="{{ route('knowledge.notadinas.edit', $nota->id) }}" class="btn btn-sm btn-warning me-1 my-2">Edit</a>
 
-                                    <form action="{{ route('knowledge.notadinas.destroy', $nota->id) }}" method="POST" class="d-inline me-1 my-1">
+                                    <form action="{{ route('knowledge.notadinas.destroy', $nota->id) }}" method="POST" class="d-inline me-1 my-2">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-sm btn-danger" onclick="return confirm('Hapus nota ini?')">Hapus</button>

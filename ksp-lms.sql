@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 07, 2025 at 01:18 AM
+-- Generation Time: Aug 12, 2025 at 02:14 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -92,37 +92,43 @@ INSERT INTO `configs` (`id`, `code`, `value`, `created_at`, `updated_at`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `daftar_hadir_knowledge`
+--
+
+CREATE TABLE `daftar_hadir_knowledge` (
+  `id` int UNSIGNED NOT NULL,
+  `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `pemateri` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tanggal` date NOT NULL,
+  `peserta` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `daftar_hadir_pelatihan`
 --
 
 CREATE TABLE `daftar_hadir_pelatihan` (
   `id` bigint UNSIGNED NOT NULL,
   `pelatihan_id` bigint UNSIGNED NOT NULL,
-  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` bigint UNSIGNED DEFAULT NULL,
-  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date` date NOT NULL,
   `check_in_time` time DEFAULT NULL,
   `check_in_timestamp` timestamp NULL DEFAULT NULL,
-  `check_in_photo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `check_in_photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `check_out_time` time DEFAULT NULL,
   `check_out_timestamp` timestamp NULL DEFAULT NULL,
-  `check_out_photo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `note` text COLLATE utf8mb4_unicode_ci,
-  `status` enum('hadir','izin','sakit','absen') COLLATE utf8mb4_unicode_ci DEFAULT 'absen',
+  `check_out_photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `status` enum('hadir','izin','sakit','absen') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'absen',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `daftar_hadir_pelatihan`
---
-
-INSERT INTO `daftar_hadir_pelatihan` (`id`, `pelatihan_id`, `kode_pelatihan`, `user_id`, `registration_id`, `date`, `check_in_time`, `check_in_timestamp`, `check_in_photo`, `check_out_time`, `check_out_timestamp`, `check_out_photo`, `note`, `status`, `created_at`, `updated_at`) VALUES
-(15, 2, NULL, 71, 'MAN019', '2025-07-10', '08:00:00', '2025-07-21 06:56:00', 'https://drive.google.com/open?id=18uoqmKn0lRqTAaKUTLTsWYpAqmvvQrIU', '16:00:00', '2025-07-21 06:57:00', 'https://drive.google.com/open?id=1_ZGGk9RDXVvlki3gzxakN0y5H6Lki0TC', 'MAN019', 'hadir', '2025-07-23 05:03:17', '2025-07-23 06:00:00'),
-(16, 2, NULL, 72, 'MAN020', '2025-07-10', '08:00:00', '2025-07-21 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-07-21 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'MAN020', 'hadir', '2025-07-23 05:05:33', '2025-07-23 06:00:00'),
-(17, 2, NULL, 71, 'MAN019', '2025-07-11', '08:00:00', '2025-07-21 06:56:00', 'https://drive.google.com/open?id=18uoqmKn0lRqTAaKUTLTsWYpAqmvvQrIU', '16:00:00', '2025-07-21 06:57:00', 'https://drive.google.com/open?id=1_ZGGk9RDXVvlki3gzxakN0y5H6Lki0TC', 'MAN019', 'hadir', '2025-07-23 08:23:55', '2025-07-23 08:39:09'),
-(18, 2, NULL, 72, 'MAN020', '2025-07-11', '08:00:00', '2025-07-21 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-07-21 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'MAN020', 'hadir', '2025-07-23 08:23:55', '2025-07-23 08:39:09');
 
 -- --------------------------------------------------------
 
@@ -140,14 +146,6 @@ CREATE TABLE `daftar_hadir_pelatihan_status` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `daftar_hadir_pelatihan_status`
---
-
-INSERT INTO `daftar_hadir_pelatihan_status` (`id`, `pelatihan_id`, `date`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
-(7, 2, '2025-07-10', 1, '2025-07-31 09:03:54', 1, '2025-07-31 08:25:30', '2025-07-31 09:03:54'),
-(8, 2, '2025-07-11', 1, '2025-08-04 09:19:43', 1, '2025-07-31 08:25:30', '2025-08-04 09:19:43');
 
 -- --------------------------------------------------------
 
@@ -309,14 +307,6 @@ CREATE TABLE `evaluasi_level_1s` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `evaluasi_level_1s`
---
-
-INSERT INTO `evaluasi_level_1s` (`id`, `pelatihan_id`, `user_id`, `registration_id`, `kode_pelatihan`, `nama_pelatihan`, `tanggal_pelaksanaan`, `tempat`, `name`, `department`, `jabatan_full`, `superior_id`, `ringkasan_isi_materi`, `ide_saran_pengembangan`, `komplain_saran_masukan`, `is_submitted`, `created_at`, `updated_at`) VALUES
-(1, 2, 71, 'MAN019', 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-10', 'Jakarta', 'Manager Front Office', 'Front Office', 'Manager', 1, 'wasdasdads', 'dsadsadssadsadad', 'asdadsada', 1, '2025-08-04 09:19:43', '2025-08-06 04:44:18'),
-(2, 2, 72, 'MAN020', 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-10', 'Jakarta', 'Manager Housekeeping', 'Housekeeping', 'Manager', 1, NULL, NULL, NULL, 0, '2025-08-04 09:19:43', '2025-08-04 09:19:43');
-
 -- --------------------------------------------------------
 
 --
@@ -338,15 +328,6 @@ CREATE TABLE `evaluasi_level_1_instrukturs` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `evaluasi_level_1_instrukturs`
---
-
-INSERT INTO `evaluasi_level_1_instrukturs` (`id`, `evaluasi_level_1_id`, `user_id`, `presenter_id`, `type`, `instruktur_penguasaan`, `instruktur_teknik`, `instruktur_sistematika`, `instruktur_waktu`, `instruktur_proses`, `created_at`, `updated_at`) VALUES
-(1, 1, 786, NULL, 'internal', 5, 5, 5, 5, 5, '2025-08-06 04:44:19', '2025-08-06 04:44:19'),
-(2, 1, NULL, 3, 'external', 5, 5, 5, 5, 5, '2025-08-06 04:44:19', '2025-08-06 04:44:19'),
-(3, 1, NULL, 2, 'external', 5, 5, 5, 5, 5, '2025-08-06 04:44:19', '2025-08-06 04:44:19');
-
 -- --------------------------------------------------------
 
 --
@@ -364,13 +345,6 @@ CREATE TABLE `evaluasi_level_1_materis` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `evaluasi_level_1_materis`
---
-
-INSERT INTO `evaluasi_level_1_materis` (`id`, `evaluasi_level_1_id`, `materi_sistematika`, `materi_pemahaman`, `materi_pengetahuan`, `materi_manfaat`, `materi_tujuan`, `created_at`, `updated_at`) VALUES
-(14, 1, '5', '5', '5', '5', '5', '2025-08-06 04:44:19', '2025-08-06 04:44:19');
 
 -- --------------------------------------------------------
 
@@ -390,13 +364,6 @@ CREATE TABLE `evaluasi_level_1_penyelenggaraans` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `evaluasi_level_1_penyelenggaraans`
---
-
-INSERT INTO `evaluasi_level_1_penyelenggaraans` (`id`, `evaluasi_level_1_id`, `penyelenggaraan_pengelolaan`, `penyelenggaraan_jadwal`, `penyelenggaraan_persiapan`, `penyelenggaraan_pelayanan`, `penyelenggaraan_koordinasi`, `created_at`, `updated_at`) VALUES
-(1, 1, '5', '5', '5', '5', '5', '2025-08-06 04:44:19', '2025-08-06 04:44:19');
-
 -- --------------------------------------------------------
 
 --
@@ -414,13 +381,6 @@ CREATE TABLE `evaluasi_level_1_saranas` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `evaluasi_level_1_saranas`
---
-
-INSERT INTO `evaluasi_level_1_saranas` (`id`, `evaluasi_level_1_id`, `sarana_media`, `sarana_kit`, `sarana_kenyamanan`, `sarana_kesesuaian`, `sarana_belajar`, `created_at`, `updated_at`) VALUES
-(1, 1, '5', '5', '5', '5', '5', '2025-08-06 04:44:19', '2025-08-06 04:44:19');
 
 -- --------------------------------------------------------
 
@@ -571,6 +531,34 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `nota_dinas`
+--
+
+CREATE TABLE `nota_dinas` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `kode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `perihal` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pemateri` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tanggal` date NOT NULL,
+  `dari` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kepada` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lampiran` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `nota_dinas`
+--
+
+INSERT INTO `nota_dinas` (`id`, `user_id`, `kode`, `perihal`, `judul`, `pemateri`, `tanggal`, `dari`, `kepada`, `lampiran`, `created_at`, `updated_at`) VALUES
+(9, 552, 'IF/1/2025', 'Kegiatan Knowledge Sharing \"Mastering English Greetings\"', 'Mastering English Greetings', 'Bpk. Purboyo Ananda', '2025-08-07', 'MOKHAMAD  HASIM', 'Jojo Director', 'lampiran_notadinas/ra7uQZB7mQtJoaTjp9qaR8wL1zS7zWc1fvu0yumb.pdf', '2025-08-07 08:01:15', '2025-08-07 08:01:15');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `password_resets`
 --
 
@@ -591,7 +579,7 @@ CREATE TABLE `pelatihan_presenters` (
   `pelatihan_id` bigint UNSIGNED NOT NULL,
   `presenter_id` bigint UNSIGNED DEFAULT NULL,
   `user_id` bigint UNSIGNED DEFAULT NULL,
-  `type` enum('internal','external') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('internal','external') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `date` date NOT NULL,
   `check_in_time` time DEFAULT NULL,
   `check_out_time` time DEFAULT NULL,
@@ -601,15 +589,6 @@ CREATE TABLE `pelatihan_presenters` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `pelatihan_presenters`
---
-
-INSERT INTO `pelatihan_presenters` (`id`, `pelatihan_id`, `presenter_id`, `user_id`, `type`, `date`, `check_in_time`, `check_out_time`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
-(21, 2, NULL, 786, 'internal', '2025-07-10', '08:00:00', '16:00:00', 1, '2025-07-31 15:58:43', 1, '2025-07-31 08:58:02', '2025-07-31 08:58:43'),
-(22, 2, 3, NULL, 'external', '2025-07-10', '08:00:00', '16:00:00', 1, '2025-07-31 15:58:43', 1, '2025-07-31 08:58:02', '2025-07-31 08:58:43'),
-(23, 2, 2, NULL, 'external', '2025-07-11', '08:00:00', '16:00:00', 1, '2025-08-04 13:09:00', 1, '2025-08-04 06:08:02', '2025-08-04 06:09:00');
 
 -- --------------------------------------------------------
 
@@ -638,11 +617,11 @@ CREATE TABLE `personal_access_tokens` (
 
 CREATE TABLE `presenters` (
   `id` bigint UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `institution` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `institution` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -663,8 +642,8 @@ INSERT INTO `presenters` (`id`, `name`, `institution`, `email`, `phone`, `notes`
 
 CREATE TABLE `signature_and_parafs` (
   `id` bigint UNSIGNED NOT NULL,
-  `user_id` bigint UNSIGNED NOT NULL,
-  `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint UNSIGNED DEFAULT NULL,
+  `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `signature_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `paraf_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -676,12 +655,10 @@ CREATE TABLE `signature_and_parafs` (
 --
 
 INSERT INTO `signature_and_parafs` (`id`, `user_id`, `registration_id`, `signature_path`, `paraf_path`, `created_at`, `updated_at`) VALUES
-(1, 1, 'ADM01', 'signatures/ADM01.png', 'parafs/ADM01.png', '2025-07-08 03:29:25', '2025-07-17 02:39:17'),
-(2, 71, 'MAN019', 'signatures/MAN019.png', 'parafs/MAN019.png', '2025-07-08 10:09:43', '2025-07-08 10:09:54'),
-(3, 52, 'EA001', 'signatures/EA001.png', 'parafs/EA001.png', '2025-07-10 08:12:34', '2025-07-17 05:36:23'),
-(4, 51, 'GM002', 'signatures/GM002.png', 'parafs/GM002.png', '2025-07-17 04:11:56', '2025-07-17 04:12:08'),
-(5, 631, '2000216', 'signatures/2000216.png', 'parafs/2000216.png', '2025-07-17 08:59:54', '2025-07-17 09:00:03'),
-(6, 552, '2000045', 'signatures/2000045.png', 'parafs/2000045.png', '2025-07-17 10:19:38', '2025-07-17 10:19:43');
+(10, NULL, 'ADM01', 'signatures/ADM01.png', 'parafs/ADM01.png', '2025-08-11 09:46:46', '2025-08-11 09:46:51'),
+(11, NULL, '2831', 'signatures/2831.png', 'parafs/2831.png', '2025-08-11 09:48:21', '2025-08-11 09:48:25'),
+(12, NULL, '2832', 'signatures/2832.png', 'parafs/2832.png', '2025-08-11 09:48:48', '2025-08-11 09:48:56'),
+(13, NULL, 'MAN020', 'signatures/MAN020.png', 'parafs/MAN020.png', '2025-08-11 09:50:15', '2025-08-11 09:50:27');
 
 -- --------------------------------------------------------
 
@@ -692,23 +669,23 @@ INSERT INTO `signature_and_parafs` (`id`, `user_id`, `registration_id`, `signatu
 CREATE TABLE `surat_pengajuan_pelatihans` (
   `id` bigint UNSIGNED NOT NULL,
   `created_by` bigint UNSIGNED NOT NULL,
-  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `kompetensi` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `judul` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `lokasi` enum('Perusahaan','Didalam Kota','Diluar Kota','Diluar Negeri') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `instruktur` enum('Internal','Eksternal') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `sifat` enum('Seminar','Kursus','Sertifikasi','Workshop') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `kompetensi_wajib` enum('Wajib','Tidak Wajib') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `materi_global` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `program_pelatihan_ksp` enum('Termasuk','Tidak Termasuk') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kompetensi` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lokasi` enum('Perusahaan','Didalam Kota','Diluar Kota','Diluar Negeri') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `instruktur` enum('Internal','Eksternal') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sifat` enum('Seminar','Kursus','Sertifikasi','Workshop') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kompetensi_wajib` enum('Wajib','Tidak Wajib') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `materi_global` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `program_pelatihan_ksp` enum('Termasuk','Tidak Termasuk') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal_mulai` date NOT NULL,
   `tanggal_selesai` date NOT NULL,
   `durasi` int NOT NULL,
-  `tempat` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `penyelenggara` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `biaya` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `per_paket_or_orang` enum('Paket','Orang') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `keterangan` text COLLATE utf8mb4_unicode_ci,
+  `tempat` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `penyelenggara` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `biaya` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `per_paket_or_orang` enum('Paket','Orang') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `keterangan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -718,9 +695,7 @@ CREATE TABLE `surat_pengajuan_pelatihans` (
 --
 
 INSERT INTO `surat_pengajuan_pelatihans` (`id`, `created_by`, `kode_pelatihan`, `kompetensi`, `judul`, `lokasi`, `instruktur`, `sifat`, `kompetensi_wajib`, `materi_global`, `program_pelatihan_ksp`, `tanggal_mulai`, `tanggal_selesai`, `durasi`, `tempat`, `penyelenggara`, `biaya`, `per_paket_or_orang`, `keterangan`, `created_at`, `updated_at`) VALUES
-(2, 1, 'Pelatihan 1', 'Bahasa Inggris', 'Pelatihan TES TOEFL KSP 1', 'Diluar Kota', 'Eksternal', 'Seminar', 'Wajib', 'Audio Visual Bahasa Inggris', 'Termasuk', '2025-07-10', '2025-07-11', 2, 'Jakarta', 'LIA', '6000000', 'Orang', 'Test', '2025-07-09 04:44:57', '2025-07-09 04:44:57'),
-(3, 1, 'Pelatihan 2', 'Bahasa Inggris', 'Pelatihan TES TOEFL KSP 2', 'Perusahaan', 'Internal', 'Kursus', 'Wajib', 'Bahasa Inggris', 'Termasuk', '2025-07-24', '2025-07-26', 3, 'Jakarta', 'LIA', '4500000', 'Paket', 'Test', '2025-07-09 08:50:59', '2025-07-09 08:50:59'),
-(5, 1, 'Pelatihan 3', 'Bahasa Inggris', 'Pelatihan TES TOEFL KSP 3', 'Diluar Kota', 'Eksternal', 'Sertifikasi', 'Wajib', 't', 'Termasuk', '2025-07-21', '2025-07-22', 2, 'Jakarta', 'LIA', '5000000', 'Orang', 'test', '2025-07-09 09:53:43', '2025-07-09 09:53:43');
+(6, 788, 'Pelatihan 1', 'Bahasa Inggris', 'Pelatihan TES TOEFL KSP 1', 'Diluar Kota', 'Eksternal', 'Seminar', 'Wajib', 'Audiovisual Bahasa Inggris', 'Termasuk', '2025-12-15', '2025-12-16', 2, 'Jakarta', 'LIA', '500000', 'Orang', 'Test Keterangan 1', '2025-08-11 05:49:32', '2025-08-11 05:49:32');
 
 -- --------------------------------------------------------
 
@@ -732,14 +707,21 @@ CREATE TABLE `surat_pengajuan_pelatihan_signatures_and_parafs` (
   `id` bigint UNSIGNED NOT NULL,
   `pelatihan_id` bigint UNSIGNED NOT NULL,
   `user_id` bigint UNSIGNED NOT NULL,
-  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `jabatan_id` bigint UNSIGNED DEFAULT NULL,
+  `jabatan_full` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `department_id` bigint UNSIGNED DEFAULT NULL,
+  `directorate_id` bigint UNSIGNED DEFAULT NULL,
+  `division_id` bigint UNSIGNED DEFAULT NULL,
+  `superior_id` bigint UNSIGNED DEFAULT NULL,
+  `golongan` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `round` int UNSIGNED NOT NULL DEFAULT '1',
   `sequence` int UNSIGNED NOT NULL,
-  `type` enum('paraf','signature') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `type` enum('paraf','signature') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `signed_at` timestamp NULL DEFAULT NULL,
-  `rejection_reason` text COLLATE utf8mb4_unicode_ci,
+  `rejection_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -748,16 +730,11 @@ CREATE TABLE `surat_pengajuan_pelatihan_signatures_and_parafs` (
 -- Dumping data for table `surat_pengajuan_pelatihan_signatures_and_parafs`
 --
 
-INSERT INTO `surat_pengajuan_pelatihan_signatures_and_parafs` (`id`, `pelatihan_id`, `user_id`, `kode_pelatihan`, `registration_id`, `round`, `sequence`, `type`, `status`, `signed_at`, `rejection_reason`, `created_at`, `updated_at`) VALUES
-(1, 2, 52, 'Pelatihan 1', 'EA001', 1, 1, 'paraf', 'approved', '2025-07-15 05:54:30', NULL, '2025-07-09 04:44:57', '2025-07-15 05:54:30'),
-(2, 2, 51, 'Pelatihan 1', 'GM002', 1, 2, 'signature', 'approved', '2025-07-15 07:04:42', NULL, '2025-07-09 04:44:58', '2025-07-15 07:04:42'),
-(3, 3, 52, 'Pelatihan 2', 'EA001', 1, 1, 'paraf', 'rejected', '2025-07-10 10:25:32', 'ganti peserta nya ya', '2025-07-09 08:50:59', '2025-07-10 10:25:32'),
-(4, 3, 50, 'Pelatihan 2', 'GM001', 1, 2, 'signature', 'rejected', '2025-07-10 10:25:32', 'Auto rejected due to earlier rejection', '2025-07-09 08:50:59', '2025-07-10 10:25:32'),
-(5, 5, 52, 'Pelatihan 3', 'EA001', 1, 1, 'paraf', 'approved', '2025-07-10 08:20:02', NULL, '2025-07-09 09:53:43', '2025-07-10 08:20:02'),
-(6, 5, 51, 'Pelatihan 3', 'GM002', 1, 2, 'paraf', 'pending', NULL, NULL, '2025-07-09 09:53:43', '2025-07-09 09:53:43'),
-(7, 5, 48, 'Pelatihan 3', 'DIR001', 1, 3, 'signature', 'pending', NULL, NULL, '2025-07-09 09:53:43', '2025-07-09 09:53:43'),
-(8, 5, 64, 'Pelatihan 3', 'MAN012', 1, 4, 'signature', 'pending', NULL, NULL, '2025-07-09 09:53:43', '2025-07-09 09:53:43'),
-(9, 5, 77, 'Pelatihan 3', 'DIR003', 1, 5, 'signature', 'pending', NULL, NULL, '2025-07-09 09:53:43', '2025-07-09 09:53:43');
+INSERT INTO `surat_pengajuan_pelatihan_signatures_and_parafs` (`id`, `pelatihan_id`, `user_id`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`, `kode_pelatihan`, `registration_id`, `round`, `sequence`, `type`, `status`, `signed_at`, `rejection_reason`, `created_at`, `updated_at`) VALUES
+(10, 6, 72, 5, 'MANAGER HOUSEKEEPING', 20, 2, 2, 51, NULL, 'Pelatihan 1', 'MAN020', 1, 1, 'paraf', 'pending', NULL, NULL, '2025-08-11 05:49:32', '2025-08-11 05:49:32'),
+(11, 6, 52, 4, NULL, NULL, 2, 2, NULL, NULL, 'Pelatihan 1', 'EA001', 1, 2, 'signature', 'pending', NULL, NULL, '2025-08-11 05:49:33', '2025-08-11 05:49:33'),
+(12, 6, 64, 5, NULL, 12, 3, NULL, NULL, NULL, 'Pelatihan 1', 'MAN012', 1, 3, 'signature', 'pending', NULL, NULL, '2025-08-11 05:49:33', '2025-08-11 05:49:33'),
+(13, 6, 790, 1, 'DIREKTUR HUMAN CAPITAL AND FINANCE', NULL, 3, NULL, NULL, '0', 'Pelatihan 1', 'DRK003', 1, 4, 'signature', 'pending', NULL, NULL, '2025-08-11 05:49:33', '2025-08-11 05:49:33');
 
 -- --------------------------------------------------------
 
@@ -792,25 +769,18 @@ INSERT INTO `surat_pengajuan_training_example` (`id`, `title`, `description`, `t
 CREATE TABLE `surat_tugas_pelatihans` (
   `id` bigint UNSIGNED NOT NULL,
   `pelatihan_id` bigint UNSIGNED NOT NULL,
-  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `judul` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal` date NOT NULL,
-  `tempat` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tempat` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal_pelatihan` date NOT NULL,
   `durasi` int UNSIGNED NOT NULL,
   `created_by` bigint UNSIGNED DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
   `is_accepted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `surat_tugas_pelatihans`
---
-
-INSERT INTO `surat_tugas_pelatihans` (`id`, `pelatihan_id`, `kode_pelatihan`, `judul`, `tanggal`, `tempat`, `tanggal_pelatihan`, `durasi`, `created_by`, `status`, `is_accepted`, `created_at`, `updated_at`) VALUES
-(1, 2, 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-07-15', 'Jakarta', '2025-07-10', 2, 51, 'draft', 1, '2025-07-15 07:04:42', '2025-07-23 03:42:41');
 
 -- --------------------------------------------------------
 
@@ -821,25 +791,17 @@ INSERT INTO `surat_tugas_pelatihans` (`id`, `pelatihan_id`, `kode_pelatihan`, `j
 CREATE TABLE `surat_tugas_pelatihan_signatures_and_parafs` (
   `id` bigint UNSIGNED NOT NULL,
   `surat_tugas_id` bigint UNSIGNED NOT NULL,
-  `kode_pelatihan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kode_pelatihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` bigint UNSIGNED NOT NULL,
-  `registration_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` enum('paraf','signature') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `registration_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` enum('paraf','signature') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sequence` int NOT NULL,
   `round` int NOT NULL DEFAULT '1',
-  `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `signed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `surat_tugas_pelatihan_signatures_and_parafs`
---
-
-INSERT INTO `surat_tugas_pelatihan_signatures_and_parafs` (`id`, `surat_tugas_id`, `kode_pelatihan`, `user_id`, `registration_id`, `type`, `sequence`, `round`, `status`, `signed_at`, `created_at`, `updated_at`) VALUES
-(9, 1, 'Pelatihan 1', 631, '2000216', 'paraf', 1, 1, 'approved', '2025-07-21 05:00:29', '2025-07-18 09:46:13', '2025-07-21 05:00:29'),
-(10, 1, 'Pelatihan 1', 552, '2000045', 'signature', 2, 1, 'approved', '2025-07-23 03:42:41', '2025-07-18 09:46:13', '2025-07-23 03:42:41');
 
 -- --------------------------------------------------------
 
@@ -851,11 +813,15 @@ CREATE TABLE `training_participants` (
   `id` bigint UNSIGNED NOT NULL,
   `pelatihan_id` bigint UNSIGNED NOT NULL,
   `user_id` bigint UNSIGNED NOT NULL,
-  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `jabatan_id` bigint UNSIGNED NOT NULL,
+  `jabatan_full` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `department_id` bigint UNSIGNED NOT NULL,
+  `directorate_id` bigint UNSIGNED DEFAULT NULL,
+  `division_id` bigint UNSIGNED DEFAULT NULL,
   `superior_id` bigint UNSIGNED DEFAULT NULL,
+  `golongan` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -864,13 +830,9 @@ CREATE TABLE `training_participants` (
 -- Dumping data for table `training_participants`
 --
 
-INSERT INTO `training_participants` (`id`, `pelatihan_id`, `user_id`, `kode_pelatihan`, `registration_id`, `jabatan_id`, `department_id`, `superior_id`, `created_at`, `updated_at`) VALUES
-(3, 2, 71, 'Pelatihan 1', 'MAN019', 5, 19, NULL, '2025-07-09 04:44:57', '2025-07-09 04:44:57'),
-(4, 2, 72, 'Pelatihan 1', 'MAN020', 5, 20, NULL, '2025-07-09 04:44:57', '2025-07-09 04:44:57'),
-(5, 3, 71, 'Pelatihan 2', 'MAN019', 5, 19, NULL, '2025-07-09 08:50:59', '2025-07-09 08:50:59'),
-(6, 3, 72, 'Pelatihan 2', 'MAN020', 5, 20, NULL, '2025-07-09 08:50:59', '2025-07-09 08:50:59'),
-(7, 5, 72, 'Pelatihan 3', 'MAN020', 5, 20, NULL, '2025-07-09 09:53:43', '2025-07-09 09:53:43'),
-(8, 5, 71, 'Pelatihan 3', 'MAN019', 5, 19, NULL, '2025-07-09 09:53:43', '2025-07-09 09:53:43');
+INSERT INTO `training_participants` (`id`, `pelatihan_id`, `user_id`, `kode_pelatihan`, `registration_id`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`, `created_at`, `updated_at`) VALUES
+(9, 6, 788, 'Pelatihan 1', 'HSK001', 15, 'Housekeeper', 20, 3, 2, 72, '6', '2025-08-11 05:49:32', '2025-08-11 05:49:32'),
+(10, 6, 789, 'Pelatihan 1', 'HSK002', 15, 'Housekeeper', 20, 2, 2, 72, '6', '2025-08-11 05:49:32', '2025-08-11 05:49:32');
 
 -- --------------------------------------------------------
 
@@ -903,7 +865,7 @@ CREATE TABLE `users` (
   `directorate_id` bigint UNSIGNED DEFAULT NULL,
   `division_id` bigint UNSIGNED DEFAULT NULL,
   `superior_id` bigint UNSIGNED DEFAULT NULL,
-  `golongan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `golongan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `nik` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -912,7 +874,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `registration_id`, `name`, `email`, `email_verified_at`, `password`, `two_factor_secret`, `two_factor_recovery_codes`, `phone`, `address`, `signature_path`, `paraf_path`, `role`, `is_active`, `profile_picture`, `remember_token`, `created_at`, `updated_at`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`, `nik`) VALUES
-(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, '2rEYiFcGZCbEwQTzhT6xVpapfesps9k7GfcxycDjWxgPGB0qxVifvt1jORSP', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, 'DnuQZQ56KwVLP0qTLCtbEh1VYoFf7fhMV8NrbpmPxmflzxyNvzLBAd3E2JM2', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (48, 'DIR001', 'Dewi Director', 'TEST@GMAIL.COM', NULL, '$2y$10$DjeExht8y6bI2lMEYJP1UOmGqacRPa4jL.hf1A/NjiBDBa3pX6iR2', NULL, NULL, '08111111001', 'Jl. Direksi No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:04', 1, NULL, NULL, 1, NULL, NULL, '00', '3173000000000001'),
 (49, 'ASDIR001', 'Arief Assistant', 'asdir@gmail.com', NULL, '$2y$10$BhayvALSwTi.vUXmICMK9eYkNoZCYzCQubfU7zwSrKN8z8MZ.9rHO', NULL, NULL, '08111111002', 'Jl. HC No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:20', 2, NULL, NULL, 1, NULL, 48, '01', '3173000000000002'),
 (50, 'GM001', 'Gita GM CP', NULL, NULL, '$2y$10$.0rbg1iVgUFkDZKfec3uUOV2jIyujakIsd2iRCNs4z4BJjYuPY/YS', NULL, NULL, '08111111003', 'Jl. Komersial No.1', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-07 06:13:17', 3, NULL, NULL, 2, 1, NULL, NULL, '3173000000000003'),
@@ -1179,7 +1141,11 @@ INSERT INTO `users` (`id`, `registration_id`, `name`, `email`, `email_verified_a
 (783, '2900037', 'ABDUL LUTHFI MADJID', '2900037@yourdomain.com', NULL, '$2y$10$Nv3HvGcas77IFlPnw.m8SeX6G3y0uhjQmguL5v2YeGbztU1qwVNQi', NULL, NULL, NULL, 'KOMP PURI TANJUNG SARI NO 41 MEDAN', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 9, 'COURSE MAINTENANCE SUPERVISOR', 17, 2, 1, NULL, '4', NULL),
 (784, '2900038', 'ANUNG NUGROHO', '2900038@yourdomain.com', NULL, '$2y$10$Q8AlOPdSSJIxasxNJ.2d5OZtRyHiHYMPfvFAZyrvQ79VAQ842XCMG', NULL, NULL, NULL, 'JL. ARJUNA NO 139 KAV BLOK J CILEGON', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 9, 'COURSE MAINTENANCE SUPERVISOR', 17, 2, 1, NULL, '4', NULL),
 (785, '2900039', 'ABDUL RIFAI', '2900039@yourdomain.com', NULL, '$2y$10$0qLBrKkv2Zfd6wQShTDlB.j8RJ0hcQXZdsgihCRuxNqW/L5yK1.Cq', NULL, NULL, NULL, 'JL NANGKA TJ BARAT RT RW 003 006 JAKARTA SELATAN', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-14 08:33:11', '2025-07-14 08:33:11', 9, 'CLUB MANAGEMENT SUPERVISOR', 17, 2, 1, NULL, '4', NULL),
-(786, '2831', 'RAFI KYANDRA ATHARIZQI', 'kyandraatharizqi@gmail.com', NULL, '$2y$10$.0do2okpR.jIMUMXykxQrua7FEwKL6fAkW8VRzfCL0if2RBYvesr2', NULL, NULL, '081389193372', 'Jalan Kitapa No.17 Lopang Cilik RT1 RW2', NULL, NULL, 'staff', 0, NULL, NULL, '2025-07-24 08:29:27', '2025-07-24 08:29:59', 6, 'HUMAN CAPITAL SUPERINTENDENT', 12, 3, NULL, 552, '05', NULL);
+(786, '2831', 'RAFI KYANDRA ATHARIZQI', 'kyandraatharizqi@gmail.com', NULL, '$2y$10$.0do2okpR.jIMUMXykxQrua7FEwKL6fAkW8VRzfCL0if2RBYvesr2', NULL, NULL, '081389193372', 'Jalan Kitapa No.17 Lopang Cilik RT1 RW2', NULL, NULL, 'staff', 1, NULL, NULL, '2025-07-24 08:29:27', '2025-08-11 04:43:07', 11, 'HUMAN CAPITAL OFFICER', 12, 3, NULL, 675, '5', NULL),
+(787, '2832', 'TRIYA', 'triya@gmail.com', NULL, '$2y$10$3IZSqGtQxO.AJo4guCK4s.WkZkac/0JDLxCkPmYsq9eV2kxXMyV.y', NULL, NULL, '085218901107', 'PCI', NULL, NULL, 'staff', 1, NULL, NULL, '2025-08-11 04:44:16', '2025-08-11 04:44:16', 11, 'HUMAN CAPITAL OFFICER', 12, 3, NULL, 552, '5', NULL),
+(788, 'HSK001', 'Merya', 'merya@gmail.com', NULL, '$2y$10$H/cY8j8yDpStqHJ.ZfuV1.E87FbUzrMypYnmXmgW4lxt4ste0MFX6', NULL, NULL, NULL, NULL, NULL, NULL, 'staff', 1, NULL, NULL, '2025-08-11 05:33:06', '2025-08-11 05:35:17', 15, 'Housekeeper', 20, 3, 2, 72, '6', NULL),
+(789, 'HSK002', 'Mesta', 'mesta@gmail.com', NULL, '$2y$10$3FbXb5kkDbrBNEcdzDDr9eak95mGRwYa6i0hrirhdglVB/eUDmg7i', NULL, NULL, NULL, NULL, NULL, NULL, 'staff', 1, NULL, NULL, '2025-08-11 05:34:12', '2025-08-11 05:34:55', 15, 'Housekeeper', 20, 2, 2, 72, '6', NULL),
+(790, 'DRK003', 'Direktur Human Capital and Finance', 'direkturhumancapitalandfinance@gmail.com', NULL, '$2y$10$iMukkh22dcsiLYSH/ze2K.vDUBYlCZsZRUPCz9AcQFyEH5m9/zu3S', NULL, NULL, NULL, NULL, NULL, NULL, 'staff', 1, NULL, NULL, '2025-08-11 05:41:58', '2025-08-11 05:41:58', 1, 'DIREKTUR HUMAN CAPITAL AND FINANCE', NULL, 3, NULL, NULL, '0', NULL);
 
 -- --------------------------------------------------------
 
@@ -1209,14 +1175,14 @@ CREATE TABLE `user_histories` (
 CREATE TABLE `user_position_histories` (
   `id` bigint UNSIGNED NOT NULL,
   `user_id` bigint UNSIGNED NOT NULL,
-  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `directorate_id` bigint UNSIGNED DEFAULT NULL,
   `division_id` bigint UNSIGNED DEFAULT NULL,
   `department_id` bigint UNSIGNED DEFAULT NULL,
   `jabatan_id` bigint UNSIGNED DEFAULT NULL,
-  `jabatan_full` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `jabatan_full` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `superior_id` bigint UNSIGNED DEFAULT NULL,
-  `golongan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `golongan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `recorded_at` timestamp NULL DEFAULT NULL,
   `effective_date` timestamp NULL DEFAULT NULL,
@@ -1498,7 +1464,17 @@ INSERT INTO `user_position_histories` (`id`, `user_id`, `registration_id`, `dire
 (267, 71, NULL, 2, NULL, 19, 5, NULL, NULL, NULL, 1, NULL, '2025-07-24 08:25:07', '2025-07-24 08:25:07', '2025-07-24 08:25:07'),
 (268, 72, NULL, 2, 2, 20, 5, NULL, NULL, NULL, 1, NULL, '2025-07-24 08:26:13', '2025-07-24 08:26:13', '2025-07-24 08:26:13'),
 (269, 786, NULL, 3, NULL, 12, 11, NULL, NULL, NULL, 0, NULL, '2025-07-23 17:00:00', '2025-07-24 08:29:27', '2025-07-24 08:29:59'),
-(270, 786, NULL, 3, NULL, 12, 6, NULL, NULL, NULL, 1, NULL, '2025-07-24 08:29:59', '2025-07-24 08:29:59', '2025-07-24 08:29:59');
+(270, 786, NULL, 3, NULL, 12, 6, NULL, NULL, NULL, 0, NULL, '2025-07-24 08:29:59', '2025-07-24 08:29:59', '2025-08-11 04:38:35'),
+(271, 786, NULL, 3, NULL, 12, 11, NULL, NULL, NULL, 0, NULL, '2025-08-11 04:38:35', '2025-08-11 04:38:35', '2025-08-11 04:38:52'),
+(272, 786, NULL, 3, NULL, 12, 11, NULL, NULL, NULL, 0, NULL, '2025-08-11 04:38:52', '2025-08-11 04:38:52', '2025-08-11 04:42:28'),
+(273, 786, NULL, 3, NULL, 12, 11, NULL, NULL, NULL, 0, NULL, '2025-08-11 04:42:28', '2025-08-11 04:42:28', '2025-08-11 04:43:07'),
+(274, 786, NULL, 3, NULL, 12, 11, NULL, NULL, NULL, 1, NULL, '2025-08-11 04:43:07', '2025-08-11 04:43:07', '2025-08-11 04:43:07'),
+(275, 787, NULL, 3, NULL, 12, 11, NULL, NULL, NULL, 1, NULL, '2025-08-10 17:00:00', '2025-08-11 04:44:16', '2025-08-11 04:44:16'),
+(276, 788, NULL, 3, 2, 20, 15, NULL, NULL, NULL, 0, NULL, '2024-12-31 17:00:00', '2025-08-11 05:33:06', '2025-08-11 05:35:17'),
+(277, 789, NULL, 2, 2, 20, 15, NULL, NULL, NULL, 0, NULL, '2024-12-31 17:00:00', '2025-08-11 05:34:12', '2025-08-11 05:34:55'),
+(278, 789, NULL, 2, 2, 20, 15, NULL, NULL, NULL, 1, NULL, '2025-08-11 05:34:55', '2025-08-11 05:34:55', '2025-08-11 05:34:55'),
+(279, 788, NULL, 3, 2, 20, 15, NULL, NULL, NULL, 1, NULL, '2025-08-11 05:35:17', '2025-08-11 05:35:17', '2025-08-11 05:35:17'),
+(280, 790, NULL, 3, NULL, NULL, 1, NULL, NULL, NULL, 1, NULL, '2024-12-31 17:00:00', '2025-08-11 05:41:58', '2025-08-11 05:41:58');
 
 --
 -- Indexes for dumped tables
@@ -1525,6 +1501,12 @@ ALTER TABLE `classifications`
 ALTER TABLE `configs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `configs_code_unique` (`code`);
+
+--
+-- Indexes for table `daftar_hadir_knowledge`
+--
+ALTER TABLE `daftar_hadir_knowledge`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `daftar_hadir_pelatihan`
@@ -1656,6 +1638,13 @@ ALTER TABLE `letter_statuses`
 --
 ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `nota_dinas`
+--
+ALTER TABLE `nota_dinas`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `kode` (`kode`);
 
 --
 -- Indexes for table `password_resets`
@@ -1799,6 +1788,12 @@ ALTER TABLE `configs`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT for table `daftar_hadir_knowledge`
+--
+ALTER TABLE `daftar_hadir_knowledge`
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `daftar_hadir_pelatihan`
 --
 ALTER TABLE `daftar_hadir_pelatihan`
@@ -1901,6 +1896,12 @@ ALTER TABLE `migrations`
   MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
+-- AUTO_INCREMENT for table `nota_dinas`
+--
+ALTER TABLE `nota_dinas`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT for table `pelatihan_presenters`
 --
 ALTER TABLE `pelatihan_presenters`
@@ -1922,19 +1923,19 @@ ALTER TABLE `presenters`
 -- AUTO_INCREMENT for table `signature_and_parafs`
 --
 ALTER TABLE `signature_and_parafs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `surat_pengajuan_pelatihans`
 --
 ALTER TABLE `surat_pengajuan_pelatihans`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `surat_pengajuan_pelatihan_signatures_and_parafs`
 --
 ALTER TABLE `surat_pengajuan_pelatihan_signatures_and_parafs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `surat_pengajuan_training_example`
@@ -1958,13 +1959,13 @@ ALTER TABLE `surat_tugas_pelatihan_signatures_and_parafs`
 -- AUTO_INCREMENT for table `training_participants`
 --
 ALTER TABLE `training_participants`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=787;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=791;
 
 --
 -- AUTO_INCREMENT for table `user_histories`
@@ -1976,7 +1977,7 @@ ALTER TABLE `user_histories`
 -- AUTO_INCREMENT for table `user_position_histories`
 --
 ALTER TABLE `user_position_histories`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=271;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=281;
 
 --
 -- Constraints for dumped tables

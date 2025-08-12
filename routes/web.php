@@ -21,6 +21,8 @@ use App\Http\Controllers\LetterStatusController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DaftarHadirPelatihanPresenterController;
 use App\Http\Controllers\NotaDinasController;
+use App\Http\Controllers\DaftarHadirKnowledgeController;
+use App\Http\Controllers\PengajuanKnowledgeController;
 
 /* 👇 NEW Evaluation controllers (create these) */
 use App\Http\Controllers\EvaluasiLevel1Controller;
@@ -262,6 +264,25 @@ Route::middleware(['auth'])->group(function () {
         });
 
     
+    /*
+    |--------------------------------------------------------------------------
+    | Pengajuan Knowledge SHaring
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('knowledge')->name('knowledge.')->group(function () {
+        Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
+            Route::get('/', [PengajuanKnowledgeController::class, 'index'])->name('index');          // GET /knowledge/pengajuan
+            Route::get('/create', [PengajuanKnowledgeController::class, 'create'])->name('create');  // GET /knowledge/pengajuan/create
+            Route::post('/', [PengajuanKnowledgeController::class, 'store'])->name('store');         // POST /knowledge/pengajuan
+            Route::get('/{id}', [PengajuanKnowledgeController::class, 'show'])->name('show');        // GET /knowledge/pengajuan/{id}
+            Route::get('/{id}/edit', [PengajuanKnowledgeController::class, 'edit'])->name('edit');   // GET /knowledge/pengajuan/{id}/edit
+            Route::put('/{id}', [PengajuanKnowledgeController::class, 'update'])->name('update');    // PUT /knowledge/pengajuan/{id}
+            Route::delete('/{id}', [PengajuanKnowledgeController::class, 'destroy'])->name('destroy'); // DELETE /knowledge/pengajuan/{id}
+            Route::get('/{id}/download', [PengajuanKnowledgeController::class, 'download'])->name('download'); // GET /knowledge/pengajuan/{id}/download
+            Route::patch('/{id}/approve', [PengajuanKnowledgeController::class, 'approve'])->name('approve');
+            Route::patch('/{id}/reject', [PengajuanKnowledgeController::class, 'reject'])->name('reject');
+        });
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -281,6 +302,13 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Daftar Hadir Knowledge Sharing
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('knowledge')->name('knowledge.')->group(function () {
+        Route::resource('daftarhadir', DaftarHadirKnowledgeController::class);
+    });
 
 });

@@ -35,6 +35,8 @@ class CreatePelatihanPresentersTable extends Migration
 
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('pelatihan_presenters');
+        Schema::enableForeignKeyConstraints();
     }
 }

@@ -18,9 +18,9 @@ return new class extends Migration
             // Add registration_id after user_id (nullable for flexibility)
             $table->string('registration_id', 50)->nullable()->after('user_id');
 
-            // Add indexes for faster filtering/search
-            $table->index('kode_pelatihan');
-            $table->index('registration_id');
+            // Add indexes for faster filtering/search with custom shorter names
+            $table->index('kode_pelatihan', 'stp_sig_kode_idx');
+            $table->index('registration_id', 'stp_sig_reg_id_idx');
         });
     }
 
@@ -30,9 +30,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('surat_tugas_pelatihan_signatures_and_parafs', function (Blueprint $table) {
-            // Drop columns and indexes
-            $table->dropIndex(['kode_pelatihan']);
-            $table->dropIndex(['registration_id']);
+            // Drop columns and indexes using custom names
+            $table->dropIndex('stp_sig_kode_idx');
+            $table->dropIndex('stp_sig_reg_id_idx');
             $table->dropColumn(['kode_pelatihan', 'registration_id']);
         });
     }

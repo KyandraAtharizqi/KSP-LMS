@@ -24,11 +24,12 @@
                     </tr>
                 </thead>
                 <tbody>
+
                     @forelse($examples as $example)
                         @php
                             $userApproval = $example->approvals
                                 ->where('user_id', auth()->id())
-                                ->where('status', 'menunggu')
+                                ->whereIn('status', ['menunggu', 'pending'])
                                 ->first();
 
                             $latestRound = $example->approvals->max('round');
@@ -40,7 +41,7 @@
 
                             $minMenungguApproval = $example->approvals
                                 ->where('round', $latestRound)
-                                ->where('status', 'menunggu')
+                                ->whereIn('status', ['menunggu', 'pending'])
                                 ->sortBy('sequence')
                                 ->first();
                         @endphp
@@ -81,19 +82,12 @@
                                     Lihat Surat
                                 </a>
 
-                                <a href="{{ route('surat.pengajuan.download', ['id' => $example->id]) }}" class="btn btn-sm btn-info mb-1">
-                                    Unduh PDF
-                                </a>
-
-                                <button class="btn btn-sm btn-outline-secondary mb-1" data-bs-toggle="modal" data-bs-target="#trackerModal-{{ $example->id }}">
-                                    🔍 Lihat Status
-                                </button>
-
+                                {{-- Tombol Approve / Tolak --}}
                                 @if (
                                     $userApproval &&
-                                    $userApproval->status === 'menunggu' &&
+                                    in_array($userApproval->status, ['menunggu', 'pending']) &&
                                     $userApproval->round === $latestRound &&
-                                    $userApproval->id === $minMenungguApproval?->id
+                                    $userApproval->sequence === $minMenungguApproval?->sequence
                                 )
                                     <form action="{{ route('training.suratpengajuan.approve', [$example->id, $userApproval->id]) }}" method="POST" class="d-inline">
                                         @csrf
@@ -107,6 +101,19 @@
                                     </button>
                                 @endif
 
+                                {{-- Tombol Unduh PDF hanya kalau semua approval sudah selesai --}}
+                                @if($example->approvals->every(fn($a) => $a->status === 'approved'))
+                                    <a href="{{ route('surat.pengajuan.download', ['id' => $example->id]) }}" class="btn btn-sm btn-info mb-1">
+                                        Unduh PDF
+                                    </a>
+                                @endif
+
+                                {{-- Tombol Lihat Status --}}
+                                <button class="btn btn-sm btn-outline-secondary mb-1" data-bs-toggle="modal" data-bs-target="#trackerModal-{{ $example->id }}">
+                                    🔍 Lihat Status
+                                </button>
+
+                                {{-- Edit & Ajukan Ulang jika ditolak --}}
                                 @if ($isCreator && $ditolakInLatestRound)
                                     <a href="{{ route('training.suratpengajuan.edit', $example->id) }}" class="btn btn-sm btn-outline-warning mb-1">
                                         ✏️ Edit & Ajukan Ulang
@@ -146,12 +153,12 @@
                                     </strong>
                                 </div>
                                 <small>Round {{ $step->round }}, Step {{ $step->sequence }}</small><br>
-                                @if ($step->status === 'disetujui')
+                                @if ($step->status === 'approved')
                                     <span class="badge bg-success">
                                         ✅ Disetujui -
                                         {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
                                     </span>
-                                @elseif ($step->status === 'ditolak')
+                                @elseif ($step->status === 'rejected')
                                     <span class="badge bg-danger">
                                         ❌ Ditolak -
                                         {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
@@ -178,21 +185,21 @@
     @php
         $userApproval = $example->approvals
             ->where('user_id', auth()->id())
-            ->where('status', 'menunggu')
+            ->whereIn('status', ['menunggu', 'pending'])
             ->first();
 
         $latestRound = $example->approvals->max('round');
         $minMenungguApproval = $example->approvals
             ->where('round', $latestRound)
-            ->where('status', 'menunggu')
+            ->whereIn('status', ['menunggu', 'pending'])
             ->sortBy('sequence')
             ->first();
     @endphp
     @if (
         $userApproval &&
-        $userApproval->status === 'menunggu' &&
+        in_array(strtolower($userApproval->status), ['menunggu', 'pending']) &&
         $userApproval->round === $latestRound &&
-        $userApproval->id === $minMenungguApproval?->id
+        $userApproval->sequence === $minMenungguApproval?->sequence
     )
     <div class="modal fade" id="rejectModal-{{ $userApproval->id }}" tabindex="-1" aria-labelledby="rejectLabel-{{ $userApproval->id }}" aria-hidden="true">
         <div class="modal-dialog">

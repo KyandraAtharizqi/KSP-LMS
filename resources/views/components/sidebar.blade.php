@@ -87,9 +87,19 @@
                 <div data-i18n="Knowledge Sharing">Knowledge Sharing</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.pengajuan.index') ? 'active' : '' }}">
+                    <a href="{{ route('knowledge.pengajuan.index') }}" class="menu-link">
+                        <div data-i18n="Pengajuan Knowledge Sharing">Pengajuan Knowledge Sharing</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.notadinas.index') ? 'active' : '' }}">
                     <a href="{{ route('knowledge.notadinas.index') }}" class="menu-link">
                         <div data-i18n="Nota Dinas">Nota Dinas</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.daftarhadir.index') ? 'active' : '' }}">
+                    <a href="{{ route('knowledge.daftarhadir.index') }}" class="menu-link">
+                        <div data-i18n="Daftar Hadir">Daftar Hadir</div>
                     </a>
                 </li>
             </ul>

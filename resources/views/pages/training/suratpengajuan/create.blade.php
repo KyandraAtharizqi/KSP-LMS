@@ -176,7 +176,7 @@
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label>Kompetensi Wajib</label>
+                    <label>Kompetensi Wajib/Tidak Wajib</label>
                     <select name="kompetensi_wajib" class="form-control" required>
                         <option value="Wajib">Wajib</option>
                         <option value="Tidak Wajib">Tidak Wajib</option>
