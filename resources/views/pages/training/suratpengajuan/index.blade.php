@@ -35,7 +35,7 @@
                             $latestRound = $example->approvals->max('round');
                             $ditolakInLatestRound = $example->approvals
                                 ->where('round', $latestRound)
-                                ->contains(fn($item) => $item->status === 'ditolak');
+                                ->contains(fn($item) => $item->status === 'rejected'); // Changed from 'ditolak' to 'rejected'
 
                             $isCreator = auth()->id() === $example->created_by;
 
@@ -55,10 +55,12 @@
                                 @if ($userApproval)
                                     <span class="badge bg-warning">Menunggu {{ ucfirst($userApproval->type) }}</span>
                                 @elseif ($ditolakInLatestRound)
-                                    <span class="badge bg-danger">Ditolak</span>
+                                    <span class="badge bg-danger">DITOLAK</span>
                                 @else
                                     @php
-                                        $statuses = $example->approvals->pluck('status')->unique();
+                                        $latestRound = $example->approvals->max('round');
+                                        $currentRoundApprovals = $example->approvals->where('round', $latestRound);
+                                        $statuses = $currentRoundApprovals->pluck('status')->unique();
                                     @endphp
                                     @foreach ($statuses as $status)
                                         @php $statusLower = strtolower($status); @endphp
@@ -67,7 +69,7 @@
                                             <span class="badge bg-success me-1">DISETUJUI</span>
                                         @elseif ($statusLower === 'rejected')
                                             <span class="badge bg-danger me-1">DITOLAK</span>
-                                        @elseif ($statusLower === 'pending')
+                                        @elseif ($statusLower === 'pending' || $statusLower === 'menunggu')
                                             <span class="badge bg-warning text-dark me-1">MENUNGGU</span>
                                         @else
                                             <span class="badge bg-secondary me-1">{{ strtoupper($status) }}</span>
@@ -102,7 +104,12 @@
                                 @endif
 
                                 {{-- Tombol Unduh PDF hanya kalau semua approval sudah selesai --}}
-                                @if($example->approvals->every(fn($a) => $a->status === 'approved'))
+                                @php
+                                    $latestRound = $example->approvals->max('round');
+                                    $latestRoundApprovals = $example->approvals->where('round', $latestRound);
+                                @endphp
+
+                                @if($latestRoundApprovals->every(fn($a) => $a->status === 'approved'))
                                     <a href="{{ route('surat.pengajuan.download', ['id' => $example->id]) }}" class="btn btn-sm btn-info mb-1">
                                         Unduh PDF
                                     </a>

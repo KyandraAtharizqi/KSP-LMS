@@ -1,12 +1,27 @@
 @extends('layout.main')
 
+<style>
+    .modal-lg {
+        max-width: 1100px !important;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+        text-align: center;
+        min-width: 140px;
+        font-size: 15px;
+    }
+    .table th {
+        background: #f8f9fa;
+    }
+</style>
+
 @push('script')
 @php
-    // Pre-process the data in PHP to avoid complex expressions in Blade directives
     $participantsData = $surat->participants->map(function($p) {
         return [
             'registration_id' => $p->registration_id,
             'name' => $p->user->name,
+            'jabatan_full' => $p->user->jabatan_full ?? ($p->user->jabatan->name ?? '-'),
         ];
     })->values();
 
@@ -19,6 +34,7 @@
             return [
                 'registration_id' => $a->registration_id,
                 'name' => $a->user->name,
+                'jabatan_full' => $a->user->jabatan_full ?? ($a->user->jabatan->name ?? '-'),
             ];
         })->values();
 
@@ -30,6 +46,7 @@
             return [
                 'registration_id' => $a->registration_id,
                 'name' => $a->user->name,
+                'jabatan_full' => $a->user->jabatan_full ?? ($a->user->jabatan->name ?? '-'),
             ];
         })->values();
 
@@ -41,6 +58,7 @@
             return [
                 'registration_id' => $a->registration_id,
                 'name' => $a->user->name,
+                'jabatan_full' => $a->user->jabatan_full ?? ($a->user->jabatan->name ?? '-'),
             ];
         })->values();
 
@@ -52,6 +70,7 @@
             return [
                 'registration_id' => $a->registration_id,
                 'name' => $a->user->name,
+                'jabatan_full' => $a->user->jabatan_full ?? ($a->user->jabatan->name ?? '-'),
             ];
         })->values();
 @endphp
@@ -65,26 +84,28 @@
     let selectedSignature2 = @json($signature2Data);
     let selectedSignature3 = @json($signature3Data);
 
-    function renderList(arr, containerId, inputName, inputContainerId, color) {
-        const container = document.getElementById(containerId);
-        const inputContainer = document.getElementById(inputContainerId);
-        container.innerHTML = '';
-        inputContainer.innerHTML = '';
+  function renderList(arr, containerId, inputName, inputContainerId, color) {
+      const container = document.getElementById(containerId);
+      const inputContainer = document.getElementById(inputContainerId);
+      container.innerHTML = '';
+      inputContainer.innerHTML = '';
 
-        arr.forEach(user => {
-            const tag = document.createElement('div');
-            tag.className = `badge bg-${color} me-1 mb-1 d-inline-flex align-items-center`;
-            tag.innerHTML = `${user.name} (${user.registration_id})
-                <button type="button" class="btn-close btn-sm ms-2" onclick="removeFromList('${user.registration_id}', '${containerId}')"></button>`;
-            container.appendChild(tag);
+      arr.forEach(user => {
+          const tag = document.createElement('div');
+          tag.className = `badge bg-${color} me-1 mb-1 d-inline-flex align-items-center`;
+          tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan_full}
+              <button type="button" class="btn-close btn-sm ms-2" 
+                      onclick="removeFromList('${user.registration_id}', '${containerId}')">
+              </button>`;
+          container.appendChild(tag);
 
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = inputName + '[]';
-            input.value = user.registration_id;
-            inputContainer.appendChild(input);
-        });
-    }
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = inputName + '[]';
+          input.value = user.registration_id;
+          inputContainer.appendChild(input);
+      });
+  }
 
     function removeFromList(registrationId, listType) {
         if (listType === 'selected-participant-list') {
@@ -150,15 +171,23 @@
         ];
 
         searchInputs.forEach(({ inputId, tableSelector }) => {
-            const input = document.getElementById(inputId);
-            const rows = document.querySelectorAll(tableSelector);
-            input.addEventListener('input', function () {
-                const keyword = input.value.toLowerCase();
-                rows.forEach(row => {
-                    const name = row.dataset.name.toLowerCase();
-                    const dept = row.dataset.department.toLowerCase();
-                    const jabatan = row.dataset.jabatan.toLowerCase();
-                    row.style.display = (name.includes(keyword) || dept.includes(keyword) || jabatan.includes(keyword)) ? '' : 'none';
+                const input = document.getElementById(inputId);
+                const rows = document.querySelectorAll(tableSelector);
+                input.addEventListener('input', function () {
+                    const keyword = input.value.toLowerCase();
+                    rows.forEach(row => {
+                        const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                        const regid = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        const jabatan = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                        const dept = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                        const golongan = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                        row.style.display = (
+                            name.includes(keyword) ||
+                            regid.includes(keyword) ||
+                            jabatan.includes(keyword) ||
+                            dept.includes(keyword) ||
+                            golongan.includes(keyword)
+                        ) ? '' : 'none';
                 });
             });
         });
@@ -215,88 +244,87 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Judul</label>
-                    <input type="text" name="judul" class="form-control" required>
+                    <input type="text" name="judul" class="form-control" value="{{ old('judul', $surat->judul) }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Lokasi</label>
                     <select name="lokasi" class="form-control" required>
-                        <option value="Perusahaan">Perusahaan</option>
-                        <option value="Didalam Kota">Didalam Kota</option>
-                        <option value="Diluar Kota">Diluar Kota</option>
-                        <option value="Diluar Negeri">Diluar Negeri</option>
+                        <option value="Perusahaan" {{ old('lokasi', $surat->lokasi) == 'Perusahaan' ? 'selected' : '' }}>Perusahaan</option>
+                        <option value="Didalam Kota" {{ old('lokasi', $surat->lokasi) == 'Didalam Kota' ? 'selected' : '' }}>Didalam Kota</option>
+                        <option value="Diluar Kota" {{ old('lokasi', $surat->lokasi) == 'Diluar Kota' ? 'selected' : '' }}>Diluar Kota</option>
+                        <option value="Diluar Negeri" {{ old('lokasi', $surat->lokasi) == 'Diluar Negeri' ? 'selected' : '' }}>Diluar Negeri</option>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Instruktur</label>
                     <select name="instruktur" class="form-control" required>
-                        <option value="Internal">Internal</option>
-                        <option value="Eksternal">Eksternal</option>
+                        <option value="Internal" {{ old('instruktur', $surat->instruktur) == 'Internal' ? 'selected' : '' }}>Internal</option>
+                        <option value="Eksternal" {{ old('instruktur', $surat->instruktur) == 'Eksternal' ? 'selected' : '' }}>Eksternal</option>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Sifat</label>
                     <select name="sifat" class="form-control" required>
-                        <option value="Seminar">Seminar</option>
-                        <option value="Kursus">Kursus</option>
-                        <option value="Sertifikasi">Sertifikasi</option>
-                        <option value="Workshop">Workshop</option>
+                        <option value="Seminar" {{ old('sifat', $surat->sifat) == 'Seminar' ? 'selected' : '' }}>Seminar</option>
+                        <option value="Kursus" {{ old('sifat', $surat->sifat) == 'Kursus' ? 'selected' : '' }}>Kursus</option>
+                        <option value="Sertifikasi" {{ old('sifat', $surat->sifat) == 'Sertifikasi' ? 'selected' : '' }}>Sertifikasi</option>
+                        <option value="Workshop" {{ old('sifat', $surat->sifat) == 'Workshop' ? 'selected' : '' }}>Workshop</option>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Kompetensi Wajib</label>
                     <select name="kompetensi_wajib" class="form-control" required>
-                        <option value="Wajib">Wajib</option>
-                        <option value="Tidak Wajib">Tidak Wajib</option>
+                        <option value="Wajib" {{ old('kompetensi_wajib', $surat->kompetensi_wajib) == 'Wajib' ? 'selected' : '' }}>Wajib</option>
+                        <option value="Tidak Wajib" {{ old('kompetensi_wajib', $surat->kompetensi_wajib) == 'Tidak Wajib' ? 'selected' : '' }}>Tidak Wajib</option>
                     </select>
                 </div>
                 <div class="col-md-12 mb-3">
                     <label>Materi Global</label>
-                    <textarea name="materi_global" class="form-control" required></textarea>
+                    <textarea name="materi_global" class="form-control" required>{{ old('materi_global', $surat->materi_global) }}</textarea>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Program Pelatihan KSP</label>
                     <select name="program_pelatihan_ksp" class="form-control" required>
-                        <option value="Termasuk">Termasuk</option>
-                        <option value="Tidak Termasuk">Tidak Termasuk</option>
+                        <option value="Termasuk" {{ old('program_pelatihan_ksp', $surat->program_pelatihan_ksp) == 'Termasuk' ? 'selected' : '' }}>Termasuk</option>
+                        <option value="Tidak Termasuk" {{ old('program_pelatihan_ksp', $surat->program_pelatihan_ksp) == 'Tidak Termasuk' ? 'selected' : '' }}>Tidak Termasuk</option>
                     </select>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label>Tanggal Mulai</label>
-                    <input type="date" name="tanggal_mulai" class="form-control" required>
+                    <input type="date" name="tanggal_mulai" class="form-control" value="{{ old('tanggal_mulai', $surat->tanggal_mulai ? $surat->tanggal_mulai->format('Y-m-d') : '') }}" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label>Tanggal Selesai</label>
-                    <input type="date" name="tanggal_selesai" class="form-control" required>
+                    <input type="date" name="tanggal_selesai" class="form-control" value="{{ old('tanggal_selesai', $surat->tanggal_selesai ? $surat->tanggal_selesai->format('Y-m-d') : '') }}" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label>Durasi (hari)</label>
-                    <input type="text" id="durasi" class="form-control" readonly>
-                    <input type="hidden" name="durasi" id="durasi-hidden">
+                    <input type="text" id="durasi" class="form-control" value="{{ old('durasi', $surat->durasi) }}" readonly>
+                    <input type="hidden" name="durasi" id="durasi-hidden" value="{{ old('durasi', $surat->durasi) }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Tempat</label>
-                    <input type="text" name="tempat" class="form-control" required>
+                    <input type="text" name="tempat" class="form-control" value="{{ old('tempat', $surat->tempat) }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Penyelenggara</label>
-                    <input type="text" name="penyelenggara" class="form-control" required>
+                    <input type="text" name="penyelenggara" class="form-control" value="{{ old('penyelenggara', $surat->penyelenggara) }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Biaya</label>
-                    <input type="text" name="biaya" class="form-control" required>
+                    <input type="text" name="biaya" class="form-control" value="{{ old('biaya', $surat->biaya) }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Per Paket/Orang</label>
                     <select name="per_paket_or_orang" class="form-control" required>
-                        <option value="Paket">Paket</option>
-                        <option value="Orang">Orang</option>
+                        <option value="Paket" {{ old('per_paket_or_orang', $surat->per_paket_or_orang) == 'Paket' ? 'selected' : '' }}>Paket</option>
+                        <option value="Orang" {{ old('per_paket_or_orang', $surat->per_paket_or_orang) == 'Orang' ? 'selected' : '' }}>Orang</option>
                     </select>
                 </div>
                 <div class="col-md-12 mb-3">
                     <label>Keterangan</label>
-                    <textarea name="keterangan" class="form-control"></textarea>
+                    <textarea name="keterangan" class="form-control">{{ old('keterangan', $surat->keterangan) }}</textarea>
                 </div>
-
 
                 {{-- Participants --}}
                 <hr><h5>Peserta</h5>
@@ -308,26 +336,40 @@
 
                 {{-- Paraf --}}
                 <hr><h5>Paraf</h5>
+                <p class="text-muted">Pilih maksimal 3 orang untuk memberikan paraf.</p>
                 <div class="col-12 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#parafModal">+ Tambah Paraf</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-paraf-list"></div>
                 <div id="paraf-inputs"></div>
 
-                {{-- Signatures --}}
+                {{-- Signatures Section --}}
                 <hr><h5>Penandatangan</h5>
+
+                {{-- Signature 1 --}}
                 <h6>Signature 1</h6>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Penandatangan 1</button>
+                <p class="text-muted">Pilih atasan langsung sebagai penandatangan pertama.</p>
+                <div class="col-12 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Signature 1</button>
+                </div>
                 <div class="col-12 mb-2" id="selected-signature1-list"></div>
                 <div id="signature1-inputs"></div>
 
+                {{-- Signature 2 --}}
                 <h6>Signature 2</h6>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Penandatangan 2</button>
+                <p class="text-muted">Pilih <strong>Human Capital Manager</strong> sebagai penandatangan kedua.</p>
+                <div class="col-12 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Signature 2</button>
+                </div>
                 <div class="col-12 mb-2" id="selected-signature2-list"></div>
                 <div id="signature2-inputs"></div>
 
+                {{-- Signature 3 --}}
                 <h6>Signature 3</h6>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature3Modal">+ Tambah Penandatangan 3</button>
+                <p class="text-muted">Pilih <strong>Director HC & Finance</strong> sebagai penandatangan ketiga.</p>
+                <div class="col-12 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature3Modal">+ Tambah Signature 3</button>
+                </div>
                 <div class="col-12 mb-2" id="selected-signature3-list"></div>
                 <div id="signature3-inputs"></div>
 
@@ -355,22 +397,30 @@
                         <thead>
                             <tr>
                                 <th>Nama</th>
-                                <th>Jabatan</th>
+                                <th>Registration ID</th>
+                                <th>Jabatan Lengkap</th>
                                 <th>Departemen</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($users as $user)
-                            <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
+                            <tr data-name="{{ $user->name }}" 
+                                data-department="{{ $user->department->name ?? '' }}" 
+                                data-jabatan="{{ $user->jabatan->name ?? '' }}">
                                 <td>{{ $user->name }}</td>
-                                <td>{{ $user->jabatan->name ?? '-' }}</td>
+                                <td>{{ $user->registration_id }}</td>
+                                <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
                                 <td>{{ $user->department->name ?? '-' }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-success"
-                                        onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "participant")'>
-                                        Tambah
-                                    </button>
+                                  <button type="button" class="btn btn-sm btn-success"
+                                      onclick='addToList(@json([
+                                          "registration_id" => $user->registration_id,
+                                          "name" => $user->name,
+                                          "jabatan_full" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                                      ]), "participant")'>
+                                      Tambah
+                                  </button>
                                 </td>
                             </tr>
                             @endforeach
@@ -394,16 +444,32 @@
       <div class="modal-body">
         <input type="text" id="paraf-search" class="form-control mb-3" placeholder="Cari nama / jabatan / departemen">
         <table class="table table-sm">
+                      <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
+              <th>Departemen</th>
+              <th>Golongan</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
           <tbody>
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
-                <button type="button" class="btn btn-sm btn-success" 
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "paraf")'>
-                  Tambah
+                <button type="button" class="btn btn-sm btn-success"
+                    onclick='addToList(@json([
+                        "registration_id" => $user->registration_id,
+                        "name" => $user->name,
+                        "jabatan_full" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                    ]), "paraf")'>
+                    Tambah
                 </button>
               </td>
             </tr>
@@ -414,7 +480,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- Signature 1 Modal -->
 <div class="modal fade" id="signatureModal" tabindex="-1">
@@ -430,8 +495,10 @@
           <thead>
             <tr>
               <th>Nama</th>
-              <th>Jabatan</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
               <th>Departemen</th>
+              <th>Golongan</th>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -439,12 +506,18 @@
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-success"
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature")'>
-                  Tambah
+                    onclick='addToList(@json([
+                        "registration_id" => $user->registration_id,
+                        "name" => $user->name,
+                        "jabatan_full" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                    ]), "signature")'>
+                    Tambah
                 </button>
               </td>
             </tr>
@@ -470,8 +543,10 @@
           <thead>
             <tr>
               <th>Nama</th>
-              <th>Jabatan</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
               <th>Departemen</th>
+              <th>Golongan</th>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -479,12 +554,18 @@
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-success"
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature2")'>
-                  Tambah
+                    onclick='addToList(@json([
+                        "registration_id" => $user->registration_id,
+                        "name" => $user->name,
+                        "jabatan_full" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                    ]), "signature2")'>
+                    Tambah
                 </button>
               </td>
             </tr>
@@ -510,8 +591,10 @@
           <thead>
             <tr>
               <th>Nama</th>
-              <th>Jabatan</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
               <th>Departemen</th>
+              <th>Golongan</th>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -519,12 +602,18 @@
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-success"
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature3")'>
-                  Tambah
+                    onclick='addToList(@json([
+                        "registration_id" => $user->registration_id,
+                        "name" => $user->name,
+                        "jabatan_full" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                    ]), "signature3")'>
+                    Tambah
                 </button>
               </td>
             </tr>

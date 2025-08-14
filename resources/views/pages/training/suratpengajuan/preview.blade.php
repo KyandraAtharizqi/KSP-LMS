@@ -237,7 +237,13 @@
                 <div class="section-content">
 
                     {{-- Paraf --}}
-                    @php $parafs = $surat->approvals->where('type','paraf')->sortBy('sequence'); @endphp
+                    @php
+                        $latestRound = $surat->approvals->max('round');
+                        $parafs = $surat->approvals
+                            ->where('type','paraf')
+                            ->where('round', $latestRound)
+                            ->sortBy('sequence');
+                    @endphp
                     @if($parafs->count())
                         <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">Paraf</div>
                         <table style="width:100%; margin-top:5px; text-align:center;">
@@ -267,11 +273,15 @@
                     @endif
 
                     {{-- Signature --}}
-                    @php $sigs = $surat->approvals->where('type','signature')->sortBy('sequence'); @endphp
+                    @php
+                        $sigs = $surat->approvals
+                            ->where('type','signature')
+                            ->where('round', $latestRound)
+                            ->sortBy('sequence');
+                    @endphp
                     @if($sigs->count())
                         <div style="font-weight:bold; font-size:13px; margin:25px 0 8px;">Tanda Tangan</div>
                         <table style="width:100%; text-align:center;">
-                            {{-- Optional fixed labels row; comment out if not wanted --}}
                             <tr class="sign-grid-header">
                                 <td>Mengusulkan</td>
                                 <td>Mengetahui</td>

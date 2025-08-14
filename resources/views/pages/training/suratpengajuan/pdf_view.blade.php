@@ -243,18 +243,27 @@
             </div>
 
             {{-- Approval Section --}}
+            @php
+                $latestRound = $surat->approvals->max('round');
+                $parafs = $surat->approvals
+                    ->where('type','paraf')
+                    ->where('round', $latestRound)
+                    ->sortBy('sequence');
+                $sigs = $surat->approvals
+                    ->where('type','signature')
+                    ->where('round', $latestRound)
+                    ->sortBy('sequence');
+            @endphp
             <div style="margin-top:10px;">
                 <div class="section-content">
 
                     {{-- Paraf --}}
-                    @php $parafs = $surat->approvals->where('type','paraf')->sortBy('sequence'); @endphp
                     @if($parafs->count())
                         <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">Paraf</div>
                         <table style="width:100%; margin-top:5px; text-align:center;">
                             <tr>
                                 @foreach($parafs as $paraf)
                                     @php
-                                        // show only if approved & pdf_path exists & readable
                                         $pdfPath  = $paraf->pdf_path ?? null;
                                         $showImg  = $paraf->status === 'approved' && $pdfPath && is_readable($pdfPath);
                                     @endphp
@@ -279,7 +288,6 @@
                     @endif
 
                     {{-- Signature --}}
-                    @php $sigs = $surat->approvals->where('type','signature')->sortBy('sequence'); @endphp
                     @if($sigs->count())
                         <div style="font-weight:bold; font-size:13px; margin:25px 0 8px;">Tanda Tangan</div>
                         <table style="width:100%; text-align:center;">

@@ -20,6 +20,13 @@ class SuratTugasPelatihanSignatureAndParaf extends Model
         'kode_pelatihan',     // snapshot (string, NOT FK)
         'user_id',
         'registration_id',    // snapshot (string, NOT FK)
+        'jabatan_id',
+        'jabatan_full',
+        'department_id',
+        'directorate_id',
+        'division_id',
+        'superior_id',
+        'golongan',
         'type',               // 'paraf' or 'signature'
         'round',
         'sequence',

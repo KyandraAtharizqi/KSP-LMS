@@ -97,11 +97,19 @@
         <div class="card-body">
             <h5>Surat Tugas: <strong>{{ $suratTugas->kode_tugas ?? '-' }}</strong></h5>
             <p><strong>Judul:</strong> {{ $suratTugas->judul }}</p>
+            <p><strong>Kode Pelatihan:</strong> {{ $suratTugas->pelatihan->kode_pelatihan ?? '-' }}</p>
+            <p><strong>Kompetensi:</strong> {{ $suratTugas->pelatihan->kompetensi ?? '-' }}</p>
+            <p><strong>Lokasi:</strong> {{ $suratTugas->pelatihan->lokasi ?? '-' }}</p>
+            <p><strong>Instruktur:</strong> {{ $suratTugas->pelatihan->instruktur ?? '-' }}</p>
+            <p><strong>Sifat:</strong> {{ $suratTugas->pelatihan->sifat ?? '-' }}</p>
             <p><strong>Tanggal Pelatihan:</strong>
                 {{ optional($suratTugas->pelatihan->tanggal_mulai)->format('d M Y') ?? '-' }} s.d.
                 {{ optional($suratTugas->pelatihan->tanggal_selesai)->format('d M Y') ?? '-' }}
             </p>
-            <p><strong>Tempat:</strong> {{ $suratTugas->tempat }}</p>
+            <p><strong>Tempat:</strong> {{ $suratTugas->pelatihan->tempat ?? '-' }}</p>
+            <p><strong>Penyelenggara:</strong> {{ $suratTugas->pelatihan->penyelenggara ?? '-' }}</p>
+            <p><strong>Biaya:</strong> {{ $suratTugas->pelatihan->biaya ?? '-' }}</p>
+            <p><strong>Keterangan:</strong> {{ $suratTugas->pelatihan->keterangan ?? '-' }}</p>
 
             <form action="{{ route('training.surattugas.assign.submit') }}" method="POST">
                 @csrf
@@ -122,6 +130,27 @@
                 </div>
                 <div class="col-12 mb-2" id="selected-signature-list"></div>
                 <div id="signature-inputs"></div>
+
+                <div class="mb-3">
+                    <label for="tujuan">Tujuan</label>
+                    <textarea name="tujuan" class="form-control" required>{{ old('tujuan', $suratTugas->tujuan ?? '') }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="waktu">Waktu</label>
+                    <input type="text" name="waktu" class="form-control" value="{{ old('waktu', $suratTugas->waktu ?? '') }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="instruksi">Instruksi</label>
+                    <textarea name="instruksi" class="form-control" required>{{ old('instruksi', $suratTugas->instruksi ?? '') }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="hal_perhatian">Hal-hal yang perlu diperhatikan</label>
+                    <textarea name="hal_perhatian" class="form-control" required>{{ old('hal_perhatian', $suratTugas->hal_perhatian ?? '') }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="catatan">Catatan</label>
+                    <textarea name="catatan" class="form-control" required>{{ old('catatan', $suratTugas->catatan ?? '') }}</textarea>
+                </div>
 
                 <div class="d-flex justify-content-end mt-4">
                     <a href="{{ route('training.surattugas.index') }}" class="btn btn-secondary me-2">Batal</a>

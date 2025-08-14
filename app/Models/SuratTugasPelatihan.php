@@ -22,8 +22,13 @@ class SuratTugasPelatihan extends Model
         'created_by',
         'status',
         'is_accepted',
+        'tujuan',
+        'waktu',
+        'instruksi',
+        'hal_perhatian',
+        'catatan',
     ];
-
+    
     protected $casts = [
         'tanggal' => 'date',
         'tanggal_pelatihan' => 'date',

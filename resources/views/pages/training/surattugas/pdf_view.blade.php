@@ -141,21 +141,12 @@
             </td>
         </tr>
         <tr>
-            <td colspan="2">Untuk mengikuti kegiatan pelatihan dengan informasi sebagai berikut:</td>
-        </tr>
-        <tr>
             <td class="label-strong">Judul</td>
             <td>{{ $surat->judul }}</td>
         </tr>
         <tr>
             <td class="label-strong">Tujuan / Sasaran</td>
-            <td>
-                <ol class="list-ol">
-                    <li>MEMENUHI GAP KOMPETENSI</li>
-                    <li>MEMBERIKAN PEMAHAMAN TERKAIT</li>
-                    <li>MENINGKATKAN KOMPETENSI TERKAIT</li>
-                </ol>
-            </td>
+            <td>{!! nl2br(e($surat->tujuan ?? '-')) !!}</td>
         </tr>
         <tr>
             <td class="label-strong">Nama Instruktur / Lembaga</td>
@@ -175,30 +166,19 @@
         </tr>
         <tr>
             <td class="label-strong">Waktu Pelaksanaan Pelatihan</td>
-            <td>09:00 - 17:00 WIB</td>
+            <td>{!! nl2br(e($surat->waktu ?? '-')) !!}</td>
         </tr>
         <tr>
             <td class="label-strong">Instruksi Saat Kegiatan</td>
-            <td>
-                <ol class="list-ol">
-                    <li>Agar mengikuti jadwal yang telah ditentukan sampai dengan selesai.</li>
-                    <li>Memperhatikan aspek-aspek Keselamatan dan Kesehatan Kerja (K3) selama kegiatan berlangsung.</li>
-                </ol>
-            </td>
+            <td>{!! nl2br(e($surat->instruksi ?? '-')) !!}</td>
         </tr>
         <tr>
             <td class="label-strong">Hal-hal yang perlu diperhatikan</td>
-            <td>
-                <ol class="list-ol">
-                    <li>Copy Materi pelatihan diserahkan ke Human Capital Department.</li>
-                    <li>Copy Sertifikat diserahkan ke Human Capital Department.</li>
-                    <li>Agar menerapkan materi pelatihan di lingkungan kerja PT. KSP.</li>
-                </ol>
-            </td>
+            <td>{!! nl2br(e($surat->hal_perhatian ?? '-')) !!}</td>
         </tr>
         <tr>
             <td class="label-strong">Catatan</td>
-            <td>Apabila tidak mengikuti tugas ini maka akan dikenakan sanksi sesuai dengan PKB Pasal 86 ayat 2 point a butir 5.</td>
+            <td>{!! nl2br(e($surat->catatan ?? '-')) !!}</td>
         </tr>
     </table>
 

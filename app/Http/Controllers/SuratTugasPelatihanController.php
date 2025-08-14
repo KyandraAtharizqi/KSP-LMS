@@ -199,6 +199,11 @@ class SuratTugasPelatihanController extends Controller
             'paraf_users'    => 'nullable|array|max:3',
             'paraf_users.*'  => 'nullable|exists:users,id',
             'signature_user' => 'required|exists:users,id',
+            'tujuan'         => 'nullable|string',
+            'waktu'          => 'nullable|string',
+            'instruksi'      => 'nullable|string',
+            'hal_perhatian'  => 'nullable|string',
+            'catatan'        => 'nullable|string',
         ]);
 
         $user = Auth::user();
@@ -239,7 +244,16 @@ class SuratTugasPelatihanController extends Controller
             ?? optional($surat->pelatihan)->kode_pelatihan
             ?? ('TUGAS-' . $surat->id);
 
-        DB::transaction(function () use ($surat, $parafIds, $signatureId, $usersMap, $kodePelatihan) {
+        DB::transaction(function () use ($surat, $parafIds, $signatureId, $usersMap, $kodePelatihan, $request) {
+            // Update surat tugas with additional fields
+            $surat->update([
+                'tujuan'        => $request->input('tujuan'),
+                'waktu'         => $request->input('waktu'),
+                'instruksi'     => $request->input('instruksi'),
+                'hal_perhatian' => $request->input('hal_perhatian'),
+                'catatan'       => $request->input('catatan'),
+            ]);
+
             $surat->signaturesAndParafs()->delete();
 
             $round    = 1;
@@ -255,6 +269,13 @@ class SuratTugasPelatihanController extends Controller
                     'kode_pelatihan'  => $kodePelatihan,
                     'user_id'         => $userId,
                     'registration_id' => $user->registration_id,
+                    'jabatan_id'      => $user->jabatan_id,
+                    'jabatan_full'    => $user->jabatan_full ?? ($user->jabatan->name ?? null),
+                    'department_id'   => $user->department_id,
+                    'directorate_id'  => $user->directorate_id,
+                    'division_id'     => $user->division_id,
+                    'superior_id'     => $user->superior_id,
+                    'golongan'        => $user->golongan ?? null,
                     'round'           => $round,
                     'sequence'        => $sequence++,
                     'type'            => 'paraf',
@@ -269,6 +290,13 @@ class SuratTugasPelatihanController extends Controller
                     'kode_pelatihan'  => $kodePelatihan,
                     'user_id'         => $signatureId,
                     'registration_id' => $sigUser->registration_id,
+                    'jabatan_id'      => $sigUser->jabatan_id,
+                    'jabatan_full'    => $sigUser->jabatan_full ?? ($sigUser->jabatan->name ?? null),
+                    'department_id'   => $sigUser->department_id,
+                    'directorate_id'  => $sigUser->directorate_id,
+                    'division_id'     => $sigUser->division_id,
+                    'superior_id'     => $sigUser->superior_id,
+                    'golongan'        => $sigUser->golongan ?? null,
                     'round'           => $round,
                     'sequence'        => $sequence,
                     'type'            => 'signature',

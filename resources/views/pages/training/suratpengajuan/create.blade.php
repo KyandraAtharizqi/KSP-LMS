@@ -1,6 +1,22 @@
 @extends('layout.main')
 
 @push('script')
+
+<style>
+    .modal-lg {
+        max-width: 1100px !important;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+        text-align: center;
+        min-width: 140px;
+        font-size: 15px;
+    }
+    .table th {
+        background: #f8f9fa;
+    }
+</style>
+
 <script>
     let selectedParticipants = [];
     let selectedParafs = [];
@@ -17,8 +33,10 @@
         arr.forEach(user => {
             const tag = document.createElement('div');
             tag.className = `badge bg-${color} me-1 mb-1 d-inline-flex align-items-center`;
-            tag.innerHTML = `${user.name} (${user.registration_id})
-                <button type="button" class="btn-close btn-sm ms-2" onclick="removeFromList('${user.registration_id}', '${containerId}')"></button>`;
+            tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan} - ${user.golongan}
+                <button type="button" class="btn-close btn-sm ms-2" 
+                        onclick="removeFromList('${user.registration_id}', '${containerId}')">
+                </button>`;
             container.appendChild(tag);
 
             const input = document.createElement('input');
@@ -93,15 +111,23 @@
         ];
 
         searchInputs.forEach(({ inputId, tableSelector }) => {
-            const input = document.getElementById(inputId);
-            const rows = document.querySelectorAll(tableSelector);
-            input.addEventListener('input', function () {
-                const keyword = input.value.toLowerCase();
-                rows.forEach(row => {
-                    const name = row.dataset.name.toLowerCase();
-                    const dept = row.dataset.department.toLowerCase();
-                    const jabatan = row.dataset.jabatan.toLowerCase();
-                    row.style.display = (name.includes(keyword) || dept.includes(keyword) || jabatan.includes(keyword)) ? '' : 'none';
+                const input = document.getElementById(inputId);
+                const rows = document.querySelectorAll(tableSelector);
+                input.addEventListener('input', function () {
+                    const keyword = input.value.toLowerCase();
+                    rows.forEach(row => {
+                        const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                        const regid = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        const jabatan = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                        const dept = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                        const golongan = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                        row.style.display = (
+                            name.includes(keyword) ||
+                            regid.includes(keyword) ||
+                            jabatan.includes(keyword) ||
+                            dept.includes(keyword) ||
+                            golongan.includes(keyword)
+                        ) ? '' : 'none';
                 });
             });
         });
@@ -252,7 +278,7 @@
                 <!-- Signature 1 -->
                 <h6>Signature 1</h6>
                 <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Penandatangan</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Signature 1</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-signature1-list"></div>
                 <div id="signature1-inputs"></div>
@@ -301,20 +327,31 @@
                         <thead>
                             <tr>
                                 <th>Nama</th>
-                                <th>Jabatan</th>
+                                <th>Registration ID</th>
+                                <th>Jabatan Lengkap</th>
                                 <th>Departemen</th>
+                                <th>Golongan</th>
                                 <th>Aksi</th>
+
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($users as $user)
-                            <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
+                            <tr data-name="{{ $user->name }}" 
+                                data-department="{{ $user->department->name ?? '' }}" 
+                                data-jabatan="{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}">
                                 <td>{{ $user->name }}</td>
-                                <td>{{ $user->jabatan->name ?? '-' }}</td>
+                                <td>{{ $user->registration_id }}</td>
+                                <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
                                 <td>{{ $user->department->name ?? '-' }}</td>
+                                <td>{{ $user->golongan ?? '-' }}</td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-success"
-                                        onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "participant")'>
+                                        onclick='addToList(@json([
+                                            "registration_id" => $user->registration_id,
+                                            "name" => $user->name,
+                                            "jabatan" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                                        ]), "participant")'>
                                         Tambah
                                     </button>
                                 </td>
@@ -340,12 +377,24 @@
       <div class="modal-body">
         <input type="text" id="paraf-search" class="form-control mb-3" placeholder="Cari nama / jabatan / departemen">
         <table class="table table-sm">
+                      <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
+              <th>Departemen</th>
+              <th>Golongan</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
           <tbody>
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-success" 
                   onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "paraf")'>
@@ -362,6 +411,7 @@
 </div>
 
 
+
 <!-- Signature 1 Modal -->
 <div class="modal fade" id="signatureModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
@@ -376,8 +426,10 @@
           <thead>
             <tr>
               <th>Nama</th>
-              <th>Jabatan</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
               <th>Departemen</th>
+              <th>Golongan</th>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -385,8 +437,10 @@
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-success"
                   onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature")'>
@@ -416,8 +470,10 @@
           <thead>
             <tr>
               <th>Nama</th>
-              <th>Jabatan</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
               <th>Departemen</th>
+              <th>Golongan</th>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -425,8 +481,10 @@
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-success"
                   onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature2")'>
@@ -456,8 +514,10 @@
           <thead>
             <tr>
               <th>Nama</th>
-              <th>Jabatan</th>
+              <th>Registration ID</th>
+              <th>Jabatan Lengkap</th>
               <th>Departemen</th>
+              <th>Golongan</th>
               <th>Aksi</th>
             </tr>
           </thead>
@@ -465,8 +525,10 @@
             @foreach($users as $user)
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
-              <td>{{ $user->jabatan->name ?? '-' }}</td>
+              <td>{{ $user->registration_id }}</td>
+              <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
+              <td>{{ $user->golongan ?? '-' }}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-success"
                   onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature3")'>

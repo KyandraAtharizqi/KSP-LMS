@@ -200,12 +200,24 @@ class SuratPengajuanPelatihanController extends Controller
             'approvals.user',
         ])->findOrFail($id);
 
-        // Only creator
+        // Check if user is creator
         if ((int)auth()->id() !== (int)$surat->created_by) {
-            abort(403);
+            abort(403, 'Anda tidak memiliki akses untuk mengubah surat ini.');
         }
 
-        $latestRound     = $surat->approvals->max('round');
+        // Check if surat has rejection in latest round
+        $latestRound = $surat->approvals->max('round');
+        $hasRejection = $surat->approvals()
+            ->where('round', $latestRound)
+            ->where('status', 'rejected')
+            ->exists();
+
+        if (!$hasRejection) {
+            return redirect()
+                ->route('training.suratpengajuan.index')
+                ->with('error', 'Surat tidak dapat diubah karena belum ada penolakan pada round terakhir.');
+        }
+
         $latestRejection = $surat->approvals
             ->where('round', $latestRound)
             ->firstWhere('status', 'rejected');

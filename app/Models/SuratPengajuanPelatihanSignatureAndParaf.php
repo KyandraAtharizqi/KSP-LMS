@@ -12,6 +12,13 @@ class SuratPengajuanPelatihanSignatureAndParaf extends Model
     protected $fillable = [
         'pelatihan_id',
         'user_id',
+        'jabatan_id',
+        'jabatan_full',
+        'department_id',
+        'directorate_id',
+        'division_id',
+        'superior_id',
+        'golongan',
         'kode_pelatihan',
         'registration_id',
         'round',
