@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('perihal');
             $table->string('judul');
             $table->string('pemateri');
-            $table->date('tanggal');
+            $table->datetime('tanggal_mulai');
+            $table->datetime('tanggal_selesai');
             $table->json('peserta')->nullable();
             $table->string('lampiran')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
@@ -26,7 +27,7 @@ return new class extends Migration
 
             // Index untuk optimasi query
             $table->index('status');
-            $table->index('tanggal');
+            $table->index('tanggal_mulai');
         });
     }
 

@@ -9,41 +9,28 @@ use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
+    public function register()
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
+    public function boot()
     {
-        // View Composer untuk navbar
         View::composer('components.navbar', function ($view) {
-            $user = Auth::user();
+            if (Auth::check()) {
+                $user = Auth::user();
 
-            if ($user) {
-                // Ambil 5 notifikasi terbaru
                 $notifikasi = Notifikasi::where('user_id', $user->id)
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->get();
 
-                // Hitung jumlah notifikasi yang belum dibaca
                 $unreadCount = Notifikasi::where('user_id', $user->id)
                     ->where('dibaca', false)
                     ->count();
-            } else {
-                $notifikasi = collect();
-                $unreadCount = 0;
-            }
 
-            // Kirim data ke view navbar
-            $view->with(compact('notifikasi', 'unreadCount'));
+                $view->with(compact('notifikasi', 'unreadCount'));
+            }
         });
     }
 }

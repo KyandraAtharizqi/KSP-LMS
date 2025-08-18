@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PengajuanKnowledge extends Model
+class SuratUndangan extends Model
 {
-    protected $table = 'knowledge_pengajuan';
-    
+    protected $table = 'knowledge_pengajuan'; // Kita pakai tabel yang sama
+
     protected $fillable = [
         'kode',
         'created_by',
@@ -26,19 +26,13 @@ class PengajuanKnowledge extends Model
     ];
 
     protected $casts = [
+        'peserta' => 'array',
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
-        'peserta' => 'array',
     ];
 
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function pesertaUsers()
-    {
-        $ids = collect($this->peserta)->pluck('id')->filter()->all();
-        return \App\Models\User::whereIn('id', $ids)->get();
     }
 }

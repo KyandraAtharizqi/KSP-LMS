@@ -92,6 +92,11 @@
                         <div data-i18n="Pengajuan Knowledge Sharing">Pengajuan Knowledge Sharing</div>
                     </a>
                 </li>
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.undangan.index') ? 'active' : '' }}">
+                    <a href="{{ route('knowledge.undangan.index') }}" class="menu-link">
+                        <div data-i18n="Surat Undangan">Surat Undangan</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.notadinas.index') ? 'active' : '' }}">
                     <a href="{{ route('knowledge.notadinas.index') }}" class="menu-link">
                         <div data-i18n="Nota Dinas">Nota Dinas</div>

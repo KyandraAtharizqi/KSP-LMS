@@ -10,11 +10,27 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Super Admin
+        User::create([
+            'id' => 1,
+            'registration_id' => 'ADM01',
+            'name' => 'Administrator',
+            'email' => 'admin@admin.com',
+            'email_verified_at' => '2025-06-23 04:55:06',
+            'password' => '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6',
+            'phone' => '082121212121',
+            'role' => 'admin',
+            'is_active' => 1,
+            'remember_token' => 'b0KlSFqz7aDQudhyzTHVAQp1lhE98MgSmlqWET4scah78nwe5lLJyZrzQopG',
+            'created_at' => '2025-06-23 04:55:06',
+            'updated_at' => '2025-06-23 04:55:06'
+        ]);
+
         // 1. Director
         User::create([
             'registration_id' => 'DIR001',
             'name' => 'Dewi Director',
-            'email' => null,
+            'email' => 'dewi.director@ksp-lms.test',
             'phone' => '08111111001',
             'password' => Hash::make('password'),
             'role' => 'admin',
@@ -30,7 +46,7 @@ class UserSeeder extends Seeder
         User::create([
             'registration_id' => 'ADIR001',
             'name' => 'Arief Assistant',
-            'email' => null,
+            'email' => 'arief.assistant@ksp-lms.test',
             'phone' => '08111111002',
             'password' => Hash::make('password'),
             'role' => 'admin',
@@ -46,7 +62,7 @@ class UserSeeder extends Seeder
         User::create([
             'registration_id' => 'GM001',
             'name' => 'Gita GM CP',
-            'email' => null,
+            'email' => 'gita.gm@ksp-lms.test',
             'phone' => '08111111003',
             'password' => Hash::make('password'),
             'role' => 'department_admin',
@@ -63,7 +79,7 @@ class UserSeeder extends Seeder
         User::create([
             'registration_id' => 'GM002',
             'name' => 'Hendra GM Hotel',
-            'email' => null,
+            'email' => 'hendra.gm@ksp-lms.test',
             'phone' => '08111111004',
             'password' => Hash::make('password'),
             'role' => 'department_admin',
@@ -80,7 +96,7 @@ class UserSeeder extends Seeder
         User::create([
             'registration_id' => 'EA001',
             'name' => 'Ela Exec Hotel',
-            'email' => null,
+            'email' => 'ela.exec@ksp-lms.test',
             'phone' => '08111111005',
             'password' => Hash::make('password'),
             'role' => 'upper_staff',
@@ -124,7 +140,7 @@ class UserSeeder extends Seeder
             User::create([
                 'registration_id' => 'MAN' . str_pad($id, 3, '0', STR_PAD_LEFT),
                 'name' => 'Manager ' . $name,
-                'email' => null,
+                'email' => strtolower(str_replace(' ', '.', $name)) . '@ksp-lms.test',
                 'phone' => '0811111' . str_pad($id + 100, 4, '0', STR_PAD_LEFT),
                 'password' => Hash::make('password'),
                 'role' => 'department_admin',

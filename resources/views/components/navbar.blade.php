@@ -22,41 +22,63 @@
                         placeholder="{{ __('navbar.search') }}"
                         aria-label="{{ __('navbar.search') }}"
                     />
-
                 </div>
             </div>
         </form>
         <!-- /Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
+            <!-- Notifikasi -->
+            <li class="nav-item dropdown">
+                <a class="nav-link position-relative d-flex align-items-center" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bx bx-bell fs-4"></i>
+                    <span class="ms-1">Notifikasi</span> <!-- tulisan tambahan -->
+                    @if($unreadCount > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ $unreadCount }}
+                            <span class="visually-hidden">notifikasi baru</span>
+                        </span>
+                    @endif
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end py-0" aria-labelledby="notifDropdown" style="width: 300px; max-height: 350px; overflow-y: auto;">
+                    <li class="dropdown-header bg-light py-2 px-3 fw-semibold">Notifikasi</li>
+                    @forelse($notifikasi as $note)
+                        <li class="dropdown-item d-flex flex-column {{ !$note->dibaca ? 'bg-light' : '' }}">
+                            <strong>{{ $note->judul }}</strong>
+                            <span>{{ $note->pesan }}</span>
+                            @if($note->link)
+                                <a href="{{ $note->link }}" class="text-primary">Lihat Detail</a>
+                            @endif
+                            <small class="text-muted">{{ $note->created_at->diffForHumans() }}</small>
+                        </li>
+                    @empty
+                        <li class="dropdown-item text-center text-muted">Belum ada notifikasi</li>
+                    @endforelse
+                </ul>
+            </li>
+
             <!-- User -->
-            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+            <li class="nav-item navbar-dropdown dropdown-user dropdown ms-3">
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                        {{-- LOGIKA BARU UNTUK AVATAR --}}
                         @php
                             $user = auth()->user();
                             $picture = $user->profile_picture;
-                            
-                            // Cek apakah path gambar ada dan bukan sebuah URL lengkap
-                            if ($picture && !\Illuminate\Support\Str::startsWith($picture, 'http')) {
-                                // Jika path lokal, buat URL ke folder storage
-                                $pictureUrl = asset('storage/' . $picture);
-                            } else {
-                                // Jika sudah URL lengkap atau kosong, gunakan langsung atau buat avatar default
-                                $pictureUrl = $picture ?: 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random&size=128';
-                            }
+                            $pictureUrl = $picture && !\Illuminate\Support\Str::startsWith($picture, 'http')
+                                ? asset('storage/' . $picture)
+                                : ($picture ?: 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random&size=128');
                         @endphp
                         <img src="{{ $pictureUrl }}" alt="Avatar" class="w-px-40 h-auto rounded-circle" />
                     </div>
                 </a>
+
                 <ul class="dropdown-menu dropdown-menu-end">
+                    <!-- Header User -->
                     <li>
                         <a class="dropdown-item" href="{{ route('profile.show') }}">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        {{-- Terapkan juga logika yang sama untuk avatar di dropdown --}}
                                         <img src="{{ $pictureUrl }}" alt="Avatar" class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </div>
@@ -67,32 +89,21 @@
                             </div>
                         </a>
                     </li>
-                    <li>
-                        <div class="dropdown-divider"></div>
-                    </li>
+                    <li><div class="dropdown-divider"></div></li>
+
+                    <!-- Profil -->
                     <li>
                         <a class="dropdown-item" href="{{ route('profile.show') }}">
-                            <i class="bx bx-user me-2"></i>
-                            <span class="align-middle">{{ __('navbar.profile.profile') }}</span>
+                            <i class="bx bx-user me-2"></i> Profil
                         </a>
                     </li>
-                    @if($user->role == 'admin')
-                    <li>
-                        <a class="dropdown-item" href="{{ route('settings.show') }}">
-                            <i class="bx bx-cog me-2"></i>
-                            <span class="align-middle">{{ __('navbar.profile.settings') }}</span>
-                        </a>
-                    </li>
-                    @endif
-                    <li>
-                        <div class="dropdown-divider"></div>
-                    </li>
+
+                    <!-- Logout -->
                     <li>
                         <form action="{{ route('logout') }}" method="post">
                             @csrf
                             <button class="dropdown-item cursor-pointer">
-                                <i class="bx bx-power-off me-2"></i>
-                                <span class="align-middle">{{ __('navbar.profile.logout') }}</span>
+                                <i class="bx bx-power-off me-2"></i> Logout
                             </button>
                         </form>
                     </li>

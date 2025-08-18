@@ -95,7 +95,7 @@
 
     <div class="card">
         <div class="card-body">
-            <h5>Surat Tugas: <strong>{{ $suratTugas->kode_tugas ?? '-' }}</strong></h5>
+            <h5>Surat Tugas: <strong>{{ $suratTugas->kode_pelatihan ?? '-' }}</strong></h5>
             <p><strong>Judul:</strong> {{ $suratTugas->judul }}</p>
             <p><strong>Kode Pelatihan:</strong> {{ $suratTugas->pelatihan->kode_pelatihan ?? '-' }}</p>
             <p><strong>Kompetensi:</strong> {{ $suratTugas->pelatihan->kompetensi ?? '-' }}</p>

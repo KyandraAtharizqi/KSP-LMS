@@ -101,9 +101,16 @@
                     <input type="file" class="form-control" id="lampiran" name="lampiran" accept="application/pdf">
                 </div>
 
-                <div class="mb-3">
-                    <label for="tanggal" class="form-label">Tanggal</label>
-                    <input type="date" class="form-control" id="tanggal" name="tanggal" value="{{ old('tanggal') }}" required>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
+                        <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="tanggal_selesai" class="form-label">Tanggal Selesai</label>
+                        <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required>
+                    </div>
                 </div>
 
                 <!-- Peserta Section -->

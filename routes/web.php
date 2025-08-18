@@ -23,6 +23,7 @@ use App\Http\Controllers\DaftarHadirPelatihanPresenterController;
 use App\Http\Controllers\NotaDinasController;
 use App\Http\Controllers\DaftarHadirKnowledgeController;
 use App\Http\Controllers\PengajuanKnowledgeController;
+use App\Http\Controllers\NotifikasiController;
 
 /* 👇 NEW Evaluation controllers (create these) */
 use App\Http\Controllers\EvaluasiLevel1Controller;
@@ -79,6 +80,31 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/profile/upload-signature', [PageController::class, 'uploadSignature'])->name('profile.upload.signature');
     Route::post('/profile/upload-paraf', [PageController::class, 'uploadParaf'])->name('profile.upload.paraf');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Notifikasi
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.show');
+        Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
+        // Route untuk testing notifikasi
+        Route::get('/test-notification', function() {
+            $notifikasiController = new NotifikasiController();
+            return $notifikasiController->sendNotification(
+                auth()->id(),
+                'knowledge_sharing',
+                [
+                    'judul' => 'Test Notifikasi',
+                    'pemateri' => 'Test Pemateri',
+                    'tanggal_mulai' => now(),
+                    'tanggal_selesai' => now()->addHour(),
+                    'id' => 1
+                ]
+            );
+        })->name('notification.test');
+    });
 
 
     /*
@@ -274,14 +300,25 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [PengajuanKnowledgeController::class, 'index'])->name('index');          // GET /knowledge/pengajuan
             Route::get('/create', [PengajuanKnowledgeController::class, 'create'])->name('create');  // GET /knowledge/pengajuan/create
             Route::post('/', [PengajuanKnowledgeController::class, 'store'])->name('store');         // POST /knowledge/pengajuan
-            Route::get('/{id}', [PengajuanKnowledgeController::class, 'show'])->name('show');        // GET /knowledge/pengajuan/{id}
+            Route::get('/{id}', [PengajuanKnowledgeController::class, 'preview'])->name('preview');        // GET /knowledge/pengajuan/{id}
             Route::get('/{id}/edit', [PengajuanKnowledgeController::class, 'edit'])->name('edit');   // GET /knowledge/pengajuan/{id}/edit
             Route::put('/{id}', [PengajuanKnowledgeController::class, 'update'])->name('update');    // PUT /knowledge/pengajuan/{id}
             Route::delete('/{id}', [PengajuanKnowledgeController::class, 'destroy'])->name('destroy'); // DELETE /knowledge/pengajuan/{id}
             Route::get('/{id}/download', [PengajuanKnowledgeController::class, 'download'])->name('download'); // GET /knowledge/pengajuan/{id}/download
             Route::patch('/{id}/approve', [PengajuanKnowledgeController::class, 'approve'])->name('approve');
             Route::patch('/{id}/reject', [PengajuanKnowledgeController::class, 'reject'])->name('reject');
+            Route::patch('/{id}', [PengajuanKnowledgeController::class, 'update'])->name('knowledge.pengajuan.update');
+
         });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Undangan Knowledge SHaring
+    |--------------------------------------------------------------------------
+    */
+    Route::group(['prefix' => 'knowledge', 'middleware' => ['auth']], function() {
+        Route::get('undangan', [App\Http\Controllers\SuratUndanganController::class, 'index'])->name('knowledge.undangan.index');
     });
 
     /*

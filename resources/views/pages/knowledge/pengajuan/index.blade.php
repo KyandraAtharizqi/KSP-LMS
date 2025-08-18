@@ -35,7 +35,15 @@
                         <tr>
                             <td>{{ $item->perihal }}</td>
                             <td>{{ $item->pemateri }}</td>
-                            <td>{{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d M Y') : '-' }}</td>
+                            <td>
+                                <div class="row mb-2">
+                                    <div class="col-sm-9">
+                                        {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') }}
+                                        -
+                                        {{ \Carbon\Carbon::parse($item->tanggal_selesai)->format('d M Y') }}
+                                    </div>
+                                </div>
+                            </td>
                             <td>
                                 @if($item->status == 'pending')
                                     <span class="badge bg-warning">Menunggu</span>
@@ -48,7 +56,7 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-info">Detail</a>
+                                <a href="{{ route('knowledge.pengajuan.preview', $item->id) }}" class="btn btn-sm btn-info me-1 my-2">Detail</a>
 
                                 {{-- Logika untuk menampilkan tombol persetujuan --}}
                                 @if($item->kepada == Auth::user()->name && $item->status == 'pending')
@@ -58,7 +66,6 @@
                                         <button type="submit" class="btn btn-sm btn-success">Setujui</button>
                                     </form>
                                     
-                                    {{-- Tombol Tolak perlu modal untuk alasan penolakan --}}
                                     <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-{{ $item->id }}">
                                         Tolak
                                     </button>
@@ -66,7 +73,15 @@
 
                                 {{-- Tombol Edit hanya untuk pembuat pengajuan --}}
                                 @if($item->created_by == Auth::id() && $item->status == 'pending')
-                                     <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{{ route('knowledge.pengajuan.edit', $item->id) }}" class="btn btn-sm btn-warning my-1">Edit</a>
+                                @endif
+                                @if($item->created_by == Auth::id() && $item->status == 'pending')
+                                    <form action="{{ route('knowledge.pengajuan.destroy', $item->id) }}" method="POST" class="d-inline"
+                                        onsubmit="return confirm('Yakin ingin menghapus pengajuan ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
                                 @endif
                             </td>
                         </tr>
