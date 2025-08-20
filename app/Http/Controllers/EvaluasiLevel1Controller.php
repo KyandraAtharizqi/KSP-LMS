@@ -37,8 +37,10 @@ class EvaluasiLevel1Controller extends Controller
     {
         $user = Auth::user();
 
+        // Get the participant record with relationships
         $participant = $pelatihan->participants()
             ->where('user_id', $user->id)
+            ->with(['user', 'jabatan', 'department', 'directorate', 'division', 'superior'])
             ->first();
 
         if (!$participant) {
@@ -55,8 +57,6 @@ class EvaluasiLevel1Controller extends Controller
                 ->with('info', 'Anda sudah mengisi evaluasi untuk pelatihan ini.');
         }
 
-        $registration_id = $participant->registration_id;
-
         // Get all presenters/instrukturs from pelatihan_presenters table for this training
         $presenters = PelatihanPresenter::with(['user', 'presenter'])
             ->where('pelatihan_id', $pelatihan->id)
@@ -64,10 +64,7 @@ class EvaluasiLevel1Controller extends Controller
             ->orderBy('created_at')
             ->get();
 
-        // Debug - remove this after testing
-        \Log::info('Presenters for training ' . $pelatihan->id . ':', $presenters->toArray());
-
-        return view('pages.training.evaluasilevel1.form', compact('pelatihan', 'registration_id', 'presenters'));
+        return view('pages.training.evaluasilevel1.form', compact('pelatihan', 'participant', 'presenters'));
     }
 
     public function store(Request $request, SuratPengajuanPelatihan $pelatihan)
@@ -78,6 +75,10 @@ class EvaluasiLevel1Controller extends Controller
             
             $validationRules = [
                 'user_id' => 'required|exists:users,id',
+                'pelatihan_id' => 'required|exists:surat_pengajuan_pelatihans,id',
+                'registration_id' => 'required|string',
+                'kode_pelatihan' => 'required|string',
+                'superior_id' => 'nullable|exists:users,id',
                 'ringkasan_isi_materi' => 'required|string',
                 'ide_saran_pengembangan' => 'required|string',
                 'komplain_saran_masukan' => 'required|string',

@@ -312,18 +312,12 @@ class DaftarHadirPelatihanController extends Controller
 
                     if (!$alreadyExists) {
                         \App\Models\EvaluasiLevel1::create([
-                            'user_id'             => $userId,
-                            'registration_id'     => $participant->registration_id,
-                            'pelatihan_id'        => $pelatihan->id,
-                            'kode_pelatihan'      => $pelatihan->kode_pelatihan,
-                            'nama_pelatihan'      => $pelatihan->judul,
-                            'tanggal_pelaksanaan' => $pelatihan->tanggal_mulai,
-                            'tempat'              => $pelatihan->tempat,
-                            'name'                => $participant->user->name,
-                            'department'          => $participant->department->name ?? '-',
-                            'jabatan_full'        => $participant->jabatan->name ?? '-',
-                            'superior_id'         => $participant->superior_id,
-                            'is_submitted'        => false,
+                            'pelatihan_id'    => $pelatihan->id,
+                            'user_id'         => $userId,
+                            'registration_id' => $participant->registration_id,
+                            'kode_pelatihan'  => $participant->kode_pelatihan ?? $pelatihan->kode_pelatihan,
+                            'superior_id'     => $participant->superior_id,
+                            'is_submitted'    => false,
                         ]);
                     }
                 }
@@ -377,12 +371,13 @@ class DaftarHadirPelatihanController extends Controller
                 \App\Models\EvaluasiLevel1::firstOrCreate(
                     [
                         'pelatihan_id' => $pelatihan->id,
-                        'user_id' => $participant->id,
+                        'user_id'      => $participant->user_id,
                     ],
                     [
-                        'jabatan_id' => $participant->pivot->jabatan_id ?? $participant->jabatan_id,
-                        'department_id' => $participant->pivot->department_id ?? $participant->department_id,
-                        'superior_id' => $participant->pivot->superior_id ?? $participant->superior_id,
+                        'registration_id' => $participant->registration_id,
+                        'kode_pelatihan'  => $participant->kode_pelatihan ?? $pelatihan->kode_pelatihan,
+                        'superior_id'     => $participant->superior_id,
+                        'is_submitted'    => false,
                     ]
                 );
             }
@@ -475,6 +470,83 @@ class DaftarHadirPelatihanController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /* ===============================================================
+    | PREVIEW AND PDF
+    * ===============================================================*/
+
+    public function preview($pelatihanId, $date)
+    {
+        $day = \Carbon\Carbon::parse($date)->toDateString();
+
+        $pelatihan = SuratPengajuanPelatihan::with([
+            'participants' => function ($q) {
+                $q->with([
+                    'user',
+                    'jabatan',
+                    'department',
+                    'division',
+                    'directorate',
+                    'superior',
+                ]);
+            },
+            'presenters' => function ($q) use ($day) {
+                $q->whereDate('date', $day)
+                ->with(['user', 'presenter']);
+            },
+        ])->findOrFail($pelatihanId);
+
+        $attendances = \App\Models\DaftarHadirPelatihan::where('pelatihan_id', $pelatihanId)
+            ->whereDate('date', $day)
+            ->get()
+            ->keyBy('user_id');
+
+        $status = \App\Models\DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihanId)
+            ->where('date', $day)
+            ->first();
+
+        return view('pages.training.daftarhadirpelatihan.preview', compact(
+            'pelatihan', 'attendances', 'status', 'day'
+        ));
+    }
+
+    public function pdf($pelatihanId, $date)
+    {
+        $day = \Carbon\Carbon::parse($date)->toDateString();
+
+        $pelatihan = SuratPengajuanPelatihan::with([
+            'participants' => function ($q) {
+                $q->with([
+                    'user',
+                    'jabatan',
+                    'department',
+                    'division',
+                    'directorate',
+                    'superior',
+                ]);
+            },
+            'presenters' => function ($q) use ($day) {
+                $q->whereDate('date', $day)
+                ->with(['user', 'presenter']);
+            },
+        ])->findOrFail($pelatihanId);
+
+        $attendances = \App\Models\DaftarHadirPelatihan::where('pelatihan_id', $pelatihanId)
+            ->whereDate('date', $day)
+            ->get()
+            ->keyBy('user_id');
+
+        $status = \App\Models\DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihanId)
+            ->where('date', $day)
+            ->first();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'pages.training.daftarhadirpelatihan.pdf_view',
+            compact('pelatihan', 'attendances', 'status', 'day')
+        );
+
+        return $pdf->download('DaftarHadir_' . $pelatihan->kode_pelatihan . '_' . $day . '.pdf');
     }
 
     /* ===============================================================

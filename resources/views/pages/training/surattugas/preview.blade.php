@@ -75,9 +75,6 @@
             {{-- BAGIAN ISI SURAT --}}
             <table class="table table-bordered-custom">
                 <tr>
-                    <td colspan="2">Kepada Yth.</td>
-                </tr>
-                <tr>
                     <td><strong>Peserta</strong></td>
                     <td>
                         <ol class="mb-0 ps-3">

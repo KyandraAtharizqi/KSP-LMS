@@ -127,6 +127,18 @@
                                         Menunggu Submit Presenter
                                     </button>
                                 @endif
+
+                                {{-- New logic for preview/download buttons --}}
+                                @if($status->is_submitted)
+                                    <a href="{{ route('training.daftarhadirpelatihan.preview', [$pelatihan->id, $status->date->toDateString()]) }}" 
+                                    class="btn btn-sm btn-info" target="_blank">
+                                        Preview
+                                    </a>
+                                    <a href="{{ route('training.daftarhadirpelatihan.download', [$pelatihan->id, $status->date->toDateString()]) }}" 
+                                    class="btn btn-sm btn-success" target="_blank">
+                                        Download PDF
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty

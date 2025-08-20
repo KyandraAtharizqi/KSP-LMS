@@ -126,9 +126,6 @@
     {{-- DETAIL SURAT --}}
     <table class="content-table">
         <tr>
-            <td colspan="2">Kepada Yth.</td>
-        </tr>
-        <tr>
             <td class="label-strong" style="width:30%;">Peserta</td>
             <td>
                 <ol class="list-ol">

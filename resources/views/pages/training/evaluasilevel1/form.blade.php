@@ -61,17 +61,33 @@
                 <dt class="col-sm-3">Penyelenggara</dt>
                 <dd class="col-sm-9">{{ $pelatihan->penyelenggara }}</dd>
 
+                {{-- Use participant snapshot data --}}
                 <dt class="col-sm-3">Nama Peserta</dt>
-                <dd class="col-sm-9">{{ Auth::user()->name }}</dd>
+                <dd class="col-sm-9">{{ $participant->user->name ?? '-' }}</dd>
 
                 <dt class="col-sm-3">NIK</dt>
-                <dd class="col-sm-9">{{ Auth::user()->nik }}</dd>
+                <dd class="col-sm-9">{{ $participant->user->nik ?? '-' }}</dd>
 
-                <dt class="col-sm-3">Unit Kerja</dt>
-                <dd class="col-sm-9">{{ Auth::user()->jabatan->name ?? '-' }}</dd>
+                <dt class="col-sm-3">Registration ID</dt>
+                <dd class="col-sm-9">{{ $participant->registration_id }}</dd>
+
+                <dt class="col-sm-3">Jabatan Full</dt>
+                <dd class="col-sm-9">{{ $participant->jabatan_full ?? ($participant->jabatan->name ?? '-') }}</dd>
+
+                <dt class="col-sm-3">Department</dt>
+                <dd class="col-sm-9">{{ $participant->department->name ?? '-' }}</dd>
+
+                <dt class="col-sm-3">Directorate</dt>
+                <dd class="col-sm-9">{{ $participant->directorate->name ?? '-' }}</dd>
+
+                <dt class="col-sm-3">Division</dt>
+                <dd class="col-sm-9">{{ $participant->division->name ?? '-' }}</dd>
+
+                <dt class="col-sm-3">Golongan</dt>
+                <dd class="col-sm-9">{{ $participant->golongan ?? '-' }}</dd>
 
                 <dt class="col-sm-3">Nama Atasan Langsung</dt>
-                <dd class="col-sm-9">{{ Auth::user()->superior->name ?? '-' }}</dd>
+                <dd class="col-sm-9">{{ $participant->superior->name ?? '-' }}</dd>
             </dl>
         </div>
     </div>
@@ -80,10 +96,10 @@
         @csrf
 
         {{-- Hidden fields --}}
-        <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+        <input type="hidden" name="user_id" value="{{ $participant->user_id }}">
         <input type="hidden" name="pelatihan_id" value="{{ $pelatihan->id }}">
-        <input type="hidden" name="registration_id" value="{{ $registration_id }}">
-        <input type="hidden" name="kode_pelatihan" value="{{ $pelatihan->kode_pelatihan }}">
+        <input type="hidden" name="registration_id" value="{{ $participant->registration_id }}">
+        <input type="hidden" name="kode_pelatihan" value="{{ $participant->kode_pelatihan }}">
         <input type="hidden" name="nama_pelatihan" value="{{ $pelatihan->judul }}">
         <input type="hidden" name="tanggal_pelaksanaan" value="{{ $pelatihan->tanggal_mulai->format('Y-m-d') }}">
         <input type="hidden" name="tempat" value="{{ $pelatihan->tempat }}">
@@ -96,7 +112,7 @@
             <div class="card-header"><h5 class="mb-0">Form Evaluasi</h5></div>
             <div class="card-body">
                 <dl class="row mb-4">
-                    <dt class="col-sm-3">Ringkasan Isi Materi</dt>
+                    <dt class="col-sm-3">Ringkasan Isi Materi Pelatihan yang Diberikan</dt>
                     <dd class="col-sm-9">
                         <textarea name="ringkasan_isi_materi" class="form-control @error('ringkasan_isi_materi') is-invalid @enderror" rows="3" required>{{ old('ringkasan_isi_materi') }}</textarea>
                         @error('ringkasan_isi_materi')
@@ -104,7 +120,7 @@
                         @enderror
                     </dd>
 
-                    <dt class="col-sm-3">Ide/Saran untuk Pengembangan</dt>
+                    <dt class="col-sm-3"> Hal-hal (Ide/Saran) yang dapat dikembangkan di PT KSP dari hasil Pelatihan ini</dt>
                     <dd class="col-sm-9">
                         <textarea name="ide_saran_pengembangan" class="form-control @error('ide_saran_pengembangan') is-invalid @enderror" rows="3" required>{{ old('ide_saran_pengembangan') }}</textarea>
                         @error('ide_saran_pengembangan')
@@ -151,7 +167,7 @@
                         <tbody>
                             @php
                                 $penyelenggaraanFields = ['pengelolaan', 'jadwal', 'persiapan', 'pelayanan', 'koordinasi'];
-                                $penyelenggaraanLabels = ['Pengelolaan pelaksanaan', 'Keteraturan jadwal', 'Persiapan pelaksanaan', 'Pelayanan peserta', 'Koordinasi dengan instruktur'];
+                                $penyelenggaraanLabels = ['Pengelolaan pelaksanaan', 'Keteraturan jadwal pelatihan', 'Persiapan pelaksanaan', 'Cepat & tanggap dalam pelayanan', 'Koordinasi dengan instruktur'];
                             @endphp
                             @foreach($penyelenggaraanLabels as $i => $label)
                                 <tr>
@@ -179,7 +195,7 @@
                         <tbody>
                             @php
                                 $saranaFields = ['media', 'kit', 'kenyamanan', 'kesesuaian', 'belajar'];
-                                $saranaLabels = ['Media (audio-visual)', 'Training kit', 'Kenyamanan ruang', 'Kesesuaian sarana', 'Lingkungan belajar'];
+                                $saranaLabels = ['Media pelatihan (audio-visual)', 'Training kit (tas, diktat, (dll)', 'Kenyamanan & kerapihan ruang kelas', 'Kesesuaian sarana dengan proses', 'Belajar-mengajar'];
                             @endphp
                             @foreach($saranaLabels as $i => $label)
                                 <tr>

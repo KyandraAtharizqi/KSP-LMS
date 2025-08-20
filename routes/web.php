@@ -237,6 +237,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{pelatihan}/day/{date}/save', [DaftarHadirPelatihanController::class, 'save'])->name('save');
         Route::post('/{pelatihan}/day/{date}/complete', [DaftarHadirPelatihanController::class, 'markComplete'])->name('complete');
 
+
+        Route::get('/{pelatihan}/preview/{date}', [DaftarHadirPelatihanController::class, 'preview'])
+            ->name('preview');
+        Route::get('/{pelatihan}/pdf/{date}', [DaftarHadirPelatihanController::class, 'pdf'])
+            ->name('download');
+
         /*
         |--------------------------------------------------------------------------
         | Presenter Assignment (Per Pelatihan, Across Days)

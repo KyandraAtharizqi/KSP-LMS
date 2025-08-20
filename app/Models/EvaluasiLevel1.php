@@ -16,12 +16,6 @@ class EvaluasiLevel1 extends Model
         'user_id',
         'registration_id',
         'kode_pelatihan',
-        'nama_pelatihan',
-        'tanggal_pelaksanaan',
-        'tempat',
-        'name',
-        'department',
-        'jabatan_full',
         'superior_id',
         'ringkasan_isi_materi',
         'ide_saran_pengembangan',
@@ -30,7 +24,6 @@ class EvaluasiLevel1 extends Model
     ];
 
     protected $casts = [
-        'tanggal_pelaksanaan' => 'date',
         'is_submitted' => 'boolean', // ✅ Cast it as boolean
     ];
 
