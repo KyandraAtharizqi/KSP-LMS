@@ -14,14 +14,14 @@ class Config extends Model
         'value',
     ];
 
-    public static function getValueByCode(\App\Enums\Config $code): string
+    public static function getValueByCode(string $code): string
     {
-        $config = self::code($code)->first();
-        return $config->value;
+        $config = self::where('code', $code)->first();
+        return $config ? $config->value : '';
     }
 
-    public function scopeCode($query, \App\Enums\Config $code)
+    public function scopeCode($query, string $code)
     {
-        return $query->where('code', $code->value());
+        return $query->where('code', $code);
     }
 }

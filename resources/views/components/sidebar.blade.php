@@ -81,7 +81,7 @@
         </li>
 
         <!-- 👇 Knowledge Sharing Menu -->
-        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('Knowledge Sharing.*') ? 'active open' : '' }}">
+        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon bx bx-book-open"></i>
                 <div data-i18n="Knowledge Sharing">Knowledge Sharing</div>

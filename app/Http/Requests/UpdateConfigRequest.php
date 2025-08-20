@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\Role;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateConfigRequest extends FormRequest
@@ -14,7 +13,7 @@ class UpdateConfigRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()->role == Role::ADMIN->status();
+        return auth()->user()->role === 'ADMIN';
     }
 
     public function attributes(): array

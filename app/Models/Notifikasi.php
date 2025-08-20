@@ -11,6 +11,9 @@ class Notifikasi extends Model
 
     // Jika nama tabel di DB berbeda dari plural default
     protected $table = 'notifikasi';
+    
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     // Kolom yang bisa diisi massal
     protected $fillable = [

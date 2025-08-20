@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('surat_tugas_pelatihan_signatures_and_parafs', function (Blueprint $table) {
+        if (!Schema::hasTable('surat_tugas_pelatihan_signatures_and_parafs')) {
+            Schema::create('surat_tugas_pelatihan_signatures_and_parafs', function (Blueprint $table) {
             $table->id();
             
             // Menggunakan cara manual untuk foreign key dengan nama yang lebih pendek
@@ -34,6 +35,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
+        }
     }
 
     /**

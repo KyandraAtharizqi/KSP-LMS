@@ -26,7 +26,7 @@
 
         $('#editModal input#is_active').prop('checked', $(this).data('active') == 1);
 
-        @if(auth()->user()->role === \App\Enums\Role::ADMIN->value)
+        @if(auth()->user()->role === \App\Enums\Role::ADMIN)
             $('#editModal select[name="role"]').val($(this).data('role')).trigger('change');
         @endif
     });
@@ -283,7 +283,7 @@
                                 data-department_id="{{ $user->department_id }}"
                                 data-golongan="{{ $user->golongan }}"
                                 data-superior_registration_id="{{ optional($user->superior)->registration_id }}"
-                                @if(auth()->user()->role === \App\Enums\Role::ADMIN->value)
+                                @if(auth()->user()->role === 'ADMIN')
                                     data-role="{{ $user->role }}"
                                 @endif
                                 data-bs-toggle="modal"
@@ -335,7 +335,7 @@
                 <x-input-form name="golongan" label="Golongan (opsional)" id="golongan" />
                 <x-input-form name="effective_date" label="Tanggal Efektif Posisi" type="date" />
 
-                @if(auth()->user()->role === \App\Enums\Role::ADMIN->value)
+                @if(auth()->user()->role === \App\Enums\Role::ADMIN)
                     <select name="role" class="form-select mt-2">
                         @foreach ($roles as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
@@ -415,7 +415,7 @@
                 <x-input-form name="golongan" label="Golongan (opsional)" id="golongan" />
                 <x-input-form name="effective_date" label="Tanggal Efektif Posisi" type="date" />
 
-                @if(auth()->user()->role === \App\Enums\Role::ADMIN->value)
+                @if(auth()->user()->role === \App\Enums\Role::ADMIN)
                     <select name="role" class="form-select mt-2">
                         @foreach ($roles as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>

@@ -31,7 +31,7 @@ class KnowledgeInvitation extends Notification
             ->line('Anda diundang untuk mengikuti Knowledge Sharing:')
             ->line('Judul: '.$this->pengajuan->judul)
             ->line('Pemateri: '.$this->pengajuan->pemateri)
-            ->line('Tanggal: '.$this->pengajuan->tanggal_mulai.' s/d '.$this->pengajuan->tanggal_selesai)
+            ->line('Waktu: ' . \Carbon\Carbon::parse($this->pengajuan->tanggal_mulai)->format('d M Y H:i') . ' s/d ' . \Carbon\Carbon::parse($this->pengajuan->tanggal_selesai)->format('H:i') . ' WIB')
             ->action('Lihat Detail', url('/knowledge/pengajuan/'.$this->pengajuan->id))
             ->line('Terima kasih.');
     }

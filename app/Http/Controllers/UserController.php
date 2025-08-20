@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Config as ConfigEnum;
+use App\Models\Config;
+use App\Enums\Config as ConfigValues;
 use App\Enums\Role;
+
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\Config;
 use App\Models\Jabatan;
 use App\Models\Department;
 use App\Models\Directorate;
 use App\Models\User;
 use App\Models\Division;
+use App\Models\Notifikasi;
 use App\Models\UserPositionHistory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -24,9 +26,10 @@ class UserController extends Controller
     public function index(Request $request): View
     {
         $auth = auth()->user();
-        $roles = collect(Role::cases())->mapWithKeys(fn ($role) => [
-            $role->value => $role->label()
-        ]);
+        $roles = array_combine(
+            Role::cases(),
+            array_map(fn($role) => Role::label($role), Role::cases())
+        );
 
         $golongans = User::query()
             ->whereNotNull('golongan')
@@ -69,17 +72,32 @@ class UserController extends Controller
             )
             ->when($request->golongan, fn($q, $gol) => $q->where('golongan', $gol))
             ->when(
-                $auth->role === Role::DEPARTMENT_ADMIN->value,
+                $auth && $auth->role === Role::DEPARTMENT_ADMIN,
                 fn($q) => $q->where('department_id', $auth->department_id)
             )
             ->when(
-                $auth->role === Role::DIVISION_ADMIN->value,
+                $auth && $auth->role === Role::DIVISION_ADMIN,
                 fn($q) => $q->whereHas('department', fn($d) =>
                     $d->where('division_id', $auth->division_id)
                 )
             )
-            ->paginate(Config::getValueByCode(ConfigEnum::PAGE_SIZE))
+            ->paginate((int)Config::getValueByCode(ConfigValues::PAGE_SIZE))
             ->appends($request->query());
+
+        $user = auth()->user();
+        $notifikasi = [];
+        $unreadCount = 0;
+        
+        if ($user) {
+            $notifikasi = Notifikasi::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+
+            $unreadCount = Notifikasi::where('user_id', $user->id)
+                ->where('dibaca', false)
+                ->count();
+        }
 
         return view('pages.user', [
             'data' => $users,
@@ -91,6 +109,8 @@ class UserController extends Controller
             'users' => User::all(),
             'roles' => $roles,
             'golongans' => $golongans,
+            'notifikasi' => $notifikasi,
+            'unreadCount' => $unreadCount,
         ]);
     }
 
@@ -98,7 +118,7 @@ class UserController extends Controller
     {
         try {
             $newUser = $request->validated();
-            $newUser['password'] = Hash::make(Config::getValueByCode(ConfigEnum::DEFAULT_PASSWORD));
+            $newUser['password'] = Hash::make(Config::getValueByCode(ConfigValues::DEFAULT_PASSWORD));
             $newUser['is_active'] = isset($newUser['is_active']);
 
             if ($request->filled('superior_registration_id')) {
@@ -136,7 +156,7 @@ class UserController extends Controller
             $newUser = $request->validated();
             $newUser['is_active'] = isset($newUser['is_active']);
 
-            if (auth()->user()->role !== Role::ADMIN->value) {
+            if (auth()->user()->role !== Role::ADMIN) {
                 unset($newUser['role']);
             }
 
@@ -152,7 +172,7 @@ class UserController extends Controller
             }
 
             if ($request->reset_password) {
-                $newUser['password'] = Hash::make(Config::getValueByCode(ConfigEnum::DEFAULT_PASSWORD));
+                $newUser['password'] = Hash::make(Config::getValueByCode(ConfigValues::DEFAULT_PASSWORD));
             }
 
             $positionChanged = (
@@ -247,9 +267,9 @@ class UserController extends Controller
                         'jabatan_id'     => $jabatan?->id,
                         'email'          => strtolower($registration_id) . '@yourdomain.com',
                         'address'        => $address,
-                        'password'       => Hash::make(Config::getValueByCode(ConfigEnum::DEFAULT_PASSWORD)),
+                        'password'       => Hash::make(Config::getValueByCode(ConfigValues::DEFAULT_PASSWORD)),
                         'is_active'      => true,
-                        'role'           => Role::STAFF->value,
+                        'role'           => Role::STAFF,
                     ]
                 );
             }

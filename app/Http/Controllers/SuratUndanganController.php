@@ -11,33 +11,35 @@ class SuratUndanganController extends Controller
 {
     public function index()
     {
-        // ambil pengajuan yang disetujui
+        $me = Auth::user();
+
+        // Ambil semua pengajuan yang sudah disetujui
         $undangan = PengajuanKnowledge::where('status', 'approved')->get();
 
-        // ambil semua user peserta sekaligus
-        $userIds = [];
-        foreach($undangan as $u){
-            foreach($u->peserta ?? [] as $p){
-                if(is_array($p) && isset($p['id'])){
-                    $userIds[] = $p['id'];
-                }
-            }
+        if ($me->role === 'admin') {
+            // Admin bisa lihat semua
+            $filtered = $undangan;
+        } else {
+            // Filter hanya undangan yang relevan
+            $filtered = $undangan->filter(function ($u) use ($me) {
+                $participantIds = collect($u->peserta ?? [])->pluck('id');
+                return $me->name === $u->dari
+                    || $me->name === $u->kepada
+                    || $participantIds->contains($me->id);
+            });
         }
-        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
 
-        // filter hanya yang boleh melihat: admin, dari, kepada, peserta
-        $filtered = $undangan->filter(function($u) use ($users){
-            $me = auth()->user();
-            $participantIds = collect($u->peserta ?? [])->map(fn($p) => $p['id'] ?? null);
-            return $me->role == 'admin' 
-                || $me->name == $u->dari 
-                || $me->name == $u->kepada 
-                || $participantIds->contains($me->id);
-        });
+        // Kumpulkan semua peserta dari hasil filter
+        $userIds = $filtered->flatMap(function ($u) {
+            return collect($u->peserta ?? [])->pluck('id');
+        })->unique();
+
+        // Ambil data peserta
+        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
 
         return view('pages.knowledge.undangan.index', [
             'undangan' => $filtered,
-            'users' => $users
+            'users' => $users,
         ]);
     }
 }

@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('knowledge_pengajuan', function (Blueprint $table) {
+        if (!Schema::hasTable('knowledge_pengajuan')) {
+            Schema::create('knowledge_pengajuan', function (Blueprint $table) {
             $table->id();
             $table->string('kode');
             $table->foreignId('created_by')->constrained('users');
@@ -29,6 +30,7 @@ return new class extends Migration
             $table->index('status');
             $table->index('tanggal_mulai');
         });
+        }
     }
 
     public function down()

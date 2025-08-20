@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,7 +11,7 @@ class UpdateUserRequest extends FormRequest
     {
         $authUser = auth()->user();
 
-        if ($authUser->role === Role::ADMIN->status()) {
+        if ($authUser->role === 'ADMIN') {
             return true;
         }
 
@@ -26,7 +25,7 @@ class UpdateUserRequest extends FormRequest
         }
 
         if (
-            $authUser->role === Role::DEPARTMENT_ADMIN->status() &&
+            $authUser->role === 'DEPARTMENT_ADMIN' &&
             $authUser->department_id &&
             $authUser->department_id === $targetUser->department_id
         ) {
@@ -34,7 +33,7 @@ class UpdateUserRequest extends FormRequest
         }
 
         if (
-            $authUser->role === Role::DIVISION_ADMIN->status() &&
+            $authUser->role === 'DIVISION_ADMIN' &&
             $authUser->division_id &&
             $authUser->division_id === $targetUser->division_id
         ) {
@@ -82,7 +81,7 @@ class UpdateUserRequest extends FormRequest
             'address' => ['nullable', 'string'],
             'golongan' => ['nullable', 'string'],
             'is_active' => ['nullable'],
-            'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
+            'role' => ['required', Rule::in(['ADMIN', 'DEPARTMENT_ADMIN', 'DIVISION_ADMIN', 'USER'])],
             'profile_picture' => 'nullable|image|mimes:jpg,gif,png|max:800',
             'effective_date' => ['nullable', 'date'], // ✅ Added here
         ];

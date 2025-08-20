@@ -58,23 +58,24 @@
                             <td>
                                 <a href="{{ route('knowledge.pengajuan.preview', $item->id) }}" class="btn btn-sm btn-info me-1 my-2">Detail</a>
 
-                                {{-- Logika untuk menampilkan tombol persetujuan --}}
-                                @if($item->kepada == Auth::user()->name && $item->status == 'pending')
-                                    <form action="{{ route('knowledge.pengajuan.approve', $item->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="btn btn-sm btn-success">Setujui</button>
-                                    </form>
-                                    
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-{{ $item->id }}">
-                                        Tolak
-                                    </button>
-                                @endif
-
                                 {{-- Tombol Edit hanya untuk pembuat pengajuan --}}
                                 @if($item->created_by == Auth::id() && $item->status == 'pending')
                                     <a href="{{ route('knowledge.pengajuan.edit', $item->id) }}" class="btn btn-sm btn-warning my-1">Edit</a>
                                 @endif
+
+                                {{-- Tombol Approve/Reject untuk kepada (atasan) --}}
+                                @if(auth()->user()->name === $item->kepada && $item->status === 'pending')
+                                    <form action="{{ route('knowledge.pengajuan.approve', $item->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-sm btn-success my-1 me-1">Setujui</button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-danger my-1" data-bs-toggle="modal" data-bs-target="#rejectModal-{{ $item->id }}">
+                                        Tolak
+                                    </button>
+                                @endif
+
+                                {{-- Tombol Delete hanya untuk pembuat pengajuan --}}
                                 @if($item->created_by == Auth::id() && $item->status == 'pending')
                                     <form action="{{ route('knowledge.pengajuan.destroy', $item->id) }}" method="POST" class="d-inline"
                                         onsubmit="return confirm('Yakin ingin menghapus pengajuan ini?')">

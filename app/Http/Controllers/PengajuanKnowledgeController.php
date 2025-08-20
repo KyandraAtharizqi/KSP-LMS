@@ -15,22 +15,17 @@ class PengajuanKnowledgeController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $me = Auth::user();
 
-        $jabatan = strtoupper($user->jabatan_full ?? '');
-        $isManager = str_contains($jabatan, 'MANAGER');
-        $isDirector = str_contains($jabatan, 'DIRECTOR');
+        // Ambil semua pengajuan dengan relasi creator
+        $pengajuan = PengajuanKnowledge::with('creator')->latest()->get();
 
-        $query = PengajuanKnowledge::with('creator')->latest();
-
-        if (!($isManager || $isDirector)) {
-            $query->where(function ($q) use ($user) {
-                $q->where('created_by', $user->id)
-                  ->orWhere('kepada', $user->name);
+        if ($me->role !== 'admin') {
+            $pengajuan = $pengajuan->filter(function ($p) use ($me) {
+                return $p->created_by == $me->id
+                    || $p->kepada == $me->name; // ⚡ Peserta tidak lagi diizinkan
             });
         }
-
-        $pengajuan = $query->get();
 
         return view('pages.knowledge.pengajuan.index', compact('pengajuan'));
     }
@@ -51,6 +46,8 @@ class PengajuanKnowledgeController extends Controller
             'pemateri' => 'required|string|max:255',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date',
+            'waktu_mulai' => 'required',
+            'waktu_selesai' => 'required',
             'lampiran' => 'nullable|mimes:pdf|max:2048',
             'participants' => 'nullable|array',
             'participants.*' => 'exists:users,registration_id',
@@ -85,33 +82,37 @@ class PengajuanKnowledgeController extends Controller
             'perihal' => $request->perihal,
             'judul' => $request->judul,
             'pemateri' => $request->pemateri,
-            'tanggal_mulai' => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
+            'tanggal_mulai' => $request->tanggal_mulai . ' ' . $request->waktu_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai . ' ' . $request->waktu_selesai,
             'peserta' => $participants,
             'lampiran' => $lampiranPath,
             'status' => 'pending',
         ]);
 
-        // Kirim notifikasi ke peserta
-        if (!empty($participants)) {
-            foreach ($users as $user) {
-                $user->notify(new KnowledgeInvitation($pengajuan));
-            }
-        }
-
         // Kirim notifikasi ke user "kepada"
         $kepadaUser = User::where('name', $request->kepada)->first();
         if ($kepadaUser) {
-            $kepadaUser->notify(new KnowledgeInvitation($pengajuan));
+            Notifikasi::create([
+                'user_id' => $kepadaUser->id,
+                'judul' => 'Pengajuan Knowledge Sharing Baru',
+                'pesan' => "Anda menerima pengajuan knowledge sharing baru dengan judul '{$request->judul}' dari " . auth()->user()->name,
+                'link' => route('knowledge.pengajuan.preview', $pengajuan->id),
+                'dibaca' => false
+            ]);
         }
 
-        dd('sampai sini');
         return redirect()->route('knowledge.pengajuan.index')
                         ->with('success', 'Pengajuan berhasil disimpan.');
     }
 
     public function approve($id)
     {
+        \Log::info('Approve request received', [
+            'id' => $id,
+            'method' => request()->method(),
+            'input' => request()->all()
+        ]);
+
         $pengajuan = PengajuanKnowledge::findOrFail($id);
 
         if ($pengajuan->kepada !== Auth::user()->name) {
@@ -124,8 +125,40 @@ class PengajuanKnowledgeController extends Controller
         // Tambahkan notifikasi ke pengaju
         Notifikasi::create([
             'user_id' => $pengajuan->created_by,
-            'message' => "Pengajuan kamu '{$pengajuan->judul}' telah disetujui oleh " . Auth::user()->name,
+            'judul' => 'Pengajuan Knowledge Sharing Disetujui',
+            'pesan' => "Pengajuan kamu '{$pengajuan->perihal}' telah disetujui oleh " . Auth::user()->name,
+            'link' => route('knowledge.pengajuan.preview', $pengajuan->id)
         ]);
+
+        // Kirim notifikasi ke semua peserta
+        try {
+            if (!empty($pengajuan->peserta)) {
+                foreach ($pengajuan->peserta as $peserta) {
+                    if (isset($peserta['id'])) {
+                        \Log::info('Creating notification for participant', [
+                            'user_id' => $peserta['id'],
+                            'name' => $peserta['name']
+                        ]);
+
+                        $tanggalMulai = \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->format('d M Y H:i');
+                        $tanggalSelesai = \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->format('H:i');
+
+                        Notifikasi::create([
+                            'user_id' => $peserta['id'],
+                            'judul' => 'Undangan Knowledge Sharing',
+                            'pesan' => "Anda diundang untuk mengikuti knowledge sharing '{$pengajuan->perihal}' oleh {$pengajuan->pemateri} yang akan dilaksanakan pada {$tanggalMulai} - {$tanggalSelesai} WIB",
+                            'link' => route('knowledge.pengajuan.preview', $pengajuan->id)
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error sending notifications to participants: ' . $e->getMessage(), [
+                'pengajuan_id' => $pengajuan->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
 
         return back()->with('success', 'Pengajuan disetujui dan notifikasi dikirim.');
     }
@@ -147,7 +180,9 @@ class PengajuanKnowledgeController extends Controller
         // Opsional: kirim notifikasi ke pengaju
         Notifikasi::create([
             'user_id' => $pengajuan->created_by,
-            'message' => "Pengajuan kamu '{$pengajuan->judul}' ditolak oleh " . Auth::user()->name,
+            'judul' => 'Pengajuan Knowledge Sharing Ditolak',
+            'pesan' => "Pengajuan kamu '{$pengajuan->perihal}' ditolak oleh " . Auth::user()->name . ". Alasan: " . $request->rejection_reason,
+            'link' => route('knowledge.pengajuan.preview', $pengajuan->id)
         ]);
 
         return back()->with('error', 'Pengajuan ditolak dan notifikasi dikirim.');
@@ -210,8 +245,9 @@ class PengajuanKnowledgeController extends Controller
 
         $pengajuan->perihal = $request->perihal;
         $pengajuan->pemateri = $request->pemateri;
-        $pengajuan->tanggal_mulai = $request->tanggal_mulai;
-        $pengajuan->tanggal_selesai = $request->tanggal_selesai;
+        // Gabungkan tanggal dan waktu untuk update
+        $pengajuan->tanggal_mulai = $request->tanggal_mulai . ' ' . $request->waktu_mulai;
+        $pengajuan->tanggal_selesai = $request->tanggal_selesai . ' ' . $request->waktu_selesai;
 
         // Update lampiran jika ada
         if ($request->hasFile('lampiran')) {

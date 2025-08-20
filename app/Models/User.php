@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\Role;
-use App\Enums\Config as ConfigEnum;
+
+use App\Enums\Config as ConfigValues;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -124,9 +124,9 @@ class User extends Authenticatable
         return $query->where('is_active', true);
     }
 
-    public function scopeRole($query, Role $role)
+    public function scopeRole($query, string $role)
     {
-        return $query->where('role', $role->status());
+        return $query->where('role', $role);
     }
 
     public function scopeSearch($query, $search)
@@ -143,8 +143,8 @@ class User extends Authenticatable
     {
         return $query
             ->search($search)
-            ->role(Role::STAFF)
-            ->paginate(Config::getValueByCode(ConfigEnum::PAGE_SIZE))
+            ->role('staff')
+            ->paginate(Config::getValueByCode(ConfigValues::PAGE_SIZE))
             ->appends(['search' => $search]);
     }
 

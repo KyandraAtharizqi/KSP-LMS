@@ -10,12 +10,13 @@ class NotifikasiSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('registration_id', 'ADM01')->first();
+        // Get all users
+        $users = User::all();
         
-        if ($admin) {
-            // Beberapa notifikasi untuk testing
+        foreach($users as $user) {
+            // Notifikasi selamat datang untuk setiap user
             Notifikasi::create([
-                'user_id' => $admin->id,
+                'user_id' => $user->id,
                 'judul' => 'Selamat Datang',
                 'pesan' => 'Selamat datang di sistem KSP-LMS!',
                 'dibaca' => false,
@@ -23,7 +24,7 @@ class NotifikasiSeeder extends Seeder
             ]);
 
             Notifikasi::create([
-                'user_id' => $admin->id,
+                'user_id' => $user->id,
                 'judul' => 'Panduan Penggunaan',
                 'pesan' => 'Silakan baca panduan penggunaan sistem di menu Help.',
                 'link' => '/help',
@@ -32,7 +33,7 @@ class NotifikasiSeeder extends Seeder
             ]);
 
             Notifikasi::create([
-                'user_id' => $admin->id,
+                'user_id' => $user->id,
                 'judul' => 'Notifikasi Lama',
                 'pesan' => 'Ini adalah notifikasi yang sudah dibaca.',
                 'dibaca' => true,

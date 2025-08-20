@@ -101,15 +101,27 @@
                     <input type="file" class="form-control" id="lampiran" name="lampiran" accept="application/pdf">
                 </div>
 
+                {{-- Tanggal dan Waktu --}}
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
-                        <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" required>
+                        <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" 
+                            value="{{ old('tanggal_mulai') }}" required>
                     </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label for="tanggal_selesai" class="form-label">Tanggal Selesai</label>
-                        <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required>
+                        <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai"
+                            value="{{ old('tanggal_selesai') }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="waktu_mulai" class="form-label">Jam Mulai</label>
+                        <input type="time" class="form-control" id="waktu_mulai" name="waktu_mulai"
+                            value="{{ old('waktu_mulai', '09:00') }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="waktu_selesai" class="form-label">Jam Selesai</label>
+                        <input type="time" class="form-control" id="waktu_selesai" name="waktu_selesai"
+                            value="{{ old('waktu_selesai', '16:00') }}" required>
                     </div>
                 </div>
 

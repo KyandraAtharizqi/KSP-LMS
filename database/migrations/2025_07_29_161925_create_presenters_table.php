@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('presenters', function (Blueprint $table) {
+        if (!Schema::hasTable('presenters')) {
+            Schema::create('presenters', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('institution')->nullable();
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->boolean('is_internal')->default(false);
             $table->timestamps();
         });
+        }
     }
 
     public function down()

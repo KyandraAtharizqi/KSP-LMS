@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 use App\Http\Controllers\PageController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\SuratPengajuanPelatihanController;
 use App\Http\Controllers\SuratTugasPelatihanController;
 use App\Http\Controllers\DaftarHadirPelatihanController;
@@ -20,12 +19,13 @@ use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LetterStatusController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DaftarHadirPelatihanPresenterController;
-use App\Http\Controllers\NotaDinasController;
+use App\Http\Controllers\Knowledge\NotaDinasController;
 use App\Http\Controllers\DaftarHadirKnowledgeController;
 use App\Http\Controllers\PengajuanKnowledgeController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\UserController;
 
-/* 👇 NEW Evaluation controllers (create these) */
+/* 👇 Evaluation controllers */
 use App\Http\Controllers\EvaluasiLevel1Controller;
 use App\Http\Controllers\TrainingEvaluation2Controller;
 use App\Http\Controllers\TrainingEvaluationAtasanController;
@@ -87,9 +87,12 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['auth'])->group(function () {
-        Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.show');
+        Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
         Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
-        // Route untuk testing notifikasi
+        Route::post('/notifikasi/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.readAll');
+        Route::post('/notifikasi/{id}/delete', [NotifikasiController::class, 'delete'])->name('notifikasi.delete');
+
+        // Route untuk testing notifikasi (sementara aja, matiin kalau production)
         Route::get('/test-notification', function() {
             $notifikasiController = new NotifikasiController();
             return $notifikasiController->sendNotification(
@@ -298,23 +301,24 @@ Route::middleware(['auth'])->group(function () {
     
     /*
     |--------------------------------------------------------------------------
-    | Pengajuan Knowledge SHaring
+    | Pengajuan Knowledge Sharing
     |--------------------------------------------------------------------------
     */
     Route::prefix('knowledge')->name('knowledge.')->group(function () {
         Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
-            Route::get('/', [PengajuanKnowledgeController::class, 'index'])->name('index');          // GET /knowledge/pengajuan
-            Route::get('/create', [PengajuanKnowledgeController::class, 'create'])->name('create');  // GET /knowledge/pengajuan/create
-            Route::post('/', [PengajuanKnowledgeController::class, 'store'])->name('store');         // POST /knowledge/pengajuan
-            Route::get('/{id}', [PengajuanKnowledgeController::class, 'preview'])->name('preview');        // GET /knowledge/pengajuan/{id}
-            Route::get('/{id}/edit', [PengajuanKnowledgeController::class, 'edit'])->name('edit');   // GET /knowledge/pengajuan/{id}/edit
-            Route::put('/{id}', [PengajuanKnowledgeController::class, 'update'])->name('update');    // PUT /knowledge/pengajuan/{id}
-            Route::delete('/{id}', [PengajuanKnowledgeController::class, 'destroy'])->name('destroy'); // DELETE /knowledge/pengajuan/{id}
-            Route::get('/{id}/download', [PengajuanKnowledgeController::class, 'download'])->name('download'); // GET /knowledge/pengajuan/{id}/download
+            // Approval-specific routes first
             Route::patch('/{id}/approve', [PengajuanKnowledgeController::class, 'approve'])->name('approve');
             Route::patch('/{id}/reject', [PengajuanKnowledgeController::class, 'reject'])->name('reject');
-            Route::patch('/{id}', [PengajuanKnowledgeController::class, 'update'])->name('knowledge.pengajuan.update');
 
+            // Then the resource-like routes
+            Route::get('/', [PengajuanKnowledgeController::class, 'index'])->name('index');
+            Route::get('/create', [PengajuanKnowledgeController::class, 'create'])->name('create');
+            Route::post('/', [PengajuanKnowledgeController::class, 'store'])->name('store');
+            Route::get('/{id}', [PengajuanKnowledgeController::class, 'preview'])->name('preview');
+            Route::get('/{id}/edit', [PengajuanKnowledgeController::class, 'edit'])->name('edit');
+            Route::patch('/{id}', [PengajuanKnowledgeController::class, 'update'])->name('update');
+            Route::delete('/{id}', [PengajuanKnowledgeController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}/download', [PengajuanKnowledgeController::class, 'download'])->name('download');
         });
     });
 

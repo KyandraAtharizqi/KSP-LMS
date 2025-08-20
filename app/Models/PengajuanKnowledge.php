@@ -19,6 +19,8 @@ class PengajuanKnowledge extends Model
         'pemateri',
         'tanggal_mulai',
         'tanggal_selesai',
+        'jam_mulai',
+        'jam_selesai',
         'peserta',
         'lampiran',
         'status',
@@ -26,8 +28,8 @@ class PengajuanKnowledge extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai' => 'date',
-        'tanggal_selesai' => 'date',
+        'tanggal_mulai' => 'datetime',
+        'tanggal_selesai' => 'datetime',
         'peserta' => 'array',
     ];
 

@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('evaluasi_level_1', function (Blueprint $table) {
+        if (!Schema::hasTable('evaluasi_level_1')) {
+            Schema::create('evaluasi_level_1', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pelatihan_id')->constrained('surat_pengajuan_pelatihans')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -17,6 +18,7 @@ return new class extends Migration
             // Index untuk optimasi query
             $table->index(['pelatihan_id', 'user_id'], 'eval_pel_user_idx');
         });
+        }
     }
 
     public function down()

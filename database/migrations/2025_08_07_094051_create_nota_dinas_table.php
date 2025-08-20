@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('nota_dinas', function (Blueprint $table) {
+        if (!Schema::hasTable('nota_dinas')) {
+            Schema::create('nota_dinas', function (Blueprint $table) {
             $table->id();
             $table->string('kode')->unique();
             $table->string('perihal');
@@ -17,6 +18,7 @@ return new class extends Migration {
             $table->text('isi');
             $table->timestamps();
         });
+        }
     }
 
     public function down(): void

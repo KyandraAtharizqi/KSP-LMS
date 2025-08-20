@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 20, 2025 at 01:04 AM
+-- Generation Time: Aug 20, 2025 at 01:31 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -87,7 +87,9 @@ INSERT INTO `configs` (`id`, `code`, `value`, `created_at`, `updated_at`) VALUES
 (6, 'institution_phone', '082121212121', NULL, NULL),
 (7, 'institution_email', 'admin@admin.com', NULL, NULL),
 (8, 'language', 'id', NULL, NULL),
-(9, 'pic', 'M. Iqbal Effendi', NULL, NULL);
+(9, 'pic', 'M. Iqbal Effendi', NULL, NULL),
+(10, 'pengajuan_pelatihan_signature_2_default', '', '2025-08-18 18:04:25', '2025-08-18 18:04:25'),
+(11, 'pengajuan_pelatihan_signature_3_default', '', '2025-08-18 18:04:25', '2025-08-18 18:04:25');
 
 -- --------------------------------------------------------
 
@@ -497,6 +499,8 @@ CREATE TABLE `knowledge_pengajuan` (
   `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `pemateri` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal` date NOT NULL,
+  `tanggal_mulai` date DEFAULT NULL,
+  `tanggal_selesai` date DEFAULT NULL,
   `peserta` json NOT NULL,
   `lampiran` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'menunggu',
@@ -509,8 +513,8 @@ CREATE TABLE `knowledge_pengajuan` (
 -- Dumping data for table `knowledge_pengajuan`
 --
 
-INSERT INTO `knowledge_pengajuan` (`id`, `kode`, `created_by`, `kepada`, `dari`, `perihal`, `judul`, `pemateri`, `tanggal`, `peserta`, `lampiran`, `status`, `rejection_reason`, `created_at`, `updated_at`) VALUES
-(1, 'IF/1/2025', 51, 'MOKHAMAD  HASIM', 'Hendra GM Hotel', 'Kegiatan Knowledge Sharing \"Mastering English Greetings\"', 'Mastering English Greetings', 'Bpk. Purboyo Ananda', '2025-08-12', '[{\"id\": 786, \"name\": \"RAFI KYANDRA ATHARIZQI\", \"jabatan\": \"Officer\", \"department\": \"Human Capital\", \"registration_id\": \"2831\"}, {\"id\": 787, \"name\": \"TRIYA\", \"jabatan\": \"Officer\", \"department\": \"Human Capital\", \"registration_id\": \"2832\"}]', 'lampiran_knowledge/ZBDSmpj7nonfHYSYan56kvBL0DSVxAXyNvqtXJ46.pdf', 'approved', NULL, '2025-08-12 10:42:10', '2025-08-12 10:53:43');
+INSERT INTO `knowledge_pengajuan` (`id`, `kode`, `created_by`, `kepada`, `dari`, `perihal`, `judul`, `pemateri`, `tanggal`, `tanggal_mulai`, `tanggal_selesai`, `peserta`, `lampiran`, `status`, `rejection_reason`, `created_at`, `updated_at`) VALUES
+(1, 'IF/1/2025', 51, 'MOKHAMAD  HASIM', 'Hendra GM Hotel', 'Kegiatan Knowledge Sharing \"Mastering English Greetings\"', 'Mastering English Greetings', 'Bpk. Purboyo Ananda', '2025-08-12', '2025-08-12', '2025-08-12', '[{\"id\": 786, \"name\": \"RAFI KYANDRA ATHARIZQI\", \"jabatan\": \"Officer\", \"department\": \"Human Capital\", \"registration_id\": \"2831\"}, {\"id\": 787, \"name\": \"TRIYA\", \"jabatan\": \"Officer\", \"department\": \"Human Capital\", \"registration_id\": \"2832\"}]', 'lampiran_knowledge/ZBDSmpj7nonfHYSYan56kvBL0DSVxAXyNvqtXJ46.pdf', 'approved', NULL, '2025-08-12 10:42:10', '2025-08-12 10:53:43');
 
 -- --------------------------------------------------------
 
@@ -1950,7 +1954,7 @@ ALTER TABLE `classifications`
 -- AUTO_INCREMENT for table `configs`
 --
 ALTER TABLE `configs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `daftar_hadir_knowledge`

@@ -2,21 +2,21 @@
 
 namespace App\Enums;
 
-enum Config
+class Config
 {
-    case DEFAULT_PASSWORD;
-    case PAGE_SIZE;
-    case APP_NAME;
-    case INSTITUTION_NAME;
-    case INSTITUTION_ADDRESS;
-    case INSTITUTION_PHONE;
-    case INSTITUTION_EMAIL;
-    case LANGUAGE;
-    case PIC;
+    public const DEFAULT_PASSWORD = 'default_password';
+    public const PAGE_SIZE = 'page_size';
+    public const APP_NAME = 'app_name';
+    public const INSTITUTION_NAME = 'institution_name';
+    public const INSTITUTION_ADDRESS = 'institution_address';
+    public const INSTITUTION_PHONE = 'institution_phone';
+    public const INSTITUTION_EMAIL = 'institution_email';
+    public const LANGUAGE = 'language';
+    public const PIC = 'pic';
 
-    public function value(): string
+    public static function value($code): string
     {
-        return match ($this) {
+        return match ($code) {
             self::DEFAULT_PASSWORD => 'default_password',
             self::PAGE_SIZE => 'page_size',
             self::APP_NAME => 'app_name',
@@ -26,6 +26,7 @@ enum Config
             self::INSTITUTION_EMAIL => 'institution_email',
             self::LANGUAGE => 'language',
             self::PIC => 'pic',
+            default => $code,
         };
     }
 }

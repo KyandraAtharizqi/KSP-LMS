@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +9,7 @@ class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->role == Role::ADMIN->status();
+        return auth()->user()->role === 'ADMIN';
     }
 
     public function attributes(): array
@@ -51,7 +50,7 @@ class StoreUserRequest extends FormRequest
             'address' => ['nullable', 'string'],
             'golongan' => ['nullable', 'string'],
             'is_active' => ['nullable'],
-            'role' => ['required', Rule::in(array_column(Role::cases(), 'value'))],
+            'role' => ['required', Rule::in(['ADMIN', 'DEPARTMENT_ADMIN', 'DIVISION_ADMIN', 'USER'])],
             'effective_date' => ['required', 'date'], // ✅ Added validation rule
         ];
     }

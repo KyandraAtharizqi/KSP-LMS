@@ -30,6 +30,7 @@
     <title>{{ config('app.name') }}</title>
 
     <meta name="description" content=""/>
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('logo-black.png') }}"/>
@@ -140,6 +141,21 @@
 
 <!-- Page JS -->
 @stack('script')
+
+<script>
+    // Initialize SweetAlert2 Toast
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+</script>
 
 @if(session('success'))
     <script>

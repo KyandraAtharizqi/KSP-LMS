@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Knowledge;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -9,12 +9,8 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 
-
-
 class NotaDinasController extends Controller
 {
-    protected $fillable = ['judul', 'isi'];
-
     public function index()
     {
         $notaDinas = NotaDinas::latest()->get(); // ambil semua nota dinas
@@ -34,7 +30,7 @@ class NotaDinasController extends Controller
             'kode' => 'required|unique:nota_dinas,kode',
             'judul' => 'required|string',
             'pemateri' => 'required|string',
-            'perihal' => 'required|string',
+            'perihal' => 'required|string', 
             'tanggal' => 'required|date',
             'dari' => 'required|string',
             'kepada' => 'required|string',
@@ -47,7 +43,7 @@ class NotaDinasController extends Controller
             'tanggal', 'dari', 'kepada'
         ]);
 
-        // Tambahkan user_id ke array
+        // Tambahkan user_id ke array 
         $data['user_id'] = auth()->id();
 
         // Cek apakah ada file lampiran
@@ -89,12 +85,11 @@ class NotaDinasController extends Controller
     {
         $notaDinas = NotaDinas::with(['user.signatureParaf'])->findOrFail($id);
 
-        $pdf = \PDF::loadView('pages.knowledge.notadinas.pdf', compact('notaDinas'))
+        $pdf = Pdf::loadView('pages.knowledge.notadinas.pdf', compact('notaDinas'))
                 ->setPaper('A4', 'portrait');
 
         $filename = 'NotaDinas-' . Str::slug($notaDinas->judul) . '.pdf';
 
         return $pdf->download($filename);
     }
-
 }
