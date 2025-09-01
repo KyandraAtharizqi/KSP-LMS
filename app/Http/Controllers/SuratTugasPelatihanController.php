@@ -111,12 +111,12 @@ class SuratTugasPelatihanController extends Controller
         if (!$this->userCanAccessListArea($user)) {
             $query->where(function ($q) use ($user) {
                 $q->where('created_by', $user->id)
-                  ->orWhereHas('signaturesAndParafs', function ($sq) use ($user) {
-                      $sq->where('user_id', $user->id);
-                  })
-                  ->orWhereHas('pelatihan.participants', function ($pq) use ($user) {
-                      $pq->where('user_id', $user->id);
-                  });
+                ->orWhereHas('signaturesAndParafs', function ($sq) use ($user) {
+                    $sq->where('user_id', $user->id);
+                })
+                ->orWhereHas('pelatihan.participants', function ($pq) use ($user) {
+                    $pq->where('user_id', $user->id);
+                });
             });
         }
 
@@ -124,11 +124,11 @@ class SuratTugasPelatihanController extends Controller
         if ($search = trim($request->q ?? '')) {
             $query->where(function ($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
-                  ->orWhere('kode_pelatihan', 'like', "%{$search}%")
-                  ->orWhereHas('pelatihan', function ($pel) use ($search) {
-                      $pel->where('kode_pelatihan', 'like', "%{$search}%")
-                          ->orWhere('judul', 'like', "%{$search}%");
-                  });
+                ->orWhere('kode_pelatihan', 'like', "%{$search}%")
+                ->orWhereHas('pelatihan', function ($pel) use ($search) {
+                    $pel->where('kode_pelatihan', 'like', "%{$search}%")
+                        ->orWhere('judul', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -137,6 +137,7 @@ class SuratTugasPelatihanController extends Controller
 
         return view('pages.training.surattugas.index', compact('suratTugasList', 'users'));
     }
+
 
     /* -----------------------------------------------------------------
      |  PREVIEW
@@ -180,16 +181,22 @@ class SuratTugasPelatihanController extends Controller
 
     public function assignView($id): View|RedirectResponse
     {
-        $suratTugas = SuratTugasPelatihan::with('pelatihan')->findOrFail($id);
+        $suratTugas = SuratTugasPelatihan::with(['pelatihan', 'signaturesAndParafs'])->findOrFail($id);
         $user = Auth::user();
 
         if (!$this->userCanAssign($user)) {
             return $this->denyAccessRedirect();
         }
 
+        // latest rejection info
+        $latestRejection = $suratTugas->signaturesAndParafs()
+            ->where('status', 'rejected')
+            ->latest('updated_at')
+            ->first();
+
         $users = $this->getAssignableUsers();
 
-        return view('pages.training.surattugas.assign', compact('suratTugas', 'users'));
+        return view('pages.training.surattugas.assign', compact('suratTugas', 'users', 'latestRejection'));
     }
 
     public function assignSave(Request $request): RedirectResponse
@@ -223,59 +230,57 @@ class SuratTugasPelatihanController extends Controller
         $allowedIds = $this->getAssignableUsers()->pluck('id')->all();
 
         if (!in_array($signatureId, $allowedIds, true)) {
-            return back()
-                ->withErrors(['signature_user' => 'Penandatangan tidak valid.'])
-                ->withInput();
+            return back()->withErrors(['signature_user' => 'Penandatangan tidak valid.'])->withInput();
         }
         foreach ($parafIds as $pid) {
             if (!in_array($pid, $allowedIds, true)) {
-                return back()
-                    ->withErrors(['paraf_users' => 'Terdapat user paraf yang tidak valid.'])
-                    ->withInput();
+                return back()->withErrors(['paraf_users' => 'Terdapat user paraf yang tidak valid.'])->withInput();
             }
         }
 
-        // preload all referenced users (avoid N+1)
+        // preload users
         $allUserIds = array_merge($parafIds, [$signatureId]);
         $usersMap   = User::whereIn('id', $allUserIds)->get()->keyBy('id');
 
-        // fallback kode pelatihan
+        // kode pelatihan
         $kodePelatihan = $surat->kode_pelatihan
             ?? optional($surat->pelatihan)->kode_pelatihan
             ?? ('TUGAS-' . $surat->id);
 
-        DB::transaction(function () use ($surat, $parafIds, $signatureId, $usersMap, $kodePelatihan, $request) {
-            // Update surat tugas with additional fields
+        DB::transaction(function () use ($surat, $parafIds, $signatureId, $usersMap, $kodePelatihan, $request, $user) {
+            // update surat tugas details + assigner
             $surat->update([
                 'tujuan'        => $request->input('tujuan'),
                 'waktu'         => $request->input('waktu'),
                 'instruksi'     => $request->input('instruksi'),
                 'hal_perhatian' => $request->input('hal_perhatian'),
                 'catatan'       => $request->input('catatan'),
+                'created_by'    => $user->id, // mark latest assigner
+                'is_accepted'   => false,     // reset acceptance
             ]);
 
-            $surat->signaturesAndParafs()->delete();
-
-            $round    = 1;
+            // determine new round
+            $latestRound = $surat->signaturesAndParafs()->max('round') ?? 0;
+            $round = $latestRound + 1;
             $sequence = 1;
 
+            // create paraf rows
             foreach ($parafIds as $userId) {
-                $user = $usersMap[$userId] ?? null;
-                if (!$user) {
-                    continue;
-                }
+                $u = $usersMap[$userId] ?? null;
+                if (!$u) continue;
+
                 SuratTugasPelatihanSignatureAndParaf::create([
                     'surat_tugas_id'  => $surat->id,
                     'kode_pelatihan'  => $kodePelatihan,
                     'user_id'         => $userId,
-                    'registration_id' => $user->registration_id,
-                    'jabatan_id'      => $user->jabatan_id,
-                    'jabatan_full'    => $user->jabatan_full ?? ($user->jabatan->name ?? null),
-                    'department_id'   => $user->department_id,
-                    'directorate_id'  => $user->directorate_id,
-                    'division_id'     => $user->division_id,
-                    'superior_id'     => $user->superior_id,
-                    'golongan'        => $user->golongan ?? null,
+                    'registration_id' => $u->registration_id,
+                    'jabatan_id'      => $u->jabatan_id,
+                    'jabatan_full'    => $u->jabatan_full ?? ($u->jabatan->name ?? null),
+                    'department_id'   => $u->department_id,
+                    'directorate_id'  => $u->directorate_id,
+                    'division_id'     => $u->division_id,
+                    'superior_id'     => $u->superior_id,
+                    'golongan'        => $u->golongan ?? null,
                     'round'           => $round,
                     'sequence'        => $sequence++,
                     'type'            => 'paraf',
@@ -283,6 +288,7 @@ class SuratTugasPelatihanController extends Controller
                 ]);
             }
 
+            // create signature row
             $sigUser = $usersMap[$signatureId] ?? null;
             if ($sigUser) {
                 SuratTugasPelatihanSignatureAndParaf::create([
@@ -305,9 +311,8 @@ class SuratTugasPelatihanController extends Controller
             }
         });
 
-        return redirect()
-            ->route('training.surattugas.index')
-            ->with('success', 'Penandatangan dan paraf berhasil ditetapkan.');
+        return redirect()->route('training.surattugas.index')
+            ->with('success', 'Penandatangan dan paraf berhasil ditetapkan untuk putaran baru.');
     }
 
     /**
@@ -366,11 +371,19 @@ class SuratTugasPelatihanController extends Controller
             // auto-create Daftar Hadir Pelatihan Status rows for each day
             $pelatihan = $surat->pelatihan;
             if ($pelatihan && $pelatihan->tanggal_mulai && $pelatihan->durasi) {
+                // Get the kode_pelatihan
+                $kodePelatihan = $surat->kode_pelatihan
+                    ?? $pelatihan->kode_pelatihan
+                    ?? ('TUGAS-' . $surat->id);
+
                 $start = Carbon::parse($pelatihan->tanggal_mulai);
                 for ($i = 0; $i < (int) $pelatihan->durasi; $i++) {
                     DaftarHadirPelatihanStatus::firstOrCreate([
                         'pelatihan_id' => $pelatihan->id,
                         'date'         => $start->copy()->addDays($i)->toDateString(),
+                    ], [
+                        // Default values when creating new record
+                        'kode_pelatihan' => $kodePelatihan,
                     ]);
                 }
             }
@@ -404,15 +417,30 @@ class SuratTugasPelatihanController extends Controller
             return $this->denyAccessRedirect();
         }
 
-        $approval->update([
-            'status'           => 'rejected',
-            'rejection_reason' => $request->reason,
-            'signed_at'        => now(),
-        ]);
+        DB::transaction(function () use ($approval, $surat, $request) {
+            // mark current as rejected
+            $approval->update([
+                'status'           => 'rejected',
+                'rejection_reason' => $request->reason,
+                'signed_at'        => now(),
+            ]);
+
+            // auto-reject later sequence in SAME round
+            SuratTugasPelatihanSignatureAndParaf::where('surat_tugas_id', $surat->id)
+                ->where('round', $approval->round)
+                ->where('sequence', '>', $approval->sequence)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'rejected',
+                ]);
+
+            // reset surat acceptance flag
+            $surat->update(['is_accepted' => false]);
+        });
 
         return redirect()
             ->route('training.surattugas.index')
-            ->with('warning', 'Surat ditolak.');
+            ->with('warning', 'Surat ditolak. Semua approval berikutnya dalam putaran ini otomatis ditolak.');
     }
 
     /* -----------------------------------------------------------------

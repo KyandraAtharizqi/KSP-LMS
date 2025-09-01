@@ -49,22 +49,36 @@
                     </a>
                 </li>
 
-                <!-- ✅ New Evaluation Submenu -->
-                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation*') ? 'active open' : '' }}">
+                <!-- ✅ Evaluation Submenu -->
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasi-level-*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <div data-i18n="Evaluation">Evaluation</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('evaluasi_level_1.index') ? 'active' : '' }}">
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasilevel1.index') ? 'active' : '' }}">
                             <a href="{{ route('training.evaluasilevel1.index') }}" class="menu-link">
                                 <div data-i18n="Evaluation 1">Evaluasi Level 1 (Peserta)</div>
                             </a>
                         </li>
                         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation2.index') ? 'active' : '' }}">
                             <a href="{{ route('training.evaluation2.index') }}" class="menu-link">
-                                <div data-i18n="Evaluation 2">Evaluation 2 (Peserta)</div>
+                                <div data-i18n="Evaluation 2">Evaluasi Level 2 (Peserta)</div>
                             </a>
                         </li>
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasilevel3.peserta.*') ? 'active' : '' }}">
+                            <a href="{{ route('evaluasi-level-3.peserta.index') }}" class="menu-link">
+                                <div data-i18n="Evaluation 3 Peserta">Evaluasi Level 3 (Peserta)</div>
+                            </a>
+                        </li>
+
+                        <!-- ✅ Evaluasi Level 3 Atasan -->
+                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasilevel3.atasan.*') ? 'active' : '' }}">
+                            <a href="{{ route('evaluasi-level-3.atasan.index') }}" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-user-check"></i>
+                                <div data-i18n="Evaluation Atasan">Evaluasi Level 3 (Atasan)</div>
+                            </a>
+                        </li>
+
                         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation.atasan.index') ? 'active' : '' }}">
                             <a href="{{ route('training.evaluation.atasan.index') }}" class="menu-link">
                                 <div data-i18n="Evaluation Atasan">Evaluation Atasan</div>

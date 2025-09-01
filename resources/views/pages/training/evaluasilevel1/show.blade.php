@@ -1,4 +1,3 @@
-
 @extends('layout.main')
 
 @section('title', 'Detail Evaluasi Pelatihan')
@@ -35,17 +34,21 @@
                 <dd class="col-sm-9">{{ $pelatihan->penyelenggara }}</dd>
 
                 <dt class="col-sm-3">Nama Peserta/Karyawan</dt>
-                <dd class="col-sm-9">{{ Auth::user()->name }}</dd>
+                <dd class="col-sm-9">{{ $evaluasi->user->name ?? '-' }}</dd>
 
-                <dt class="col-sm-3">NIK</dt>
-                <dd class="col-sm-9">{{ Auth::user()->nik }}</dd>
+                <dt class="col-sm-3">Registration ID</dt>
+                <dd class="col-sm-9">{{ $evaluasi->user->registration_id ?? '-' }}</dd>
 
-                <dt class="col-sm-3">Unit Kerja</dt>
-                <dd class="col-sm-9">{{ Auth::user()->jabatan->name ?? '-' }}</dd>
+                <dt class="col-sm-3">Jabatan</dt>
+                <dd class="col-sm-9">{{ $evaluasi->user->jabatan_full?? '-' }}</dd>
 
-                <dt class="col-sm-3">Nama Atasan Langsung</dt>
-                <dd class="col-sm-9">{{ Auth::user()->directorate->name }}</dd>
+                <dt class="col-sm-3">Department</dt>
+                <dd class="col-sm-9">{{ $evaluasi->user->department->name ?? '-' }}</dd>
+            </dl>
 
+            <hr>
+
+            <dl class="row">
                 <dt class="col-sm-3">Ringkasan Materi Pelatihan</dt>
                 <dd class="col-sm-9">{{ $evaluasi->ringkasan_isi_materi }}</dd>
 
@@ -53,6 +56,7 @@
                 <dd class="col-sm-9">{{ $evaluasi->ide_saran_pengembangan }}</dd>
             </dl>
 
+            {{-- Materi --}}
             <div class="mb-4">
                 <h5 class="mb-3">A. Materi</h5>
                 <table class="table table-bordered">
@@ -80,7 +84,6 @@
                                 $evaluasi->materi->materi_tujuan ?? '-'
                             ];
                         @endphp
-                    
                         @foreach ($materiItems as $i => $item)
                             <tr>
                                 <td class="text-center">{{ $i + 1 }}</td>
@@ -92,6 +95,7 @@
                 </table>
             </div>
 
+            {{-- Penyelenggaraan --}}
             <div class="mb-4">
                 <h5 class="mb-3">B. Penyelenggaraan</h5>
                 <table class="table table-bordered">
@@ -130,6 +134,7 @@
                 </table>
             </div>
 
+            {{-- Sarana --}}
             <div class="mb-4">
                 <h5 class="mb-3">C. Sarana</h5>
                 <table class="table table-bordered">
@@ -168,18 +173,19 @@
                 </table>
             </div>
 
+            {{-- Instruktur --}}
             <div class="mb-4">
                 <h5 class="mb-3">D. Kemampuan Instruktur</h5>
                 <table class="table table-bordered table-striped align-middle text-center">
                     <thead class="table-light">
                         <tr>
-                            <th class="text-center align-middle">No</th>
-                            <th class="text-center align-middle">Nama</th>
-                            <th class="text-center align-middle">Penguasaan Materi</th>
-                            <th class="text-center align-middle">Teknik Penyajian Materi</th>
-                            <th class="text-center align-middle">Sistematika Pengajian Materi</th>
-                            <th class="text-center align-middle">Pengaturan Waktu Pengajian Materi</th>
-                            <th class="text-center align-middle">Pengelolaan Proses Belajar Mengajar</th>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Penguasaan Materi</th>
+                            <th>Teknik Penyajian</th>
+                            <th>Sistematika</th>
+                            <th>Pengaturan Waktu</th>
+                            <th>Pengelolaan Proses</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -205,7 +211,7 @@
             </div>
 
             <dl class="row">
-                <dt class="col-sm-3">KOMPLAIN, SARAN, DAN MASUKAN LAIN DARI ANDA TENTANG PELATIHAN INI</dt>
+                <dt class="col-sm-3">KOMPLAIN, SARAN, DAN MASUKAN LAIN</dt>
                 <dd class="col-sm-9">{{ $evaluasi->komplain_saran_masukan }}</dd>
             </dl>
         </div>

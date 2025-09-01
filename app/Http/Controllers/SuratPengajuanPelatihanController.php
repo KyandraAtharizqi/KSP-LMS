@@ -65,6 +65,10 @@ class SuratPengajuanPelatihanController extends Controller
             'biaya'                 => 'required|string',
             'per_paket_or_orang'    => 'required|string',
             'keterangan'            => 'nullable|string',
+            'tujuan_peserta'        => 'nullable|string',
+
+            'tanggal_pelaksanaan'   => 'nullable|array',
+            'tanggal_pelaksanaan.*' => 'date',
 
             'participants'          => 'required|array|min:1',
             'participants.*'        => 'exists:users,registration_id',
@@ -104,7 +108,11 @@ class SuratPengajuanPelatihanController extends Controller
                 'biaya'                 => $validated['biaya'],
                 'per_paket_or_orang'    => $validated['per_paket_or_orang'],
                 'keterangan'            => $validated['keterangan'],
+                'tujuan_peserta'        => $validated['tujuan_peserta'],
+                'tanggal_pelaksanaan'   => json_encode($validated['tanggal_pelaksanaan'] ?? []),
+                'is_accepted'           => 0, // <- force default to 0
             ]);
+
 
             // Participants
             foreach ($validated['participants'] as $registrationId) {
@@ -265,8 +273,8 @@ class SuratPengajuanPelatihanController extends Controller
     }
 
     /* -----------------------------------------------------------------
-     | Update (after rejection)
-     |----------------------------------------------------------------- */
+    | Update (after rejection)
+    |----------------------------------------------------------------- */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -286,6 +294,10 @@ class SuratPengajuanPelatihanController extends Controller
             'biaya'                 => 'required|string',
             'per_paket_or_orang'    => 'required|string',
             'keterangan'            => 'nullable|string',
+            'tujuan_peserta'        => 'nullable|string',
+
+            'tanggal_pelaksanaan'   => 'nullable|array',
+            'tanggal_pelaksanaan.*' => 'date',
 
             'participants'          => 'required|array|min:1',
             'participants.*'        => 'exists:users,registration_id',
@@ -324,8 +336,10 @@ class SuratPengajuanPelatihanController extends Controller
         DB::beginTransaction();
 
         try {
-            // Update surat
-            $surat->update($validated);
+            // Update surat (merge tanggal_pelaksanaan snapshot)
+            $surat->update(array_merge($validated, [
+                'tanggal_pelaksanaan' => json_encode($validated['tanggal_pelaksanaan'] ?? []),
+            ]));
 
             // Replace participants
             $surat->participants()->delete();
@@ -421,9 +435,10 @@ class SuratPengajuanPelatihanController extends Controller
         }
     }
 
+
     /* -----------------------------------------------------------------
-     | Approve / Reject
-     |----------------------------------------------------------------- */
+    | Approve / Reject
+    |----------------------------------------------------------------- */
     public function approve($suratId, $approvalId)
     {
         $approval = SuratPengajuanPelatihanSignatureAndParaf::where('id', $approvalId)
@@ -444,34 +459,38 @@ class SuratPengajuanPelatihanController extends Controller
         }
 
         DB::transaction(function () use ($approval, $suratId) {
+            // Approve current
             $approval->update([
                 'status'    => 'approved',
                 'signed_at' => now(),
             ]);
 
-            $surat       = SuratPengajuanPelatihan::with('approvals')->findOrFail($suratId);
-            $currentRound= $approval->round;
+            $surat        = SuratPengajuanPelatihan::with('approvals')->findOrFail($suratId);
+            $currentRound = $approval->round;
 
+            // Check if all approvals in this round are completed
             $allCompleted = $surat->approvals()
                 ->where('round', $currentRound)
                 ->where('status', 'pending')
                 ->doesntExist();
 
             if ($allCompleted) {
-                $alreadyExists = \App\Models\SuratTugasPelatihan::where('pelatihan_id', $surat->id)->exists();
+                // Mark SuratPengajuanPelatihan as accepted
+                $surat->update(['is_accepted' => 1]);
 
-                if (!$alreadyExists) {
+                // Optionally, create SuratTugasPelatihan only if it doesn't exist
+                if (!\App\Models\SuratTugasPelatihan::where('pelatihan_id', $surat->id)->exists()) {
                     \App\Models\SuratTugasPelatihan::create([
-                        'pelatihan_id'      => $surat->id,
-                        'kode_pelatihan'    => $surat->kode_pelatihan,
-                        'judul'             => $surat->judul,
-                        'tanggal'           => now()->toDateString(),
-                        'tempat'            => $surat->tempat,
-                        'tanggal_pelatihan' => $surat->tanggal_mulai,
-                        'durasi'            => $surat->durasi,
-                        'created_by'        => auth()->id(),
-                        'status'            => 'draft',
-                        'is_accepted'       => false,
+                        'pelatihan_id'        => $surat->id,
+                        'kode_pelatihan'      => $surat->kode_pelatihan,
+                        'judul'               => $surat->judul,
+                        'tanggal'             => now()->toDateString(),
+                        'tempat'              => $surat->tempat,
+                        'tanggal_pelatihan'   => $surat->tanggal_mulai,
+                        'tanggal_pelaksanaan' => null,
+                        'durasi'              => $surat->durasi,
+                        'status'              => 'draft',
+                        'is_accepted'         => false,
                     ]);
                 }
             }
@@ -479,6 +498,7 @@ class SuratPengajuanPelatihanController extends Controller
 
         return back()->with('success', 'Surat telah disetujui.');
     }
+
 
     public function reject(Request $request, $suratId, $approvalId)
     {

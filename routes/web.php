@@ -27,6 +27,9 @@ use App\Http\Controllers\UserController;
 
 /* 👇 Evaluation controllers */
 use App\Http\Controllers\EvaluasiLevel1Controller;
+use App\Http\Controllers\EvaluasiLevel3PesertaController;
+use App\Http\Controllers\EvaluasiLevel3AtasanController;
+
 use App\Http\Controllers\TrainingEvaluation2Controller;
 use App\Http\Controllers\TrainingEvaluationAtasanController;
 use App\Http\Controllers\TrainingEvaluationRekapController;
@@ -269,24 +272,54 @@ Route::middleware(['auth'])->group(function () {
         |--------------------------------------------------------------------------
         */
 
-        // Evaluation 1 (Peserta) – e.g., immediate reaction / feedback
         Route::prefix('training/evaluasi-level-1')->as('training.evaluasilevel1.')->group(function () {
             Route::get('/', [EvaluasiLevel1Controller::class, 'index'])->name('index');
-            
-            // Show the form for a specific pelatihan
             Route::get('/{pelatihan}/create', [EvaluasiLevel1Controller::class, 'create'])->name('create');
-            
-            // Store the submitted evaluation
             Route::post('/{pelatihan}', [EvaluasiLevel1Controller::class, 'store'])->name('store');
-            
-            // Show a filled evaluation (optional)
             Route::get('/{pelatihan}/show', [EvaluasiLevel1Controller::class, 'show'])->name('show');
+            Route::get('/{pelatihan}/pdf', [EvaluasiLevel1Controller::class, 'pdfView'])->name('pdf');
+
+            // ✅ Only this part changes
+            Route::put('/{evaluasi}/update-superior', [EvaluasiLevel1Controller::class, 'updateSuperior'])
+                ->name('updateSuperior');
         });
 
         // Evaluation 2 (Peserta) – e.g., post-training learning assessment
         Route::prefix('training/evaluation2')->as('training.evaluation2.')->group(function () {
             Route::get('/', [TrainingEvaluation2Controller::class, 'index'])->name('index');
         });
+
+        Route::prefix('training/evaluasi-level-3/peserta')->name('evaluasi-level-3.peserta.')->group(function () {
+            Route::get('/', [EvaluasiLevel3PesertaController::class, 'index'])->name('index');
+            Route::get('/create/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'create'])->name('create');
+            Route::post('/store/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'store'])->name('store');
+            Route::get('/preview/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'preview'])->name('preview');
+            Route::get('/edit/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'edit'])->name('edit');
+            Route::put('/update/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'update'])->name('update');
+            Route::get('/pdf/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'pdfView'])->name('pdf');
+
+
+
+        });
+
+
+
+        Route::prefix('training/evaluasi-level-3/atasan')
+            ->name('evaluasi-level-3.atasan.')
+            ->group(function () {
+
+                // Index - list all peserta evaluations for this supervisor
+                Route::get('/', [EvaluasiLevel3AtasanController::class, 'index'])->name('index');
+
+                // Approval page - preview a peserta evaluation and approve/rollback
+                Route::get('/approval/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'approval'])->name('approval');
+                Route::post('/approval/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'submitApproval'])->name('submitApproval');
+
+                // Create evaluation by supervisor
+                Route::get('/create/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'create'])->name('create');
+                Route::post('/store/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'store'])->name('store');
+            });
+                
 
         // Evaluation Atasan (manager follow‑up on behavior/transfer)
         Route::prefix('training/evaluation/atasan')->as('training.evaluation.atasan.')->group(function () {

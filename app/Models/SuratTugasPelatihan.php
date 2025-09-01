@@ -127,4 +127,11 @@ class SuratTugasPelatihan extends Model
             $model->signaturesAndParafs()->delete();
         });
     }
+
+
+    public function approvals()
+    {
+        return $this->hasMany(SuratTugasPelatihanSignatureAndParaf::class, 'surat_tugas_id');
+    }
+
 }

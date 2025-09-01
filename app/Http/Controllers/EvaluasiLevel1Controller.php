@@ -13,24 +13,35 @@ use App\Models\EvaluasiLevel1Materi;
 use App\Models\EvaluasiLevel1Sarana;
 use App\Models\EvaluasiLevel1Penyelenggaraan;
 use App\Models\EvaluasiLevel1Instruktur;
+use App\Models\EvaluasiLevel3Peserta;
 use App\Models\PelatihanPresenter;
+use App\Models\User; 
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EvaluasiLevel1Controller extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
+        $user = Auth::user();
 
-        $pelatihans = SuratPengajuanPelatihan::whereHas('participants', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })
-        ->whereDoesntHave('daftarHadirStatus', function ($q) {
-            $q->where('is_submitted', false);
-        })
-        ->with(['evaluasiLevel1', 'daftarHadirStatus'])
-        ->get();
+        if (in_array($user->role, ['admin', 'department_admin'])) {
+            // Admin & DeptAdmin can see all evaluations
+            $pelatihans = SuratPengajuanPelatihan::with(['evaluasiLevel1', 'daftarHadirStatus', 'participants'])->get();
+        } else {
+            // Normal participants only see their own
+            $pelatihans = SuratPengajuanPelatihan::whereHas('participants', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })
+                ->whereDoesntHave('daftarHadirStatus', function ($q) {
+                    $q->where('is_submitted', false);
+                })
+                ->with(['evaluasiLevel1', 'daftarHadirStatus', 'participants'])
+                ->get();
+        }
 
-        return view('pages.training.evaluasilevel1.index', compact('pelatihans'));
+        $availableSuperiors = User::all();
+
+        return view('pages.training.evaluasilevel1.index', compact('pelatihans', 'availableSuperiors'));
     }
 
     public function create(SuratPengajuanPelatihan $pelatihan)
@@ -141,6 +152,31 @@ class EvaluasiLevel1Controller extends Controller
 
             \Log::info('Main evaluation record updated successfully');
 
+            /**
+             * ✅ Insert initial record into EvaluasiLevel3
+             * Only if not already exists
+             */
+            $existingEval3 = EvaluasiLevel3Peserta::where('pelatihan_id', $pelatihan->id)
+                ->where('user_id', $request->user_id)
+                ->first();
+
+            if (!$existingEval3) {
+                EvaluasiLevel3Peserta::create([
+                    'pelatihan_id' => $pelatihan->id,
+                    'user_id' => $request->user_id,
+                    'registration_id' => $request->registration_id,
+                    'kode_pelatihan' => $request->kode_pelatihan,
+                    'manfaat_pelatihan' => null, // to be filled later
+                    'kinerja' => null,           // to be filled later
+                    'saran' => null,             // to be filled later
+                    'is_submitted' => 0,         // explicitly set to 0 (false)
+                    'is_accepted' => 0,          // explicitly set to 0 (false)
+                ]);
+                \Log::info('Initial Evaluasi Level 3 record created for user_id=' . $request->user_id);
+            } else {
+                \Log::info('Evaluasi Level 3 record already exists, skipping creation');
+            }
+
             // Create/update materi record
             $materiData = [
                 'evaluasi_level_1_id' => $evaluasi->id,
@@ -151,16 +187,11 @@ class EvaluasiLevel1Controller extends Controller
                 'materi_tujuan' => $request->materi_tujuan,
             ];
             
-            \Log::info('Creating materi record with data: ', $materiData);
-            
-            // Use direct creation instead of updateOrCreate to see exact error
             $existingMateri = EvaluasiLevel1Materi::where('evaluasi_level_1_id', $evaluasi->id)->first();
             if ($existingMateri) {
                 $existingMateri->update($materiData);
-                \Log::info('Updated existing materi record');
             } else {
                 EvaluasiLevel1Materi::create($materiData);
-                \Log::info('Created new materi record');
             }
 
             // Create/update penyelenggaraan record
@@ -176,10 +207,8 @@ class EvaluasiLevel1Controller extends Controller
             $existingPenyelenggaraan = EvaluasiLevel1Penyelenggaraan::where('evaluasi_level_1_id', $evaluasi->id)->first();
             if ($existingPenyelenggaraan) {
                 $existingPenyelenggaraan->update($penyelenggaraanData);
-                \Log::info('Updated existing penyelenggaraan record');
             } else {
                 EvaluasiLevel1Penyelenggaraan::create($penyelenggaraanData);
-                \Log::info('Created new penyelenggaraan record');
             }
 
             // Create/update sarana record
@@ -195,19 +224,15 @@ class EvaluasiLevel1Controller extends Controller
             $existingSarana = EvaluasiLevel1Sarana::where('evaluasi_level_1_id', $evaluasi->id)->first();
             if ($existingSarana) {
                 $existingSarana->update($saranaData);
-                \Log::info('Updated existing sarana record');
             } else {
                 EvaluasiLevel1Sarana::create($saranaData);
-                \Log::info('Created new sarana record');
             }
 
             // Handle instructor records
             EvaluasiLevel1Instruktur::where('evaluasi_level_1_id', $evaluasi->id)->delete();
 
             if ($request->has('instrukturs') && is_array($request->instrukturs)) {
-                foreach ($request->instrukturs as $index => $instruktur) {
-                    \Log::info('Processing instructor: ', ['index' => $index, 'data' => $instruktur]);
-                    
+                foreach ($request->instrukturs as $instruktur) {
                     $instrukturData = [
                         'evaluasi_level_1_id' => $evaluasi->id,
                         'type' => $instruktur['type'],
@@ -221,14 +246,14 @@ class EvaluasiLevel1Controller extends Controller
                     ];
                     
                     EvaluasiLevel1Instruktur::create($instrukturData);
-                    \Log::info('Instructor record created successfully');
                 }
             }
 
             DB::commit();
             \Log::info('All records successfully saved for pelatihan: ' . $pelatihan->id);
             
-            return redirect()->route('training.evaluasilevel1.index')->with('success', 'Evaluasi berhasil disimpan.');
+            return redirect()->route('training.evaluasilevel1.index')
+                ->with('success', 'Evaluasi berhasil disimpan.');
             
         } catch (\Exception $e) {
             DB::rollback();
@@ -238,21 +263,66 @@ class EvaluasiLevel1Controller extends Controller
         }
     }
 
+
     public function show(SuratPengajuanPelatihan $pelatihan)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
-        $evaluasi = EvaluasiLevel1::with([
-            'materi',
-            'penyelenggaraan', 
-            'sarana', 
-            'instrukturs.user',
-            'instrukturs.presenter'
-        ])
-        ->where('pelatihan_id', $pelatihan->id)
-        ->where('user_id', $user->id)
-        ->firstOrFail();
+        $query = EvaluasiLevel1::with([
+            'materi', 'penyelenggaraan', 'sarana',
+            'instrukturs.user', 'instrukturs.presenter'
+        ])->where('pelatihan_id', $pelatihan->id);
+
+        if (!in_array($user->role, ['admin', 'department_admin'])) {
+            $query->where('user_id', $user->id);
+        }
+
+        $evaluasi = $query->firstOrFail();
 
         return view('pages.training.evaluasilevel1.show', compact('pelatihan', 'evaluasi'));
     }
+
+    public function pdfView(SuratPengajuanPelatihan $pelatihan)
+    {
+        $user = Auth::user();
+
+        $query = EvaluasiLevel1::with([
+            'materi', 'penyelenggaraan', 'sarana',
+            'instrukturs.user', 'instrukturs.presenter'
+        ])->where('pelatihan_id', $pelatihan->id);
+
+        if (!in_array($user->role, ['admin', 'department_admin'])) {
+            $query->where('user_id', $user->id);
+        }
+
+        $evaluasi = $query->firstOrFail();
+
+        $pdf = Pdf::loadView('pages.training.evaluasilevel1.pdf_view', [
+            'pelatihan' => $pelatihan,
+            'evaluasi' => $evaluasi
+        ]);
+
+        return $pdf->download('Evaluasi_Level_1_' . $pelatihan->kode_pelatihan . '.pdf');
+    }
+
+
+    public function updateSuperior(Request $request, EvaluasiLevel1 $evaluasi)
+    {
+        $user = auth()->user();
+
+        // Optional: ensure the logged-in user can only change their own superior
+        if ($evaluasi->user_id !== $user->id) {
+            abort(403, 'Anda tidak berhak mengubah superior ini.');
+        }
+
+        $request->validate([
+            'superior_id' => 'nullable|exists:users,id',
+        ]);
+
+        $evaluasi->superior_id = $request->superior_id;
+        $evaluasi->save();
+
+        return redirect()->back()->with('success', 'Superior berhasil diperbarui.');
+    }
+
 }

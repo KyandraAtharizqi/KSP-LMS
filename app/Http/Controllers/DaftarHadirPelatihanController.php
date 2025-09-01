@@ -104,7 +104,7 @@ class DaftarHadirPelatihanController extends Controller
     }
 
     /* ===============================================================
-     | IMPORT – CSV batch update (NOT finalize)
+     | IMPORT – CSV batch update with DATE VALIDATION
      * ===============================================================*/
     public function import(Request $request, $pelatihanId, $date)
     {
@@ -137,6 +137,22 @@ class DaftarHadirPelatihanController extends Controller
 
         [$rows, $mode] = $this->parseAttendanceFile($request->file('file'));
 
+        // 🔥 VALIDASI TANGGAL - Periksa apakah tanggal di Excel sesuai dengan hari pelatihan yang diharapkan
+        foreach ($rows as $r) {
+            if (!empty($r['timestamp'])) {
+                $ts = $this->parseGoogleTimestamp($r['timestamp']);
+                if ($ts && $ts->toDateString() !== $day) {
+                    return back()->with('error', 
+                        "KESALAHAN TANGGAL IMPOR DATA\n\n" .
+                        "Tanggal di Excel: {$ts->format('d/m/Y')}\n" .
+                        "Tanggal yang diharapkan: " . Carbon::parse($day)->format('d/m/Y') . "\n\n" .
+                        "Silakan periksa kembali file Excel Anda atau pastikan mengimpor pada hari pelatihan yang sesuai.\n\n" .
+                        "Import dibatalkan untuk mencegah kesalahan data."
+                    );
+                }
+            }
+        }
+
         $updated = 0;
         $skipped = 0;
 
@@ -156,6 +172,7 @@ class DaftarHadirPelatihanController extends Controller
                 ]);
 
                 $att->registration_id = $participant->registration_id;
+                $att->kode_pelatihan  = $pelatihan->kode_pelatihan; // ✅ FIX
 
                 if ($mode === 'event') {
                     $checkType  = trim((string)($r['check_type'] ?? ''));
@@ -219,8 +236,8 @@ class DaftarHadirPelatihanController extends Controller
     }
 
     /* ===============================================================
-     | SAVE – manual edits; optional finalize via action=finalize
-     * ===============================================================*/
+    | SAVE – manual edits; optional finalize via action=finalize
+    * ===============================================================*/
     public function save(Request $request, $pelatihanId, $date)
     {
         $user = Auth::user();
@@ -264,6 +281,7 @@ class DaftarHadirPelatihanController extends Controller
                 ]);
 
                 $att->registration_id = $participant->registration_id;
+                $att->kode_pelatihan  = $pelatihan->kode_pelatihan; // ✅ FIX
 
                 $status  = $this->normalizeStatus($data['status'] ?? 'absen');
                 $note    = $data['note'] ?? null;
@@ -290,14 +308,13 @@ class DaftarHadirPelatihanController extends Controller
             }
         });
 
-        // Finalize logic
+        // Finalize logic with superior_id
         if ($request->input('action') === 'finalize') {
             $status->is_submitted = true;
             $status->submitted_at = now();
             $status->submitted_by = $user->id;
             $status->save();
 
-            // Check if all days for this pelatihan are submitted
             $allSubmitted = DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihan->id)
                 ->where('is_submitted', false)
                 ->count() === 0;
@@ -316,7 +333,7 @@ class DaftarHadirPelatihanController extends Controller
                             'user_id'         => $userId,
                             'registration_id' => $participant->registration_id,
                             'kode_pelatihan'  => $participant->kode_pelatihan ?? $pelatihan->kode_pelatihan,
-                            'superior_id'     => $participant->superior_id,
+                            'superior_id'     => $participant->user->superior_id ?? null, // ✅ ADDED
                             'is_submitted'    => false,
                         ]);
                     }
@@ -340,7 +357,7 @@ class DaftarHadirPelatihanController extends Controller
     public function markComplete(Request $request, $pelatihanId, $date)
     {
         $user = Auth::user();
-        $pelatihan = SuratPengajuanPelatihan::findOrFail($pelatihanId);
+        $pelatihan = SuratPengajuanPelatihan::with('participants.user')->findOrFail($pelatihanId); // ✅ UPDATED: Added user relationship
 
         if (!$this->userCanManageAttendance($user, $pelatihan)) {
             abort(Response::HTTP_FORBIDDEN);
@@ -365,7 +382,7 @@ class DaftarHadirPelatihanController extends Controller
 
         if ($totalDates > 0 && $totalDates === $submittedDates) {
             // 🔁 Insert evaluation records for each participant
-            $participants = $pelatihan->participants; // assuming `participants` relationship exists
+            $participants = $pelatihan->participants;
 
             foreach ($participants as $participant) {
                 \App\Models\EvaluasiLevel1::firstOrCreate(
@@ -376,7 +393,7 @@ class DaftarHadirPelatihanController extends Controller
                     [
                         'registration_id' => $participant->registration_id,
                         'kode_pelatihan'  => $participant->kode_pelatihan ?? $pelatihan->kode_pelatihan,
-                        'superior_id'     => $participant->superior_id,
+                        'superior_id'     => $participant->user->superior_id ?? null, // ✅ ADDED
                         'is_submitted'    => false,
                     ]
                 );
@@ -584,6 +601,8 @@ class DaftarHadirPelatihanController extends Controller
             DaftarHadirPelatihanStatus::firstOrCreate([
                 'pelatihan_id' => $pelatihan->id,
                 'date'         => $start->copy()->addDays($i)->toDateString(),
+            ], [
+                'kode_pelatihan' => $pelatihan->kode_pelatihan,
             ]);
         }
     }

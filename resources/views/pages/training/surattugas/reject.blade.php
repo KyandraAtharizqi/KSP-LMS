@@ -1,18 +1,18 @@
 @extends('layout.main')
 
-@section('title', 'Konfirmasi Persetujuan - Surat Tugas')
+@section('title', 'Konfirmasi Penolakan - Surat Tugas')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold mb-4">Konfirmasi Persetujuan</h4>
+    <h4 class="fw-bold mb-4">Konfirmasi Penolakan</h4>
 
     <div class="card">
         <div class="card-body">
-            <div class="alert alert-info" role="alert">
+            <div class="alert alert-warning" role="alert">
                 <h5 class="alert-heading">Perhatian!</h5>
-                <p>Anda akan menyetujui surat tugas di bawah ini. Tindakan ini akan tercatat dalam sistem dan tidak dapat diubah.</p>
+                <p>Anda akan menolak surat tugas di bawah ini. Tindakan ini akan <strong>mengembalikan surat kepada ADMIN dan DEPARTMENT ADMIN</strong> untuk diperbaiki.</p>
                 <hr>
-                <p class="mb-0">Pastikan semua informasi sudah benar sebelum melanjutkan.</p>
+                <p class="mb-0">Harap berikan alasan penolakan agar pembuat dapat melakukan perbaikan yang sesuai.</p>
             </div>
 
             <div class="mb-4">
@@ -25,13 +25,18 @@
                 </p>
             </div>
 
-            {{-- Form persetujuan --}}
-            <form action="{{ route('training.surattugas.approve', ['id' => $surat->id, 'approval' => $approval->id]) }}" method="POST">
+            {{-- Form penolakan --}}
+            <form action="{{ route('training.surattugas.reject', ['id' => $surat->id, 'approval' => $approval->id]) }}" method="POST">
                 @csrf
+                <div class="mb-3">
+                    <label for="reason" class="form-label">Alasan Penolakan</label>
+                    <textarea class="form-control" id="reason" name="reason" rows="4" required></textarea>
+                </div>
+
                 <div class="d-flex justify-content-end">
                     <a href="{{ route('training.surattugas.index') }}" class="btn btn-secondary me-2">Batal</a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bx bx-check"></i> Ya, Saya Setuju
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bx bx-x"></i> Tolak Surat
                     </button>
                 </div>
             </form>

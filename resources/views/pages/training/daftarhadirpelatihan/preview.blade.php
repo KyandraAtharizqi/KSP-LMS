@@ -16,6 +16,11 @@
     .header-logo {
         height: 50px;
     }
+
+    .table-bordered-custom td.catatan-col {
+    padding: 4px;
+}
+    
 </style>
 @endpush
 

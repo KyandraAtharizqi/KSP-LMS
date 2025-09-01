@@ -76,53 +76,52 @@
 @endphp
 
 <script>
-    // Initialize JavaScript selection arrays based on existing approvals/participants
-    let selectedParticipants = @json($participantsData);
-    let lastRound = {{ $maxRound }};
-    let selectedParafs = @json($parafsData);
-    let selectedSignature1 = @json($signature1Data);
-    let selectedSignature2 = @json($signature2Data);
-    let selectedSignature3 = @json($signature3Data);
+    let selectedParticipants = [];
+    let selectedParafs = [];
+    let selectedSignature1 = [];
+    let selectedSignature2 = [];
+    let selectedSignature3 = [];
 
-  function renderList(arr, containerId, inputName, inputContainerId, color) {
-      const container = document.getElementById(containerId);
-      const inputContainer = document.getElementById(inputContainerId);
-      container.innerHTML = '';
-      inputContainer.innerHTML = '';
+    function renderList(arr, containerId, inputName, inputContainerId, colorClass) {
+        const container = document.getElementById(containerId);
+        const inputContainer = document.getElementById(inputContainerId);
+        container.innerHTML = '';
+        inputContainer.innerHTML = '';
 
-      arr.forEach(user => {
-          const tag = document.createElement('div');
-          tag.className = `badge bg-${color} me-1 mb-1 d-inline-flex align-items-center`;
-          tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan_full}
-              <button type="button" class="btn-close btn-sm ms-2" 
-                      onclick="removeFromList('${user.registration_id}', '${containerId}')">
-              </button>`;
-          container.appendChild(tag);
+        arr.forEach(user => {
+            const tag = document.createElement('div');
+            tag.className = `badge ${colorClass} me-1 mb-1 d-inline-flex align-items-center`;
+            tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan_full}
+                <button type="button" class="btn-close btn-sm ms-2" 
+                        onclick="removeFromList('${user.registration_id}', '${containerId}')">
+                </button>`;
+            container.appendChild(tag);
 
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = inputName + '[]';
-          input.value = user.registration_id;
-          inputContainer.appendChild(input);
-      });
-  }
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = inputName + '[]';
+            input.value = user.registration_id;
+            inputContainer.appendChild(input);
+        });
+    }
+
 
     function removeFromList(registrationId, listType) {
         if (listType === 'selected-participant-list') {
             selectedParticipants = selectedParticipants.filter(p => p.registration_id !== registrationId);
-            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'primary');
+            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'bg-primary');
         } else if (listType === 'selected-paraf-list') {
             selectedParafs = selectedParafs.filter(p => p.registration_id !== registrationId);
-            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'warning text-dark');
+            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'bg-warning text-dark');
         } else if (listType === 'selected-signature1-list') {
             selectedSignature1 = selectedSignature1.filter(p => p.registration_id !== registrationId);
-            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'success');
+            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'bg-success');
         } else if (listType === 'selected-signature2-list') {
             selectedSignature2 = [];
-            renderList([], 'selected-signature2-list', 'signature2', 'signature2-inputs', 'info');
+            renderList([], 'selected-signature2-list', 'signature2', 'signature2-inputs', 'bg-info');
         } else if (listType === 'selected-signature3-list') {
             selectedSignature3 = [];
-            renderList([], 'selected-signature3-list', 'signature3', 'signature3-inputs', 'info');
+            renderList([], 'selected-signature3-list', 'signature3', 'signature3-inputs', 'bg-secondary');
         }
     }
 
@@ -136,27 +135,27 @@
             if (!selectedParticipants.find(p => p.registration_id === user.registration_id)) {
                 selectedParticipants.push(user);
             }
-            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'primary');
+            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'bg-primary');
             bootstrap.Modal.getInstance(document.getElementById('participantModal')).hide();
         } else if (listType === 'paraf') {
             if (!selectedParafs.find(p => p.registration_id === user.registration_id)) {
                 selectedParafs.push(user);
             }
-            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'warning text-dark');
+            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'bg-warning text-dark');
             bootstrap.Modal.getInstance(document.getElementById('parafModal')).hide();
         } else if (listType === 'signature') {
             if (!selectedSignature1.find(p => p.registration_id === user.registration_id)) {
                 selectedSignature1 = [user]; // Only one allowed
             }
-            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'success');
+            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'bg-success');
             bootstrap.Modal.getInstance(document.getElementById('signatureModal')).hide();
         } else if (listType === 'signature2') {
             selectedSignature2 = [user];
-            renderList(selectedSignature2, 'selected-signature2-list', 'signature2', 'signature2-inputs', 'info');
+            renderList(selectedSignature2, 'selected-signature2-list', 'signature2', 'signature2-inputs', 'bg-info');
             bootstrap.Modal.getInstance(document.getElementById('signature2Modal')).hide();
         } else if (listType === 'signature3') {
             selectedSignature3 = [user];
-            renderList(selectedSignature3, 'selected-signature3-list', 'signature3', 'signature3-inputs', 'info');
+            renderList(selectedSignature3, 'selected-signature3-list', 'signature3', 'signature3-inputs', 'bg-secondary');
             bootstrap.Modal.getInstance(document.getElementById('signature3Modal')).hide();
         }
     }
@@ -171,23 +170,23 @@
         ];
 
         searchInputs.forEach(({ inputId, tableSelector }) => {
-                const input = document.getElementById(inputId);
-                const rows = document.querySelectorAll(tableSelector);
-                input.addEventListener('input', function () {
-                    const keyword = input.value.toLowerCase();
-                    rows.forEach(row => {
-                        const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-                        const regid = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                        const jabatan = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-                        const dept = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-                        const golongan = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
-                        row.style.display = (
-                            name.includes(keyword) ||
-                            regid.includes(keyword) ||
-                            jabatan.includes(keyword) ||
-                            dept.includes(keyword) ||
-                            golongan.includes(keyword)
-                        ) ? '' : 'none';
+            const input = document.getElementById(inputId);
+            const rows = document.querySelectorAll(tableSelector);
+            input.addEventListener('input', function () {
+                const keyword = input.value.toLowerCase();
+                rows.forEach(row => {
+                    const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                    const regid = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const jabatan = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                    const dept = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                    const golongan = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                    row.style.display = (
+                        name.includes(keyword) ||
+                        regid.includes(keyword) ||
+                        jabatan.includes(keyword) ||
+                        dept.includes(keyword) ||
+                        golongan.includes(keyword)
+                    ) ? '' : 'none';
                 });
             });
         });
@@ -326,7 +325,7 @@
                     <textarea name="keterangan" class="form-control">{{ old('keterangan', $surat->keterangan) }}</textarea>
                 </div>
 
-                {{-- Participants --}}
+                <!-- Participant -->
                 <hr><h5>Peserta</h5>
                 <div class="col-12 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#participantModal">+ Tambah Peserta</button>
@@ -334,38 +333,36 @@
                 <div class="col-12 mb-2" id="selected-participant-list"></div>
                 <div id="participant-inputs"></div>
 
-                {{-- Paraf --}}
+                <!-- Paraf -->
                 <hr><h5>Paraf</h5>
-                <p class="text-muted">Pilih maksimal 3 orang untuk memberikan paraf.</p>
                 <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#parafModal">+ Tambah Paraf</button>
+                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#parafModal">+ Tambah Paraf</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-paraf-list"></div>
                 <div id="paraf-inputs"></div>
 
-                {{-- Signatures Section --}}
+                <!-- Signatures (1, 2, 3 in one list but shown separately) -->
                 <hr><h5>Penandatangan</h5>
 
-                {{-- Signature 1 --}}
+                <!-- Signature 1 -->
                 <h6>Signature 1</h6>
-                <p class="text-muted">Pilih atasan langsung sebagai penandatangan pertama.</p>
                 <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Signature 1</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Signature 1</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-signature1-list"></div>
                 <div id="signature1-inputs"></div>
 
-                {{-- Signature 2 --}}
-                <h6>Signature 2</h6>
+                <!-- Signature 2 -->
+                <h6 class="mt-3">Signature 2</h6>
                 <p class="text-muted">Pilih <strong>Human Capital Manager</strong> sebagai penandatangan kedua.</p>
                 <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Signature 2</button>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Signature 2</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-signature2-list"></div>
                 <div id="signature2-inputs"></div>
 
-                {{-- Signature 3 --}}
-                <h6>Signature 3</h6>
+                <!-- Signature 3 -->
+                <h6 class="mt-3">Signature 3</h6>
                 <p class="text-muted">Pilih <strong>Director HC & Finance</strong> sebagai penandatangan ketiga.</p>
                 <div class="col-12 mb-2">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature3Modal">+ Tambah Signature 3</button>

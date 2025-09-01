@@ -28,11 +28,14 @@ class SuratPengajuanPelatihan extends Model
         'biaya',
         'per_paket_or_orang',
         'keterangan',
+        'tujuan_peserta',
     ];
 
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
+        'tanggal_pelaksanaan' => 'array',
+        'is_accepted' => 'boolean',
     ];
 
     // Relationships
@@ -129,6 +132,12 @@ class SuratPengajuanPelatihan extends Model
         public function evaluasiLevel1()
     {
         return $this->hasMany(EvaluasiLevel1::class, 'pelatihan_id');
+    }
+
+    public function evaluasiLevel3Peserta()
+    {
+        return $this->hasOne(EvaluasiLevel3Peserta::class, 'pelatihan_id', 'id')
+            ->where('user_id', auth()->id()); // important to scope only current user
     }
 
 

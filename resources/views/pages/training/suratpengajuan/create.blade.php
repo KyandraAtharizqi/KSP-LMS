@@ -23,8 +23,94 @@
     let selectedSignature1 = [];
     let selectedSignature2 = [];
     let selectedSignature3 = [];
+    let selectedTanggalPelaksanaan = [];
 
-    function renderList(arr, containerId, inputName, inputContainerId, color) {
+    function renderTanggalPelaksanaan() {
+        const container = document.getElementById('tanggal-pelaksanaan-list');
+        const inputContainer = document.getElementById('tanggal-pelaksanaan-inputs');
+        
+        // Clear existing content
+        container.innerHTML = '';
+        inputContainer.innerHTML = '';
+
+        // Render each selected date
+        selectedTanggalPelaksanaan.forEach((tgl, idx) => {
+            // Create display badge
+            const tag = document.createElement('div');
+            tag.className = 'badge bg-dark me-1 mb-1 d-inline-flex align-items-center';
+            tag.innerHTML = `${formatDate(tgl)}
+                <button type="button" class="btn-close btn-close-white btn-sm ms-2" onclick="removeTanggalPelaksanaan(${idx})" aria-label="Remove"></button>`;
+            container.appendChild(tag);
+
+            // Create hidden input for form submission
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'tanggal_pelaksanaan[]';
+            input.value = tgl;
+            inputContainer.appendChild(input);
+        });
+        
+        // Show count
+        if (selectedTanggalPelaksanaan.length > 0) {
+            const countInfo = document.createElement('small');
+            countInfo.className = 'text-muted d-block mt-1';
+            countInfo.textContent = `${selectedTanggalPelaksanaan.length} tanggal dipilih`;
+            container.appendChild(countInfo);
+        }
+    }
+
+    function addTanggalPelaksanaan() {
+        const picker = document.getElementById('tanggal-pelaksanaan-picker');
+        const tgl = picker.value;
+        
+        console.log('Date picker value:', tgl); // Debug log
+        
+        // Validate date input
+        if (!tgl) {
+            alert('Silakan pilih tanggal terlebih dahulu');
+            return;
+        }
+        
+        // Check if date already selected
+        if (selectedTanggalPelaksanaan.includes(tgl)) {
+            alert('Tanggal sudah dipilih sebelumnya');
+            picker.value = ''; // Clear the picker
+            return;
+        }
+        
+        // Add to array and sort
+        selectedTanggalPelaksanaan.push(tgl);
+        selectedTanggalPelaksanaan.sort(); // Keep chronological order
+        
+        // Re-render the list
+        renderTanggalPelaksanaan();
+        
+        // Clear the picker
+        picker.value = '';
+        
+        console.log('Selected dates:', selectedTanggalPelaksanaan); // Debug log
+    }
+
+    function removeTanggalPelaksanaan(index) {
+        if (confirm('Hapus tanggal ini?')) {
+            selectedTanggalPelaksanaan.splice(index, 1);
+            renderTanggalPelaksanaan();
+        }
+    }
+
+    // Helper function to format date for display
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short', 
+            day: 'numeric'
+        });
+    }
+
+    // Rest of your existing functions...
+    function renderList(arr, containerId, inputName, inputContainerId, colorClass) {
         const container = document.getElementById(containerId);
         const inputContainer = document.getElementById(inputContainerId);
         container.innerHTML = '';
@@ -32,8 +118,8 @@
 
         arr.forEach(user => {
             const tag = document.createElement('div');
-            tag.className = `badge bg-${color} me-1 mb-1 d-inline-flex align-items-center`;
-            tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan} - ${user.golongan}
+            tag.className = `badge ${colorClass} me-1 mb-1 d-inline-flex align-items-center`;
+            tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan}
                 <button type="button" class="btn-close btn-sm ms-2" 
                         onclick="removeFromList('${user.registration_id}', '${containerId}')">
                 </button>`;
@@ -50,19 +136,19 @@
     function removeFromList(registrationId, listType) {
         if (listType === 'selected-participant-list') {
             selectedParticipants = selectedParticipants.filter(p => p.registration_id !== registrationId);
-            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'primary');
+            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'bg-primary');
         } else if (listType === 'selected-paraf-list') {
             selectedParafs = selectedParafs.filter(p => p.registration_id !== registrationId);
-            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'warning text-dark');
+            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'bg-warning text-dark');
         } else if (listType === 'selected-signature1-list') {
             selectedSignature1 = selectedSignature1.filter(p => p.registration_id !== registrationId);
-            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'success');
+            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'bg-success');
         } else if (listType === 'selected-signature2-list') {
             selectedSignature2 = [];
-            renderList([], 'selected-signature2-list', 'signature2', 'signature2-inputs', 'info');
+            renderList([], 'selected-signature2-list', 'signature2', 'signature2-inputs', 'bg-info');
         } else if (listType === 'selected-signature3-list') {
             selectedSignature3 = [];
-            renderList([], 'selected-signature3-list', 'signature3', 'signature3-inputs', 'info');
+            renderList([], 'selected-signature3-list', 'signature3', 'signature3-inputs', 'bg-secondary');
         }
     }
 
@@ -76,32 +162,36 @@
             if (!selectedParticipants.find(p => p.registration_id === user.registration_id)) {
                 selectedParticipants.push(user);
             }
-            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'primary');
+            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'bg-primary');
             bootstrap.Modal.getInstance(document.getElementById('participantModal')).hide();
         } else if (listType === 'paraf') {
             if (!selectedParafs.find(p => p.registration_id === user.registration_id)) {
                 selectedParafs.push(user);
             }
-            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'warning text-dark');
+            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'bg-warning text-dark');
             bootstrap.Modal.getInstance(document.getElementById('parafModal')).hide();
         } else if (listType === 'signature') {
             if (!selectedSignature1.find(p => p.registration_id === user.registration_id)) {
                 selectedSignature1 = [user]; // Only one allowed
             }
-            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'success');
+            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'bg-success');
             bootstrap.Modal.getInstance(document.getElementById('signatureModal')).hide();
         } else if (listType === 'signature2') {
             selectedSignature2 = [user];
-            renderList(selectedSignature2, 'selected-signature2-list', 'signature2', 'signature2-inputs', 'info');
+            renderList(selectedSignature2, 'selected-signature2-list', 'signature2', 'signature2-inputs', 'bg-info');
             bootstrap.Modal.getInstance(document.getElementById('signature2Modal')).hide();
         } else if (listType === 'signature3') {
             selectedSignature3 = [user];
-            renderList(selectedSignature3, 'selected-signature3-list', 'signature3', 'signature3-inputs', 'info');
+            renderList(selectedSignature3, 'selected-signature3-list', 'signature3', 'signature3-inputs', 'bg-secondary');
             bootstrap.Modal.getInstance(document.getElementById('signature3Modal')).hide();
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize tanggal pelaksanaan functionality
+        renderTanggalPelaksanaan();
+        
+        // Search functionality
         const searchInputs = [
             { inputId: 'participant-search', tableSelector: '#participant-table tbody tr' },
             { inputId: 'paraf-search', tableSelector: '#parafModal table tbody tr' },
@@ -111,16 +201,17 @@
         ];
 
         searchInputs.forEach(({ inputId, tableSelector }) => {
-                const input = document.getElementById(inputId);
+            const input = document.getElementById(inputId);
+            if (input) {
                 const rows = document.querySelectorAll(tableSelector);
                 input.addEventListener('input', function () {
                     const keyword = input.value.toLowerCase();
                     rows.forEach(row => {
-                        const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-                        const regid = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                        const jabatan = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-                        const dept = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-                        const golongan = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                        const name = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+                        const regid = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                        const jabatan = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                        const dept = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '';
+                        const golongan = row.querySelector('td:nth-child(5)')?.textContent.toLowerCase() || '';
                         row.style.display = (
                             name.includes(keyword) ||
                             regid.includes(keyword) ||
@@ -128,33 +219,44 @@
                             dept.includes(keyword) ||
                             golongan.includes(keyword)
                         ) ? '' : 'none';
+                    });
                 });
-            });
+            }
         });
 
+        // Duration calculation
         const start = document.querySelector('[name="tanggal_mulai"]');
         const end = document.querySelector('[name="tanggal_selesai"]');
         const durasi = document.querySelector('#durasi');
 
         function updateDurasi() {
-            const startDate = new Date(start.value);
-            const endDate = new Date(end.value);
-            if (startDate && endDate && endDate >= startDate) {
-                const diff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                durasi.value = diff;
-                document.getElementById('durasi-hidden').value = diff;
-            } else {
-                durasi.value = '';
-                document.getElementById('durasi-hidden').value = '';
+            if (start && end && durasi) {
+                const startDate = new Date(start.value);
+                const endDate = new Date(end.value);
+                if (startDate && endDate && endDate >= startDate) {
+                    const diff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                    durasi.value = diff;
+                    const hiddenDurasi = document.getElementById('durasi-hidden');
+                    if (hiddenDurasi) {
+                        hiddenDurasi.value = diff;
+                    }
+                } else {
+                    durasi.value = '';
+                    const hiddenDurasi = document.getElementById('durasi-hidden');
+                    if (hiddenDurasi) {
+                        hiddenDurasi.value = '';
+                    }
+                }
             }
         }
 
-        start.addEventListener('change', updateDurasi);
-        end.addEventListener('change', updateDurasi);
+        if (start && end) {
+            start.addEventListener('change', updateDurasi);
+            end.addEventListener('change', updateDurasi);
+        }
     });
 </script>
 @endpush
-
 
 
 @section('content')
@@ -227,9 +329,21 @@
                     <label>Tanggal Selesai</label>
                     <input type="date" name="tanggal_selesai" class="form-control" required>
                 </div>
+
+                <div class="col-md-12 mb-3">
+                    <label>Tanggal Pelaksanaan</label>
+                    <div id="tanggal-pelaksanaan-list" class="mb-2"></div>
+                    <div id="tanggal-pelaksanaan-inputs"></div>
+                    <div class="input-group">
+                        <input type="date" id="tanggal-pelaksanaan-picker" class="form-control">
+                        <button type="button" class="btn btn-outline-primary" onclick="addTanggalPelaksanaan()">+ Tambah</button>
+                    </div>
+                </div>
+
+
                 <div class="col-md-3 mb-3">
                     <label>Durasi (hari)</label>
-                    <input type="text" id="durasi" class="form-control" readonly>
+                    <input type="number" id="durasi" class="form-control" min="1" step="1" placeholder="Masukkan durasi dalam hari">
                     <input type="hidden" name="durasi" id="durasi-hidden">
                 </div>
                 <div class="col-md-6 mb-3">
@@ -256,6 +370,13 @@
                     <textarea name="keterangan" class="form-control"></textarea>
                 </div>
 
+
+                <div class="col-md-12 mb-3">
+                    <label>Tujuan Peserta</label>
+                    <textarea name="tujuan_peserta" class="form-control"></textarea>
+                </div>
+
+
                 <!-- Participant -->
                 <hr><h5>Peserta</h5>
                 <div class="col-12 mb-2">
@@ -267,7 +388,7 @@
                 <!-- Paraf -->
                 <hr><h5>Paraf</h5>
                 <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#parafModal">+ Tambah Paraf</button>
+                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#parafModal">+ Tambah Paraf</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-paraf-list"></div>
                 <div id="paraf-inputs"></div>
@@ -278,7 +399,7 @@
                 <!-- Signature 1 -->
                 <h6>Signature 1</h6>
                 <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Signature 1</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#signatureModal">+ Tambah Signature 1</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-signature1-list"></div>
                 <div id="signature1-inputs"></div>
@@ -287,7 +408,7 @@
                 <h6 class="mt-3">Signature 2</h6>
                 <p class="text-muted">Pilih <strong>Human Capital Manager</strong> sebagai penandatangan kedua.</p>
                 <div class="col-12 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Signature 2</button>
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#signature2Modal">+ Tambah Signature 2</button>
                 </div>
                 <div class="col-12 mb-2" id="selected-signature2-list"></div>
                 <div id="signature2-inputs"></div>
@@ -396,10 +517,14 @@
               <td>{{ $user->department->name ?? '-' }}</td>
               <td>{{ $user->golongan ?? '-' }}</td>
               <td>
-                <button type="button" class="btn btn-sm btn-success" 
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "paraf")'>
-                  Tambah
-                </button>
+                                    <button type="button" class="btn btn-sm btn-success"
+                                        onclick='addToList(@json([
+                                            "registration_id" => $user->registration_id,
+                                            "name" => $user->name,
+                                            "jabatan" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                                        ]), "paraf")'>
+                                        Tambah
+                                    </button>
               </td>
             </tr>
             @endforeach
@@ -442,10 +567,14 @@
               <td>{{ $user->department->name ?? '-' }}</td>
               <td>{{ $user->golongan ?? '-' }}</td>
               <td>
-                <button type="button" class="btn btn-sm btn-success"
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature")'>
-                  Tambah
-                </button>
+                                    <button type="button" class="btn btn-sm btn-success"
+                                        onclick='addToList(@json([
+                                            "registration_id" => $user->registration_id,
+                                            "name" => $user->name,
+                                            "jabatan" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                                        ]), "signature")'>
+                                        Tambah
+                                    </button>
               </td>
             </tr>
             @endforeach
@@ -486,10 +615,14 @@
               <td>{{ $user->department->name ?? '-' }}</td>
               <td>{{ $user->golongan ?? '-' }}</td>
               <td>
-                <button type="button" class="btn btn-sm btn-success"
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature2")'>
-                  Tambah
-                </button>
+                                    <button type="button" class="btn btn-sm btn-success"
+                                        onclick='addToList(@json([
+                                            "registration_id" => $user->registration_id,
+                                            "name" => $user->name,
+                                            "jabatan" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                                        ]), "signature2")'>
+                                        Tambah
+                                    </button>
               </td>
             </tr>
             @endforeach
@@ -530,10 +663,14 @@
               <td>{{ $user->department->name ?? '-' }}</td>
               <td>{{ $user->golongan ?? '-' }}</td>
               <td>
-                <button type="button" class="btn btn-sm btn-success"
-                  onclick='addToList(@json(["registration_id" => $user->registration_id, "name" => $user->name]), "signature3")'>
-                  Tambah
-                </button>
+                                    <button type="button" class="btn btn-sm btn-success"
+                                        onclick='addToList(@json([
+                                            "registration_id" => $user->registration_id,
+                                            "name" => $user->name,
+                                            "jabatan" => $user->jabatan_full ?? ($user->jabatan->name ?? "-")
+                                        ]), "signature3")'>
+                                        Tambah
+                                    </button>
               </td>
             </tr>
             @endforeach
