@@ -8,7 +8,9 @@
 * Created by: ThemeSelection
 * License: You must have a valid license purchased in order to legally use the theme for your project.
 * Copyright ThemeSelection (https://themeselection.com)
-========================================================= -->
+
+=========================================================
+ -->
 <!-- beautify ignore:start -->
 <html
     lang="en"
@@ -91,11 +93,17 @@
                             />
                         </div>
                         <div class="mb-3">
-                            <x-input-form
-                                name="password"
-                                type="password"
-                                :label="__('model.user.password')"
-                            />
+                            <label for="password" class="form-label">{{ __('model.user.password') }}</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                                       id="password" name="password" required>
+                                <span class="input-group-text toggle-password" data-target="password" style="cursor: pointer;">
+                                    <i class="bx bx-hide"></i>
+                                </span>
+                            </div>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mt-2">
                             <button class="btn btn-primary d-grid w-100" type="submit">
@@ -111,5 +119,30 @@
 </div>
 
 <!-- / Content -->
+
+<script>
+    // Toggle password visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.querySelector('.toggle-password');
+        if (togglePassword) {
+            togglePassword.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                
+                // Toggle type attribute
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle icon
+                const icon = this.querySelector('i');
+                if (type === 'password') {
+                    icon.className = 'bx bx-hide';
+                } else {
+                    icon.className = 'bx bx-show';
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

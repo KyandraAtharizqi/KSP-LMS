@@ -22,10 +22,12 @@ class SuratUndanganController extends Controller
         } else {
             // Filter hanya undangan yang relevan
             $filtered = $undangan->filter(function ($u) use ($me) {
-                $participantIds = collect($u->peserta ?? [])->pluck('id');
-                return $me->name === $u->dari
-                    || $me->name === $u->kepada
-                    || $participantIds->contains($me->id);
+                // Ambil daftar id peserta (kalau ada)
+                $participantIds = collect($u->peserta ?? [])->pluck('id')->all();
+
+                return $me->id === $u->created_by  // pengaju
+                    || $me->name === $u->kepada   // approver
+                    || in_array($me->id, $participantIds); // peserta
             });
         }
 

@@ -146,8 +146,8 @@ class PengajuanKnowledgeController extends Controller
                         Notifikasi::create([
                             'user_id' => $peserta['id'],
                             'judul' => 'Undangan Knowledge Sharing',
-                            'pesan' => "Anda diundang untuk mengikuti knowledge sharing '{$pengajuan->perihal}' oleh {$pengajuan->pemateri} yang akan dilaksanakan pada {$tanggalMulai} - {$tanggalSelesai} WIB",
-                            'link' => route('knowledge.pengajuan.preview', $pengajuan->id)
+                            'pesan' => "Anda diundang untuk mengikuti Kegiatan Knowledge Sharing '{$pengajuan->judul}' oleh {$pengajuan->pemateri} yang akan dilaksanakan pada {$tanggalMulai} - {$tanggalSelesai} WIB",
+                            'link' => route('knowledge.undangan.index')
                         ]);
                     }
                 }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 20, 2025 at 01:31 AM
+-- Generation Time: Sep 02, 2025 at 12:24 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -140,7 +140,9 @@ INSERT INTO `daftar_hadir_pelatihan` (`id`, `pelatihan_id`, `kode_pelatihan`, `u
 (19, 6, NULL, 788, 'HSK001', '2025-12-15', '08:00:00', '2025-12-15 06:56:00', 'https://drive.google.com/open?id=18uoqmKn0lRqTAaKUTLTsWYpAqmvvQrIU', '16:00:00', '2025-12-15 06:57:00', 'https://drive.google.com/open?id=1_ZGGk9RDXVvlki3gzxakN0y5H6Lki0TC', 'Catatan Merya', 'hadir', '2025-08-19 03:55:47', '2025-08-19 03:58:15'),
 (20, 6, NULL, 789, 'HSK002', '2025-12-15', '08:00:00', '2025-12-15 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-12-15 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'Catatan Merya', 'hadir', '2025-08-19 03:55:47', '2025-08-19 03:58:15'),
 (21, 6, NULL, 788, 'HSK001', '2025-12-16', '08:00:00', '2025-12-16 06:56:00', 'https://drive.google.com/open?id=18uoqmKn0lRqTAaKUTLTsWYpAqmvvQrIU', '16:00:00', '2025-12-16 06:57:00', 'https://drive.google.com/open?id=1_ZGGk9RDXVvlki3gzxakN0y5H6Lki0TC', 'Catatan Merya', 'hadir', '2025-08-19 04:02:25', '2025-08-19 04:06:59'),
-(22, 6, NULL, 789, 'HSK002', '2025-12-16', '08:00:00', '2025-12-16 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-12-16 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'Catatan Mesta', 'hadir', '2025-08-19 04:02:25', '2025-08-19 04:06:59');
+(22, 6, NULL, 789, 'HSK002', '2025-12-16', '08:00:00', '2025-12-16 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-12-16 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'Catatan Mesta', 'hadir', '2025-08-19 04:02:25', '2025-08-19 04:06:59'),
+(23, 13, 'Pelatihan 3', 789, 'HSK002', '2025-11-27', '08:00:00', '2025-11-27 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-11-27 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', NULL, 'hadir', '2025-08-29 04:51:10', '2025-08-29 04:51:10'),
+(24, 13, 'Pelatihan 3', 789, 'HSK002', '2025-11-28', '08:00:00', '2025-11-28 07:00:00', 'https://drive.google.com/open?id=1d9SQYcy5P3mlJZWOqy9M9NSRkz26JjKv', '16:00:00', '2025-11-28 07:08:00', 'https://drive.google.com/open?id=16gVIvU4miQ8bZAs8aDyXvpTajuEowtAB', 'AMONG US IRL', 'hadir', '2025-08-29 09:42:46', '2025-08-29 09:42:55');
 
 -- --------------------------------------------------------
 
@@ -151,6 +153,7 @@ INSERT INTO `daftar_hadir_pelatihan` (`id`, `pelatihan_id`, `kode_pelatihan`, `u
 CREATE TABLE `daftar_hadir_pelatihan_status` (
   `id` bigint UNSIGNED NOT NULL,
   `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `kode_pelatihan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date` date NOT NULL,
   `is_submitted` tinyint(1) NOT NULL DEFAULT '0',
   `submitted_at` timestamp NULL DEFAULT NULL,
@@ -163,9 +166,11 @@ CREATE TABLE `daftar_hadir_pelatihan_status` (
 -- Dumping data for table `daftar_hadir_pelatihan_status`
 --
 
-INSERT INTO `daftar_hadir_pelatihan_status` (`id`, `pelatihan_id`, `date`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
-(9, 6, '2025-12-15', 1, '2025-08-19 03:58:17', 1, '2025-08-19 03:18:44', '2025-08-19 03:58:17'),
-(10, 6, '2025-12-16', 1, '2025-08-19 08:55:07', 1, '2025-08-19 03:18:44', '2025-08-19 08:55:07');
+INSERT INTO `daftar_hadir_pelatihan_status` (`id`, `pelatihan_id`, `kode_pelatihan`, `date`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
+(9, 6, NULL, '2025-12-15', 1, '2025-08-19 03:58:17', 1, '2025-08-19 03:18:44', '2025-08-19 03:58:17'),
+(10, 6, NULL, '2025-12-16', 1, '2025-08-19 08:55:07', 1, '2025-08-19 03:18:44', '2025-08-19 08:55:07'),
+(11, 13, NULL, '2025-11-27', 1, '2025-09-01 02:48:22', 1, '2025-08-27 03:34:26', '2025-09-01 02:48:22'),
+(12, 13, NULL, '2025-11-28', 1, '2025-09-01 03:24:49', 1, '2025-08-27 03:34:26', '2025-09-01 03:24:49');
 
 -- --------------------------------------------------------
 
@@ -286,6 +291,7 @@ CREATE TABLE `evaluasi_level_1` (
   `user_id` bigint UNSIGNED NOT NULL,
   `registration_id` varchar(100) DEFAULT NULL,
   `kode_pelatihan` varchar(100) DEFAULT NULL,
+  `superior_id` bigint UNSIGNED DEFAULT NULL,
   `nama_pelatihan` varchar(255) DEFAULT NULL,
   `tanggal_pelaksanaan` date DEFAULT NULL,
   `tempat` varchar(255) DEFAULT NULL,
@@ -310,7 +316,7 @@ CREATE TABLE `evaluasi_level_1s` (
   `id` bigint UNSIGNED NOT NULL,
   `pelatihan_id` bigint UNSIGNED NOT NULL,
   `user_id` bigint UNSIGNED NOT NULL,
-  `registration_id` varchar(100) DEFAULT NULL,
+  `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `superior_id` bigint UNSIGNED DEFAULT NULL,
   `ringkasan_isi_materi` text,
@@ -326,8 +332,9 @@ CREATE TABLE `evaluasi_level_1s` (
 --
 
 INSERT INTO `evaluasi_level_1s` (`id`, `pelatihan_id`, `user_id`, `registration_id`, `kode_pelatihan`, `superior_id`, `ringkasan_isi_materi`, `ide_saran_pengembangan`, `komplain_saran_masukan`, `is_submitted`, `created_at`, `updated_at`) VALUES
-(5, 6, 788, 'HSK001', 'Pelatihan 1', 72, 'Ringkasan Isi Materi Pelatihan yang Diberikan Merya', 'Hal-hal (Ide/Saran) yang dapat dikembangkan di PT KSP dari hasil Pelatihan ini Merya', 'Komplain / Masukan Lain Merya', 1, '2025-08-19 08:55:07', '2025-08-19 09:22:21'),
-(6, 6, 789, 'HSK002', 'Pelatihan 1', 72, NULL, NULL, NULL, 0, '2025-08-19 08:55:07', '2025-08-19 08:55:07');
+(5, 6, 788, 'HSK001', 'Pelatihan 1', 72, 'Ringkasan Isi Materi Pelatihan yang Diberikan Merya', 'Hal-hal (Ide/Saran) yang dapat dikembangkan di PT KSP dari hasil Pelatihan ini Merya', 'Komplain / Masukan Lain Merya', 1, '2025-08-19 08:55:07', '2025-08-22 05:27:17'),
+(6, 6, 789, 'HSK002', 'Pelatihan 1', 72, NULL, NULL, NULL, 0, '2025-08-19 08:55:07', '2025-08-19 08:55:07'),
+(9, 13, 789, 'HSK002', 'Pelatihan 3', 72, NULL, NULL, NULL, 0, '2025-09-01 03:24:49', '2025-09-01 03:24:49');
 
 -- --------------------------------------------------------
 
@@ -355,8 +362,8 @@ CREATE TABLE `evaluasi_level_1_instrukturs` (
 --
 
 INSERT INTO `evaluasi_level_1_instrukturs` (`id`, `evaluasi_level_1_id`, `user_id`, `presenter_id`, `type`, `instruktur_penguasaan`, `instruktur_teknik`, `instruktur_sistematika`, `instruktur_waktu`, `instruktur_proses`, `created_at`, `updated_at`) VALUES
-(4, 5, NULL, 3, 'external', 5, 5, 5, 5, 5, '2025-08-19 09:22:21', '2025-08-19 09:22:21'),
-(5, 5, NULL, 2, 'external', 5, 5, 5, 5, 5, '2025-08-19 09:22:21', '2025-08-19 09:22:21');
+(6, 5, NULL, 3, 'external', 5, 5, 5, 5, 5, '2025-08-22 05:27:17', '2025-08-22 05:27:17'),
+(7, 5, NULL, 2, 'external', 5, 5, 5, 5, 5, '2025-08-22 05:27:17', '2025-08-22 05:27:17');
 
 -- --------------------------------------------------------
 
@@ -432,6 +439,190 @@ CREATE TABLE `evaluasi_level_1_saranas` (
 
 INSERT INTO `evaluasi_level_1_saranas` (`id`, `evaluasi_level_1_id`, `sarana_media`, `sarana_kit`, `sarana_kenyamanan`, `sarana_kesesuaian`, `sarana_belajar`, `created_at`, `updated_at`) VALUES
 (2, 5, '5', '5', '5', '5', '5', '2025-08-19 09:22:21', '2025-08-19 09:22:21');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_3_atasans`
+--
+
+CREATE TABLE `evaluasi_level_3_atasans` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `atasan_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kode_pelatihan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `manfaat_pelatihan` text COLLATE utf8mb4_unicode_ci,
+  `kinerja` tinyint UNSIGNED DEFAULT NULL,
+  `saran` text COLLATE utf8mb4_unicode_ci,
+  `is_submitted` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_3_atasans_feedbacks`
+--
+
+CREATE TABLE `evaluasi_level_3_atasans_feedbacks` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_3_atasan_id` bigint UNSIGNED DEFAULT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `atasan_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kode_pelatihan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `telah_mampu` tinyint(1) NOT NULL DEFAULT '0',
+  `tidak_diaplikasikan_karena` text COLLATE utf8mb4_unicode_ci,
+  `memberikan_informasi_mengenai` text COLLATE utf8mb4_unicode_ci,
+  `lain_lain` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_3_atasans_tujuan_pembelajarans`
+--
+
+CREATE TABLE `evaluasi_level_3_atasans_tujuan_pembelajarans` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_3_atasan_id` bigint UNSIGNED DEFAULT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `atasan_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kode_pelatihan` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tujuan_pembelajaran` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `diaplikasikan` tinyint(1) NOT NULL DEFAULT '0',
+  `frekuensi` tinyint UNSIGNED NOT NULL,
+  `hasil` tinyint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_3_pesertas`
+--
+
+CREATE TABLE `evaluasi_level_3_pesertas` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) NOT NULL,
+  `kode_pelatihan` varchar(50) NOT NULL,
+  `manfaat_pelatihan` text,
+  `kinerja` tinyint UNSIGNED DEFAULT NULL,
+  `saran` text,
+  `is_submitted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_accepted` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ;
+
+--
+-- Dumping data for table `evaluasi_level_3_pesertas`
+--
+
+INSERT INTO `evaluasi_level_3_pesertas` (`id`, `pelatihan_id`, `user_id`, `registration_id`, `kode_pelatihan`, `manfaat_pelatihan`, `kinerja`, `saran`, `is_submitted`, `is_accepted`, `created_at`, `updated_at`) VALUES
+(1, 6, 788, 'HSK001', 'Pelatihan 1', 'Kemampuan Merya', 2, 'Saran', 1, 1, '2025-08-22 05:27:17', '2025-08-26 04:03:17');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_3_peserta_action_plans`
+--
+
+CREATE TABLE `evaluasi_level_3_peserta_action_plans` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_3_peserta_id` bigint UNSIGNED DEFAULT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) NOT NULL,
+  `kode_pelatihan` varchar(50) NOT NULL,
+  `action_plan` text NOT NULL,
+  `diaplikasikan` tinyint(1) NOT NULL DEFAULT '0',
+  `frekuensi` tinyint UNSIGNED NOT NULL,
+  `hasil` tinyint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ;
+
+--
+-- Dumping data for table `evaluasi_level_3_peserta_action_plans`
+--
+
+INSERT INTO `evaluasi_level_3_peserta_action_plans` (`id`, `pelatihan_id`, `evaluasi_level_3_peserta_id`, `user_id`, `registration_id`, `kode_pelatihan`, `action_plan`, `diaplikasikan`, `frekuensi`, `hasil`, `created_at`, `updated_at`) VALUES
+(8, 6, 1, 788, 'HSK001', 'Pelatihan 1', 'Action Plan 1 Merya', 1, 3, 4, '2025-08-25 04:39:57', '2025-08-25 04:39:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_3_peserta_feedbacks`
+--
+
+CREATE TABLE `evaluasi_level_3_peserta_feedbacks` (
+  `id` bigint UNSIGNED NOT NULL,
+  `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_3_peserta_id` bigint UNSIGNED DEFAULT NULL,
+  `user_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) NOT NULL,
+  `kode_pelatihan` varchar(50) NOT NULL,
+  `telah_mampu` tinyint(1) NOT NULL DEFAULT '0',
+  `membantu_mengaplikasikan` tinyint(1) NOT NULL DEFAULT '0',
+  `tidak_diaplikasikan_karena` text,
+  `memberikan_informasi_mengenai` text,
+  `lain_lain` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `evaluasi_level_3_peserta_feedbacks`
+--
+
+INSERT INTO `evaluasi_level_3_peserta_feedbacks` (`id`, `pelatihan_id`, `evaluasi_level_3_peserta_id`, `user_id`, `registration_id`, `kode_pelatihan`, `telah_mampu`, `membantu_mengaplikasikan`, `tidak_diaplikasikan_karena`, `memberikan_informasi_mengenai`, `lain_lain`, `created_at`, `updated_at`) VALUES
+(6, 6, 1, 788, 'HSK001', 'Pelatihan 1', 1, 1, '-', '-', '-', '2025-08-25 04:39:57', '2025-08-25 04:39:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `evaluasi_level_3_signatures`
+--
+
+CREATE TABLE `evaluasi_level_3_signatures` (
+  `id` bigint UNSIGNED NOT NULL,
+  `evaluasi_level_3_peserta_id` bigint UNSIGNED DEFAULT NULL,
+  `pelatihan_id` bigint UNSIGNED DEFAULT NULL,
+  `approver_id` bigint UNSIGNED NOT NULL,
+  `registration_id` varchar(255) NOT NULL,
+  `kode_pelatihan` varchar(50) NOT NULL,
+  `round` int NOT NULL DEFAULT '1',
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `rejection_reason` text,
+  `signed_at` timestamp NULL DEFAULT NULL,
+  `jabatan_id` bigint UNSIGNED DEFAULT NULL,
+  `jabatan_full` varchar(255) DEFAULT NULL,
+  `department_id` bigint UNSIGNED DEFAULT NULL,
+  `directorate_id` bigint UNSIGNED DEFAULT NULL,
+  `division_id` bigint UNSIGNED DEFAULT NULL,
+  `golongan` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `evaluasi_level_3_signatures`
+--
+
+INSERT INTO `evaluasi_level_3_signatures` (`id`, `evaluasi_level_3_peserta_id`, `pelatihan_id`, `approver_id`, `registration_id`, `kode_pelatihan`, `round`, `status`, `rejection_reason`, `signed_at`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `golongan`, `created_at`, `updated_at`) VALUES
+(1, 1, 6, 72, 'HSK001', 'Pelatihan 1', 1, 'approved', NULL, '2025-08-26 04:03:17', 5, 'MANAGER HOUSEKEEPING', 20, 2, 2, NULL, '2025-08-25 04:39:57', '2025-08-26 05:54:37');
 
 -- --------------------------------------------------------
 
@@ -662,12 +853,11 @@ CREATE TABLE `notifikasi` (
 --
 
 INSERT INTO `notifikasi` (`id`, `user_id`, `judul`, `pesan`, `link`, `dibaca`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Selamat Datang', 'Selamat datang di sistem KSP-LMS!', NULL, 0, '2025-08-18 11:08:54', '2025-08-18 11:08:54'),
-(2, 1, 'Panduan Penggunaan', 'Silakan baca panduan penggunaan sistem di menu Help.', '/help', 0, '2025-08-18 11:13:54', '2025-08-18 11:08:54'),
-(3, 1, 'Notifikasi Lama', 'Ini adalah notifikasi yang sudah dibaca.', NULL, 1, '2025-08-17 11:08:54', '2025-08-18 11:08:54'),
-(4, 1, 'Selamat Datang', 'Selamat datang di sistem KSP-LMS!', NULL, 0, '2025-08-18 11:10:34', '2025-08-18 11:10:34'),
-(5, 1, 'Panduan Penggunaan', 'Silakan baca panduan penggunaan sistem di menu Help.', '/help', 0, '2025-08-18 11:15:34', '2025-08-18 11:10:34'),
-(6, 1, 'Notifikasi Lama', 'Ini adalah notifikasi yang sudah dibaca.', NULL, 1, '2025-08-17 11:10:34', '2025-08-18 11:10:34');
+(21, 787, 'Undangan Knowledge Sharing', 'Anda diundang untuk mengikuti knowledge sharing \'Kegiatan Knowledge Sharing \"Mastering English Greetings\"\' oleh Bpk. Purboyo Ananda yang akan dilaksanakan pada 20 Aug 2025 08:00 - 16:00 WIB', 'http://localhost/KSP-LMS/public/knowledge/pengajuan/8', 1, '2025-08-20 04:12:25', '2025-08-20 04:12:42'),
+(22, 790, 'Pengajuan Knowledge Sharing Baru', 'Anda menerima pengajuan knowledge sharing baru dengan judul \'Mastering English Greetings\' dari MOKHAMAD  HASIM', 'http://localhost/KSP-LMS/public/knowledge/pengajuan/9', 1, '2025-08-20 20:04:45', '2025-08-20 20:06:17'),
+(23, 552, 'Pengajuan Knowledge Sharing Disetujui', 'Pengajuan kamu \'Kegiatan Knowledge Sharing \"Mastering English Greetings\"\' telah disetujui oleh Direktur Human Capital and Finance', 'http://localhost/KSP-LMS/public/knowledge/pengajuan/9', 0, '2025-08-20 20:06:21', '2025-08-20 20:06:21'),
+(24, 786, 'Undangan Knowledge Sharing', 'Anda diundang untuk mengikuti knowledge sharing \'Kegiatan Knowledge Sharing \"Mastering English Greetings\"\' oleh Bpk. Purboyo Ananda yang akan dilaksanakan pada 21 Aug 2025 08:00 - 16:00 WIB', 'http://localhost/KSP-LMS/public/knowledge/undangan', 1, '2025-08-20 20:06:21', '2025-08-20 20:06:43'),
+(25, 787, 'Undangan Knowledge Sharing', 'Anda diundang untuk mengikuti knowledge sharing \'Kegiatan Knowledge Sharing \"Mastering English Greetings\"\' oleh Bpk. Purboyo Ananda yang akan dilaksanakan pada 21 Aug 2025 08:00 - 16:00 WIB', 'http://localhost/KSP-LMS/public/knowledge/undangan', 0, '2025-08-20 20:06:21', '2025-08-20 20:06:21');
 
 -- --------------------------------------------------------
 
@@ -690,8 +880,19 @@ CREATE TABLE `password_resets` (
 CREATE TABLE `pelatihan_presenters` (
   `id` bigint UNSIGNED NOT NULL,
   `pelatihan_id` bigint UNSIGNED NOT NULL,
+  `kode_pelatihan` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `presenter_id` bigint UNSIGNED DEFAULT NULL,
+  `presenter_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `presenter_institution` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` bigint UNSIGNED DEFAULT NULL,
+  `user_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `jabatan_id` bigint UNSIGNED DEFAULT NULL,
+  `jabatan_full` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `department_id` bigint UNSIGNED DEFAULT NULL,
+  `directorate_id` bigint UNSIGNED DEFAULT NULL,
+  `superior_id` bigint UNSIGNED DEFAULT NULL,
+  `division_id` bigint UNSIGNED DEFAULT NULL,
+  `golongan` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `type` enum('internal','external') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `date` date NOT NULL,
   `check_in_time` time DEFAULT NULL,
@@ -707,9 +908,11 @@ CREATE TABLE `pelatihan_presenters` (
 -- Dumping data for table `pelatihan_presenters`
 --
 
-INSERT INTO `pelatihan_presenters` (`id`, `pelatihan_id`, `presenter_id`, `user_id`, `type`, `date`, `check_in_time`, `check_out_time`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
-(24, 6, 3, NULL, 'external', '2025-12-15', '08:00:00', '16:00:00', 1, '2025-08-19 10:55:28', 1, '2025-08-19 03:54:44', '2025-08-19 03:55:28'),
-(25, 6, 2, NULL, 'external', '2025-12-16', '08:00:00', '16:00:00', 1, '2025-08-19 10:55:29', 1, '2025-08-19 03:54:53', '2025-08-19 03:55:29');
+INSERT INTO `pelatihan_presenters` (`id`, `pelatihan_id`, `kode_pelatihan`, `presenter_id`, `presenter_name`, `presenter_institution`, `user_id`, `user_name`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `superior_id`, `division_id`, `golongan`, `type`, `date`, `check_in_time`, `check_out_time`, `is_submitted`, `submitted_at`, `submitted_by`, `created_at`, `updated_at`) VALUES
+(24, 6, NULL, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'external', '2025-12-15', '08:00:00', '16:00:00', 1, '2025-08-19 10:55:28', 1, '2025-08-19 03:54:44', '2025-08-19 03:55:28'),
+(25, 6, NULL, 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'external', '2025-12-16', '08:00:00', '16:00:00', 1, '2025-08-19 10:55:29', 1, '2025-08-19 03:54:53', '2025-08-19 03:55:29'),
+(28, 13, NULL, 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'external', '2025-11-27', '08:00:00', '16:00:00', 1, '2025-08-29 10:04:37', 1, '2025-08-29 03:04:06', '2025-08-29 03:04:37'),
+(32, 13, 'Pelatihan 3', NULL, NULL, NULL, 787, 'TRIYA', 11, 'Officer', 12, 3, 552, NULL, '5', 'internal', '2025-11-28', '08:00:00', '16:00:00', 1, '2025-08-29 17:20:42', 1, '2025-08-29 10:20:21', '2025-08-29 10:20:42');
 
 -- --------------------------------------------------------
 
@@ -753,7 +956,8 @@ CREATE TABLE `presenters` (
 
 INSERT INTO `presenters` (`id`, `name`, `institution`, `email`, `phone`, `notes`, `created_at`, `updated_at`) VALUES
 (2, 'Ansori', 'LIA', 'ansori@gmail.com', '019213021381', 'Instruktur LIA', '2025-07-30 08:14:07', '2025-07-30 08:14:07'),
-(3, 'Ambari', 'LIA', 'ambari@gmail.com', '02190318230198301', 'temennya ansori', '2025-07-30 08:18:20', '2025-07-30 08:18:20');
+(3, 'Ambari', 'LIA', 'ambari@gmail.com', '02190318230198301', 'temennya ansori', '2025-07-30 08:18:20', '2025-07-30 08:18:20'),
+(4, 'Nuriman', 'DINKES', NULL, NULL, NULL, '2025-08-29 03:03:18', '2025-08-29 03:03:18');
 
 -- --------------------------------------------------------
 
@@ -782,7 +986,12 @@ INSERT INTO `signature_and_parafs` (`id`, `user_id`, `registration_id`, `signatu
 (13, NULL, 'MAN020', 'signatures/MAN020.png', 'parafs/MAN020.png', '2025-08-11 09:50:15', '2025-08-11 09:50:27'),
 (14, NULL, 'EA001', 'signatures/EA001.png', 'parafs/EA001.png', '2025-08-13 08:23:53', '2025-08-13 08:24:09'),
 (15, NULL, 'MAN012', 'signatures/MAN012.png', 'parafs/MAN012.png', '2025-08-13 08:26:43', '2025-08-13 08:26:47'),
-(16, NULL, 'DRK003', 'signatures/DRK003.png', 'parafs/DRK003.png', '2025-08-13 08:27:15', '2025-08-13 08:27:20');
+(16, NULL, 'DRK003', 'signatures/DRK003.png', 'parafs/DRK003.png', '2025-08-13 08:27:15', '2025-08-13 08:27:20'),
+(17, NULL, 'HSK002', 'signatures/HSK002.png', 'parafs/HSK002.png', '2025-08-26 05:18:20', '2025-08-26 05:18:29'),
+(18, NULL, 'HSK001', 'signatures/HSK001.png', NULL, '2025-08-26 07:09:43', '2025-08-26 07:09:43'),
+(19, NULL, 'GM002', 'signatures/GM002.png', 'parafs/GM002.png', '2025-08-26 08:01:00', '2025-08-26 08:01:02'),
+(20, NULL, 'DIR003', 'signatures/DIR003.png', 'parafs/DIR003.png', '2025-08-26 08:02:26', '2025-08-26 08:02:34'),
+(21, NULL, '2000045', 'signatures/2000045.png', 'parafs/2000045.png', '2025-09-01 09:45:33', '2025-09-01 09:45:37');
 
 -- --------------------------------------------------------
 
@@ -804,12 +1013,15 @@ CREATE TABLE `surat_pengajuan_pelatihans` (
   `program_pelatihan_ksp` enum('Termasuk','Tidak Termasuk') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal_mulai` date NOT NULL,
   `tanggal_selesai` date NOT NULL,
+  `tanggal_pelaksanaan` text COLLATE utf8mb4_unicode_ci,
   `durasi` int NOT NULL,
   `tempat` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `penyelenggara` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `biaya` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `per_paket_or_orang` enum('Paket','Orang') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `keterangan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `tujuan_peserta` text COLLATE utf8mb4_unicode_ci,
+  `is_accepted` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -818,9 +1030,11 @@ CREATE TABLE `surat_pengajuan_pelatihans` (
 -- Dumping data for table `surat_pengajuan_pelatihans`
 --
 
-INSERT INTO `surat_pengajuan_pelatihans` (`id`, `created_by`, `kode_pelatihan`, `kompetensi`, `judul`, `lokasi`, `instruktur`, `sifat`, `kompetensi_wajib`, `materi_global`, `program_pelatihan_ksp`, `tanggal_mulai`, `tanggal_selesai`, `durasi`, `tempat`, `penyelenggara`, `biaya`, `per_paket_or_orang`, `keterangan`, `created_at`, `updated_at`) VALUES
-(6, 788, 'Pelatihan 1', 'Bahasa Inggris', 'Pelatihan TES TOEFL KSP 1', 'Diluar Kota', 'Eksternal', 'Seminar', 'Wajib', 'Audiovisual Bahasa Inggris', 'Termasuk', '2025-12-15', '2025-12-16', 2, 'Jakarta', 'LIA', '500000', 'Orang', 'Test Keterangan 1 ya', '2025-08-11 05:49:32', '2025-08-13 08:14:24'),
-(12, 552, 'Pelatihan 2', 'Soft Skill', 'Pelatihan TES TOEFL KSP 2', 'Diluar Kota', 'Eksternal', 'Kursus', 'Wajib', 'Pelatihan TES TOEFL KSP 2', 'Termasuk', '2025-08-12', '2025-08-13', 2, 'Jakarta', 'LIA', '5000000', 'Paket', NULL, '2025-08-12 04:44:55', '2025-08-12 04:44:55');
+INSERT INTO `surat_pengajuan_pelatihans` (`id`, `created_by`, `kode_pelatihan`, `kompetensi`, `judul`, `lokasi`, `instruktur`, `sifat`, `kompetensi_wajib`, `materi_global`, `program_pelatihan_ksp`, `tanggal_mulai`, `tanggal_selesai`, `tanggal_pelaksanaan`, `durasi`, `tempat`, `penyelenggara`, `biaya`, `per_paket_or_orang`, `keterangan`, `tujuan_peserta`, `is_accepted`, `created_at`, `updated_at`) VALUES
+(6, 788, 'Pelatihan 1', 'Bahasa Inggris', 'Pelatihan TES TOEFL KSP 1', 'Diluar Kota', 'Eksternal', 'Seminar', 'Wajib', 'Audiovisual Bahasa Inggris', 'Termasuk', '2025-12-15', '2025-12-16', NULL, 2, 'Jakarta', 'LIA', '500000', 'Orang', 'Test Keterangan 1 ya', NULL, 1, '2025-08-11 05:49:32', '2025-08-13 08:14:24'),
+(12, 552, 'Pelatihan 2', 'Soft Skill', 'Pelatihan TES TOEFL KSP 2', 'Diluar Kota', 'Eksternal', 'Kursus', 'Wajib', 'Pelatihan TES TOEFL KSP 2', 'Termasuk', '2025-08-12', '2025-08-13', NULL, 2, 'Jakarta', 'LIA', '5000000', 'Paket', NULL, NULL, 1, '2025-08-12 04:44:55', '2025-08-12 04:44:55'),
+(13, 789, 'Pelatihan 3', 'Kompetensi 3', 'Pelatihan TES TOEFL KSP 3', 'Perusahaan', 'Internal', 'Seminar', 'Wajib', 'Materi Global 3', 'Termasuk', '2025-11-27', '2025-11-28', NULL, 2, 'Tempat 3', 'Penyelenggara 3', '300000', 'Paket', 'Keterangan 3', NULL, 1, '2025-08-26 08:00:12', '2025-08-26 08:00:12'),
+(16, 1, 'Pelatihan 4', 'Penyajan Buah', 'Fruit Carving Competition', 'Diluar Kota', 'Eksternal', 'Workshop', 'Tidak Wajib', 'Fruit Carving Competition', 'Tidak Termasuk', '2025-09-20', '2025-09-28', NULL, 9, 'BSD', 'Grandzia Hotel', '450000', 'Orang', 'Peserta 2 Orang', 'Mengikuti Lomba Fruit Carving', 0, '2025-09-01 08:32:36', '2025-09-01 08:32:36');
 
 -- --------------------------------------------------------
 
@@ -860,14 +1074,28 @@ INSERT INTO `surat_pengajuan_pelatihan_signatures_and_parafs` (`id`, `pelatihan_
 (11, 6, 52, 4, NULL, NULL, 2, 2, NULL, NULL, 'Pelatihan 1', 'EA001', 1, 2, 'signature', 'rejected', '2025-08-13 02:55:03', 'Ganti keterangannya', '2025-08-11 05:49:33', '2025-08-13 02:55:03'),
 (12, 6, 64, 5, NULL, 12, 3, NULL, NULL, NULL, 'Pelatihan 1', 'MAN012', 1, 3, 'signature', 'rejected', '2025-08-13 02:55:03', 'Auto rejected due to earlier rejection', '2025-08-11 05:49:33', '2025-08-13 02:55:03'),
 (13, 6, 790, 1, 'DIREKTUR HUMAN CAPITAL AND FINANCE', NULL, 3, NULL, NULL, '0', 'Pelatihan 1', 'DRK003', 1, 4, 'signature', 'rejected', '2025-08-13 02:55:03', 'Auto rejected due to earlier rejection', '2025-08-11 05:49:33', '2025-08-13 02:55:03'),
-(34, 12, 629, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', '2000211', 1, 1, 'paraf', 'pending', NULL, NULL, '2025-08-12 04:44:55', '2025-08-12 04:44:55'),
-(35, 12, 552, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', '2000045', 1, 2, 'signature', 'pending', NULL, NULL, '2025-08-12 04:44:55', '2025-08-12 04:44:55'),
-(36, 12, 552, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', '2000045', 1, 3, 'signature', 'pending', NULL, NULL, '2025-08-12 04:44:55', '2025-08-12 04:44:55'),
-(37, 12, 790, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', 'DRK003', 1, 4, 'signature', 'pending', NULL, NULL, '2025-08-12 04:44:55', '2025-08-12 04:44:55'),
+(34, 12, 629, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', '2000211', 1, 1, 'paraf', 'rejected', '2025-08-27 03:56:02', 'beri keterangan', '2025-08-12 04:44:55', '2025-08-27 03:56:02'),
+(35, 12, 552, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', '2000045', 1, 2, 'signature', 'rejected', '2025-08-27 03:56:02', 'Auto rejected due to earlier rejection', '2025-08-12 04:44:55', '2025-08-27 03:56:02'),
+(36, 12, 552, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', '2000045', 1, 3, 'signature', 'rejected', '2025-08-27 03:56:02', 'Auto rejected due to earlier rejection', '2025-08-12 04:44:55', '2025-08-27 03:56:02'),
+(37, 12, 790, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 2', 'DRK003', 1, 4, 'signature', 'rejected', '2025-08-27 03:56:02', 'Auto rejected due to earlier rejection', '2025-08-12 04:44:55', '2025-08-27 03:56:02'),
 (38, 6, 72, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 1', 'MAN020', 2, 1, 'paraf', 'approved', '2025-08-13 08:21:55', NULL, '2025-08-13 08:14:24', '2025-08-13 08:21:55'),
 (39, 6, 52, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 1', 'EA001', 2, 2, 'signature', 'approved', '2025-08-13 08:23:31', NULL, '2025-08-13 08:14:24', '2025-08-13 08:23:31'),
 (40, 6, 64, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 1', 'MAN012', 2, 3, 'signature', 'approved', '2025-08-13 08:26:17', NULL, '2025-08-13 08:14:24', '2025-08-13 08:26:17'),
-(41, 6, 790, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 1', 'DRK003', 2, 4, 'signature', 'approved', '2025-08-13 08:27:41', NULL, '2025-08-13 08:14:24', '2025-08-13 08:27:41');
+(41, 6, 790, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pelatihan 1', 'DRK003', 2, 4, 'signature', 'approved', '2025-08-13 08:27:41', NULL, '2025-08-13 08:14:24', '2025-08-13 08:27:41'),
+(42, 13, 51, 3, NULL, NULL, 2, 2, NULL, NULL, 'Pelatihan 3', 'GM002', 1, 1, 'signature', 'approved', '2025-08-26 08:00:50', NULL, '2025-08-26 08:00:12', '2025-08-26 08:00:50'),
+(43, 13, 64, 5, 'Manager Human Capital', 12, 3, NULL, NULL, NULL, 'Pelatihan 3', 'MAN012', 1, 2, 'signature', 'approved', '2025-08-26 08:01:38', NULL, '2025-08-26 08:00:12', '2025-08-26 08:01:38'),
+(44, 13, 77, 1, 'DIREKTUR HUMAN CAPITAL & FINANCE', NULL, 3, NULL, NULL, NULL, 'Pelatihan 3', 'DIR003', 1, 3, 'signature', 'approved', '2025-08-28 03:30:24', NULL, '2025-08-26 08:00:12', '2025-08-28 03:30:24'),
+(45, 16, 571, 4, 'EXECUTIVE ASSISTANT MANAGEMENT HOTEL', NULL, NULL, NULL, NULL, '2', 'Pelatihan 4', '2000095', 1, 1, 'paraf', 'rejected', '2025-09-01 09:31:52', 'Test Tolak', '2025-09-01 08:32:36', '2025-09-01 09:31:52'),
+(46, 16, 688, 3, 'HOTEL GENERAL MANAGER', NULL, NULL, NULL, NULL, '1', 'Pelatihan 4', '2500010', 1, 2, 'signature', 'rejected', '2025-09-01 09:31:52', 'Auto rejected due to earlier rejection', '2025-09-01 08:32:36', '2025-09-01 09:31:52'),
+(47, 16, 552, 5, 'HUMAN CAPITAL MANAGER', 12, 3, NULL, NULL, '2', 'Pelatihan 4', '2000045', 1, 3, 'signature', 'rejected', '2025-09-01 09:31:52', 'Auto rejected due to earlier rejection', '2025-09-01 08:32:36', '2025-09-01 09:31:52'),
+(48, 16, 77, 1, 'DIREKTUR HUMAN CAPITAL & FINANCE', NULL, 3, NULL, NULL, NULL, 'Pelatihan 4', 'DIR003', 1, 4, 'signature', 'rejected', '2025-09-01 09:31:52', 'Auto rejected due to earlier rejection', '2025-09-01 08:32:36', '2025-09-01 09:31:52'),
+(49, 16, 571, 4, 'EXECUTIVE ASSISTANT MANAGEMENT HOTEL', NULL, NULL, NULL, NULL, '2', 'Pelatihan 4', '2000095', 2, 1, 'paraf', 'rejected', '2025-09-01 09:33:14', 'Test Tolak 2', '2025-09-01 09:32:41', '2025-09-01 09:33:14'),
+(50, 16, 688, 3, 'HOTEL GENERAL MANAGER', NULL, NULL, NULL, NULL, '1', 'Pelatihan 4', '2500010', 2, 2, 'signature', 'rejected', '2025-09-01 09:33:14', 'Auto rejected due to earlier rejection', '2025-09-01 09:32:41', '2025-09-01 09:33:14'),
+(51, 16, 552, 5, 'HUMAN CAPITAL MANAGER', 12, 3, NULL, NULL, '2', 'Pelatihan 4', '2000045', 2, 3, 'signature', 'rejected', '2025-09-01 09:33:14', 'Auto rejected due to earlier rejection', '2025-09-01 09:32:41', '2025-09-01 09:33:14'),
+(52, 16, 571, 4, 'EXECUTIVE ASSISTANT MANAGEMENT HOTEL', NULL, NULL, NULL, NULL, '2', 'Pelatihan 4', '2000095', 3, 1, 'paraf', 'approved', '2025-09-01 09:44:01', NULL, '2025-09-01 09:37:08', '2025-09-01 09:44:01'),
+(53, 16, 688, 3, 'HOTEL GENERAL MANAGER', NULL, NULL, NULL, NULL, '1', 'Pelatihan 4', '2500010', 3, 2, 'signature', 'approved', '2025-09-01 09:44:50', NULL, '2025-09-01 09:37:08', '2025-09-01 09:44:50'),
+(54, 16, 552, 5, 'HUMAN CAPITAL MANAGER', 12, 3, NULL, NULL, '2', 'Pelatihan 4', '2000045', 3, 3, 'signature', 'pending', '2025-09-01 10:15:59', NULL, '2025-09-01 09:37:08', '2025-09-01 10:15:59'),
+(55, 16, 77, 1, 'DIREKTUR HUMAN CAPITAL & FINANCE', NULL, 3, NULL, NULL, NULL, 'Pelatihan 4', 'DIR003', 3, 4, 'signature', 'approved', '2025-09-01 10:22:22', NULL, '2025-09-01 09:37:08', '2025-09-01 10:22:22');
 
 -- --------------------------------------------------------
 
@@ -905,6 +1133,7 @@ CREATE TABLE `surat_tugas_pelatihans` (
   `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal` date NOT NULL,
+  `tanggal_pelaksanaan` json DEFAULT NULL,
   `tempat` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tanggal_pelatihan` date NOT NULL,
   `durasi` int UNSIGNED NOT NULL,
@@ -924,8 +1153,9 @@ CREATE TABLE `surat_tugas_pelatihans` (
 -- Dumping data for table `surat_tugas_pelatihans`
 --
 
-INSERT INTO `surat_tugas_pelatihans` (`id`, `pelatihan_id`, `kode_pelatihan`, `judul`, `tanggal`, `tempat`, `tanggal_pelatihan`, `durasi`, `created_by`, `status`, `is_accepted`, `created_at`, `updated_at`, `tujuan`, `waktu`, `instruksi`, `hal_perhatian`, `catatan`) VALUES
-(2, 6, 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-08-13', 'Jakarta', '2025-12-15', 2, 790, 'draft', 1, '2025-08-13 08:27:41', '2025-08-19 03:18:44', 'Test Tujuan 1', '08:00 - 17:30', 'Instruksi 1', 'Hal hal 1', 'Catatan 1');
+INSERT INTO `surat_tugas_pelatihans` (`id`, `pelatihan_id`, `kode_pelatihan`, `judul`, `tanggal`, `tanggal_pelaksanaan`, `tempat`, `tanggal_pelatihan`, `durasi`, `created_by`, `status`, `is_accepted`, `created_at`, `updated_at`, `tujuan`, `waktu`, `instruksi`, `hal_perhatian`, `catatan`) VALUES
+(2, 6, 'Pelatihan 1', 'Pelatihan TES TOEFL KSP 1', '2025-08-13', NULL, 'Jakarta', '2025-12-15', 2, 790, 'draft', 1, '2025-08-13 08:27:41', '2025-08-19 03:18:44', 'Test Tujuan 1', '08:00 - 17:30', 'Instruksi 1', 'Hal hal 1', 'Catatan 1'),
+(4, 13, 'Pelatihan 3', 'Pelatihan TES TOEFL KSP 3', '2025-08-28', NULL, 'Tempat 3', '2025-11-27', 2, 1, 'draft', 1, '2025-08-28 03:30:24', '2025-08-28 09:29:52', 'Tujuan 1\r\nTujuan 2\r\nTujuan 3', '08:00 - 17:30', 'Instruksi 1\r\nInstruksi 2\r\nInstruksi 3', 'Hal-hal yang perlu diperhatikan 1\r\nHal-hal yang perlu diperhatikan 2\r\nHal-hal yang perlu diperhatikan 3', 'Catatan 1 2 3');
 
 -- --------------------------------------------------------
 
@@ -943,6 +1173,7 @@ CREATE TABLE `surat_tugas_pelatihan_signatures_and_parafs` (
   `sequence` int NOT NULL,
   `round` int NOT NULL DEFAULT '1',
   `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `rejection_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `signed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -959,9 +1190,13 @@ CREATE TABLE `surat_tugas_pelatihan_signatures_and_parafs` (
 -- Dumping data for table `surat_tugas_pelatihan_signatures_and_parafs`
 --
 
-INSERT INTO `surat_tugas_pelatihan_signatures_and_parafs` (`id`, `surat_tugas_id`, `kode_pelatihan`, `user_id`, `registration_id`, `type`, `sequence`, `round`, `status`, `signed_at`, `created_at`, `updated_at`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`) VALUES
-(13, 2, 'Pelatihan 1', 64, 'MAN012', 'paraf', 1, 1, 'approved', '2025-08-19 03:18:10', '2025-08-13 10:51:23', '2025-08-19 03:18:10', 5, 'Manager Human Capital', 12, 3, NULL, NULL, NULL),
-(14, 2, 'Pelatihan 1', 790, 'DRK003', 'signature', 2, 1, 'approved', '2025-08-19 03:18:44', '2025-08-13 10:51:23', '2025-08-19 03:18:44', 1, 'DIREKTUR HUMAN CAPITAL AND FINANCE', NULL, 3, NULL, NULL, '0');
+INSERT INTO `surat_tugas_pelatihan_signatures_and_parafs` (`id`, `surat_tugas_id`, `kode_pelatihan`, `user_id`, `registration_id`, `type`, `sequence`, `round`, `status`, `rejection_reason`, `signed_at`, `created_at`, `updated_at`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`) VALUES
+(13, 2, 'Pelatihan 1', 64, 'MAN012', 'paraf', 1, 1, 'approved', NULL, '2025-08-19 03:18:10', '2025-08-13 10:51:23', '2025-08-19 03:18:10', 5, 'Manager Human Capital', 12, 3, NULL, NULL, NULL),
+(14, 2, 'Pelatihan 1', 790, 'DRK003', 'signature', 2, 1, 'approved', NULL, '2025-08-19 03:18:44', '2025-08-13 10:51:23', '2025-08-19 03:18:44', 1, 'DIREKTUR HUMAN CAPITAL AND FINANCE', NULL, 3, NULL, NULL, '0'),
+(22, 4, 'Pelatihan 3', 675, '2400009', 'paraf', 1, 1, 'rejected', 'catatannya salah', '2025-08-28 03:53:02', '2025-08-28 03:50:52', '2025-08-28 03:53:02', 11, 'HUMAN CAPITAL ORG. & DEV.  OFFICER', 12, 3, NULL, NULL, '4'),
+(23, 4, 'Pelatihan 3', 64, 'MAN012', 'signature', 2, 1, 'rejected', NULL, NULL, '2025-08-28 03:50:52', '2025-08-28 03:53:02', 5, 'Manager Human Capital', 12, 3, NULL, NULL, NULL),
+(24, 4, 'Pelatihan 3', 631, '2000216', 'paraf', 1, 2, 'approved', NULL, '2025-08-28 09:29:34', '2025-08-28 03:53:49', '2025-08-28 09:29:34', 11, 'HUMAN CAPITAL ORG. & DEV.  OFFICER', 12, 3, NULL, NULL, '4'),
+(25, 4, 'Pelatihan 3', 64, 'MAN012', 'signature', 2, 2, 'approved', NULL, '2025-08-28 09:29:52', '2025-08-28 03:53:49', '2025-08-28 09:29:52', 5, 'Manager Human Capital', 12, 3, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -975,7 +1210,7 @@ CREATE TABLE `training_participants` (
   `user_id` bigint UNSIGNED NOT NULL,
   `kode_pelatihan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `registration_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `jabatan_id` bigint UNSIGNED NOT NULL,
+  `jabatan_id` bigint UNSIGNED DEFAULT NULL,
   `jabatan_full` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `department_id` bigint UNSIGNED NOT NULL,
   `directorate_id` bigint UNSIGNED DEFAULT NULL,
@@ -994,7 +1229,9 @@ INSERT INTO `training_participants` (`id`, `pelatihan_id`, `user_id`, `kode_pela
 (23, 12, 786, 'Pelatihan 2', '2831', 11, 'HUMAN CAPITAL OFFICER', 12, 3, NULL, 675, '5', '2025-08-12 04:44:55', '2025-08-12 04:44:55'),
 (24, 12, 672, 'Pelatihan 2', '2400006', 11, 'LEGAL OFFICER', 2, 1, NULL, NULL, '4', '2025-08-12 04:44:55', '2025-08-12 04:44:55'),
 (25, 6, 788, 'Pelatihan 1', 'HSK001', 15, 'Housekeeper', 20, 2, 2, 72, '6', '2025-08-13 08:14:24', '2025-08-13 08:14:24'),
-(26, 6, 789, 'Pelatihan 1', 'HSK002', 15, 'Housekeeper', 20, 2, 2, 72, '6', '2025-08-13 08:14:24', '2025-08-13 08:14:24');
+(26, 6, 789, 'Pelatihan 1', 'HSK002', 15, 'Housekeeper', 20, 2, 2, 72, '6', '2025-08-13 08:14:24', '2025-08-13 08:14:24'),
+(27, 13, 789, 'Pelatihan 3', 'HSK002', 15, 'Housekeeper', 20, 2, 2, 72, '6', '2025-08-26 08:00:12', '2025-08-26 08:00:12'),
+(30, 16, 727, 'Pelatihan 4', '2600115', NULL, 'COOK THE KAIBON', 22, 2, 2, NULL, '6', '2025-09-01 09:37:08', '2025-09-01 09:37:08');
 
 -- --------------------------------------------------------
 
@@ -1036,7 +1273,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `registration_id`, `name`, `email`, `email_verified_at`, `password`, `two_factor_secret`, `two_factor_recovery_codes`, `phone`, `address`, `signature_path`, `paraf_path`, `role`, `is_active`, `profile_picture`, `remember_token`, `created_at`, `updated_at`, `jabatan_id`, `jabatan_full`, `department_id`, `directorate_id`, `division_id`, `superior_id`, `golongan`, `nik`) VALUES
-(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, 'gs0bFFM4r0iHSLKa9wIbpNs9MfBNYCpW1zOZtp2zvz2XNAoGM8tyCXO7BAfi', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1, 'ADM01', 'Administrator', 'admin@admin.com', '2025-06-23 04:55:06', '$2y$10$TRhzLAV1wP.IjrpLAe6T6eeg2uw9J3fNwlc/xF/KlZklkeWpcKSd6', NULL, NULL, '082121212121', NULL, NULL, NULL, 'admin', 1, NULL, 'upebeaGWCL6hq4ZpyoAV7aXKjIZokVqzs3WLXgFicgooiPd3k8QLJhUlV23Y', '2025-06-23 04:55:06', '2025-06-23 04:55:06', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (48, 'DIR001', 'Dewi Director', 'TEST@GMAIL.COM', NULL, '$2y$10$DjeExht8y6bI2lMEYJP1UOmGqacRPa4jL.hf1A/NjiBDBa3pX6iR2', NULL, NULL, '08111111001', 'Jl. Direksi No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:04', 1, NULL, NULL, 1, NULL, NULL, '0', '3173000000000001'),
 (49, 'ASDIR001', 'Arief Assistant', 'asdir@gmail.com', NULL, '$2y$10$BhayvALSwTi.vUXmICMK9eYkNoZCYzCQubfU7zwSrKN8z8MZ.9rHO', NULL, NULL, '08111111002', 'Jl. HC No.1', NULL, NULL, 'admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-11 07:45:20', 2, NULL, NULL, 1, NULL, 48, '1', '3173000000000002'),
 (50, 'GM001', 'Gita GM CP', NULL, NULL, '$2y$10$.0rbg1iVgUFkDZKfec3uUOV2jIyujakIsd2iRCNs4z4BJjYuPY/YS', NULL, NULL, '08111111003', 'Jl. Komersial No.1', NULL, NULL, 'department_admin', 1, NULL, NULL, '2025-07-07 06:13:17', '2025-07-07 06:13:17', 3, NULL, NULL, 2, 1, NULL, NULL, '3173000000000003'),
@@ -1725,7 +1962,8 @@ ALTER TABLE `divisions`
 ALTER TABLE `evaluasi_level_1`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_eval1_pelatihan` (`pelatihan_id`),
-  ADD KEY `fk_eval1_user` (`user_id`);
+  ADD KEY `fk_eval1_user` (`user_id`),
+  ADD KEY `superior_id` (`superior_id`);
 
 --
 -- Indexes for table `evaluasi_level_1s`
@@ -1734,7 +1972,7 @@ ALTER TABLE `evaluasi_level_1s`
   ADD PRIMARY KEY (`id`),
   ADD KEY `pelatihan_id` (`pelatihan_id`),
   ADD KEY `user_id` (`user_id`),
-  ADD KEY `superior_id` (`superior_id`);
+  ADD KEY `kode_pelatihan` (`superior_id`);
 
 --
 -- Indexes for table `evaluasi_level_1_instrukturs`
@@ -1765,6 +2003,70 @@ ALTER TABLE `evaluasi_level_1_penyelenggaraans`
 ALTER TABLE `evaluasi_level_1_saranas`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_eval1_saranas` (`evaluasi_level_1_id`) USING BTREE;
+
+--
+-- Indexes for table `evaluasi_level_3_atasans`
+--
+ALTER TABLE `evaluasi_level_3_atasans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_pelatihan` (`pelatihan_id`),
+  ADD KEY `idx_user` (`user_id`),
+  ADD KEY `idx_atasan` (`atasan_id`);
+
+--
+-- Indexes for table `evaluasi_level_3_atasans_feedbacks`
+--
+ALTER TABLE `evaluasi_level_3_atasans_feedbacks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_pelatihan` (`pelatihan_id`),
+  ADD KEY `idx_evaluasi` (`evaluasi_level_3_atasan_id`),
+  ADD KEY `idx_user` (`user_id`),
+  ADD KEY `idx_atasan` (`atasan_id`);
+
+--
+-- Indexes for table `evaluasi_level_3_atasans_tujuan_pembelajarans`
+--
+ALTER TABLE `evaluasi_level_3_atasans_tujuan_pembelajarans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_pelatihan` (`pelatihan_id`),
+  ADD KEY `idx_evaluasi` (`evaluasi_level_3_atasan_id`),
+  ADD KEY `idx_user` (`user_id`),
+  ADD KEY `idx_atasan` (`atasan_id`);
+
+--
+-- Indexes for table `evaluasi_level_3_pesertas`
+--
+ALTER TABLE `evaluasi_level_3_pesertas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval3peserta_pelatihan` (`pelatihan_id`),
+  ADD KEY `fk_eval3peserta_user` (`user_id`);
+
+--
+-- Indexes for table `evaluasi_level_3_peserta_action_plans`
+--
+ALTER TABLE `evaluasi_level_3_peserta_action_plans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval3pesertaactionplan_eval3peserta` (`evaluasi_level_3_peserta_id`),
+  ADD KEY `fk_eval3pesertaactionplan_user` (`user_id`),
+  ADD KEY `fk_eval3pesertaactionplan_pelatihan` (`pelatihan_id`);
+
+--
+-- Indexes for table `evaluasi_level_3_peserta_feedbacks`
+--
+ALTER TABLE `evaluasi_level_3_peserta_feedbacks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval3pesertafeedback_eval3peserta` (`evaluasi_level_3_peserta_id`),
+  ADD KEY `fk_eval3pesertafeedback_user` (`user_id`),
+  ADD KEY `fk_eval3pesertafeedback_pelatihan` (`pelatihan_id`);
+
+--
+-- Indexes for table `evaluasi_level_3_signatures`
+--
+ALTER TABLE `evaluasi_level_3_signatures`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_eval3sig_eval3peserta` (`evaluasi_level_3_peserta_id`),
+  ADD KEY `fk_eval3sig_user` (`approver_id`),
+  ADD KEY `fk_eval3sig_pelatihan` (`pelatihan_id`);
 
 --
 -- Indexes for table `failed_jobs`
@@ -1816,6 +2118,13 @@ ALTER TABLE `nota_dinas`
   ADD UNIQUE KEY `kode` (`kode`);
 
 --
+-- Indexes for table `notifikasi`
+--
+ALTER TABLE `notifikasi`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `notifikasi_user_id_dibaca_index` (`user_id`,`dibaca`);
+
+--
 -- Indexes for table `password_resets`
 --
 ALTER TABLE `password_resets`
@@ -1829,7 +2138,12 @@ ALTER TABLE `pelatihan_presenters`
   ADD KEY `pelatihan_presenters_pelatihan_id_foreign` (`pelatihan_id`),
   ADD KEY `pelatihan_presenters_presenter_id_foreign` (`presenter_id`),
   ADD KEY `pelatihan_presenters_user_id_foreign` (`user_id`),
-  ADD KEY `pelatihan_presenters_submitted_by_foreign` (`submitted_by`);
+  ADD KEY `pelatihan_presenters_submitted_by_foreign` (`submitted_by`),
+  ADD KEY `fk_pelatihan_presenters_jabatan` (`jabatan_id`),
+  ADD KEY `fk_pelatihan_presenters_department` (`department_id`),
+  ADD KEY `fk_pelatihan_presenters_directorate` (`directorate_id`),
+  ADD KEY `fk_pelatihan_presenters_division` (`division_id`),
+  ADD KEY `fk_pelatihan_presenters_superior` (`superior_id`);
 
 --
 -- Indexes for table `personal_access_tokens`
@@ -1966,13 +2280,13 @@ ALTER TABLE `daftar_hadir_knowledge`
 -- AUTO_INCREMENT for table `daftar_hadir_pelatihan`
 --
 ALTER TABLE `daftar_hadir_pelatihan`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `daftar_hadir_pelatihan_status`
 --
 ALTER TABLE `daftar_hadir_pelatihan_status`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `departments`
@@ -2008,13 +2322,13 @@ ALTER TABLE `evaluasi_level_1`
 -- AUTO_INCREMENT for table `evaluasi_level_1s`
 --
 ALTER TABLE `evaluasi_level_1s`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `evaluasi_level_1_instrukturs`
 --
 ALTER TABLE `evaluasi_level_1_instrukturs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `evaluasi_level_1_materis`
@@ -2033,6 +2347,48 @@ ALTER TABLE `evaluasi_level_1_penyelenggaraans`
 --
 ALTER TABLE `evaluasi_level_1_saranas`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_3_atasans`
+--
+ALTER TABLE `evaluasi_level_3_atasans`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_3_atasans_feedbacks`
+--
+ALTER TABLE `evaluasi_level_3_atasans_feedbacks`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_3_atasans_tujuan_pembelajarans`
+--
+ALTER TABLE `evaluasi_level_3_atasans_tujuan_pembelajarans`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_3_pesertas`
+--
+ALTER TABLE `evaluasi_level_3_pesertas`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_3_peserta_action_plans`
+--
+ALTER TABLE `evaluasi_level_3_peserta_action_plans`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_3_peserta_feedbacks`
+--
+ALTER TABLE `evaluasi_level_3_peserta_feedbacks`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `evaluasi_level_3_signatures`
+--
+ALTER TABLE `evaluasi_level_3_signatures`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -2077,10 +2433,16 @@ ALTER TABLE `nota_dinas`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT for table `notifikasi`
+--
+ALTER TABLE `notifikasi`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+
+--
 -- AUTO_INCREMENT for table `pelatihan_presenters`
 --
 ALTER TABLE `pelatihan_presenters`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
@@ -2092,25 +2454,25 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT for table `presenters`
 --
 ALTER TABLE `presenters`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `signature_and_parafs`
 --
 ALTER TABLE `signature_and_parafs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `surat_pengajuan_pelatihans`
 --
 ALTER TABLE `surat_pengajuan_pelatihans`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `surat_pengajuan_pelatihan_signatures_and_parafs`
 --
 ALTER TABLE `surat_pengajuan_pelatihan_signatures_and_parafs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `surat_pengajuan_training_example`
@@ -2122,19 +2484,19 @@ ALTER TABLE `surat_pengajuan_training_example`
 -- AUTO_INCREMENT for table `surat_tugas_pelatihans`
 --
 ALTER TABLE `surat_tugas_pelatihans`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `surat_tugas_pelatihan_signatures_and_parafs`
 --
 ALTER TABLE `surat_tugas_pelatihan_signatures_and_parafs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `training_participants`
 --
 ALTER TABLE `training_participants`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -2205,7 +2567,8 @@ ALTER TABLE `divisions`
 --
 ALTER TABLE `evaluasi_level_1`
   ADD CONSTRAINT `fk_eval1_pelatihan` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_eval1_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_eval1_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `superior_id` FOREIGN KEY (`superior_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `evaluasi_level_1s`
@@ -2213,7 +2576,7 @@ ALTER TABLE `evaluasi_level_1`
 ALTER TABLE `evaluasi_level_1s`
   ADD CONSTRAINT `evaluasi_level_1s_ibfk_1` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `evaluasi_level_1s_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `evaluasi_level_1s_ibfk_3` FOREIGN KEY (`superior_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `kode_pelatihan` FOREIGN KEY (`superior_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `evaluasi_level_1_instrukturs`
@@ -2242,6 +2605,37 @@ ALTER TABLE `evaluasi_level_1_saranas`
   ADD CONSTRAINT `fk_eval1_saranas` FOREIGN KEY (`evaluasi_level_1_id`) REFERENCES `evaluasi_level_1s` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Constraints for table `evaluasi_level_3_pesertas`
+--
+ALTER TABLE `evaluasi_level_3_pesertas`
+  ADD CONSTRAINT `fk_eval3_pelatihan` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval3_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `evaluasi_level_3_peserta_action_plans`
+--
+ALTER TABLE `evaluasi_level_3_peserta_action_plans`
+  ADD CONSTRAINT `fk_eval3actionplan_eval3` FOREIGN KEY (`evaluasi_level_3_peserta_id`) REFERENCES `evaluasi_level_3_pesertas` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval3actionplan_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval3pesertaactionplan_pelatihan` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `evaluasi_level_3_peserta_feedbacks`
+--
+ALTER TABLE `evaluasi_level_3_peserta_feedbacks`
+  ADD CONSTRAINT `fk_eval3feedback_eval3` FOREIGN KEY (`evaluasi_level_3_peserta_id`) REFERENCES `evaluasi_level_3_pesertas` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval3feedback_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval3pesertafeedback_pelatihan` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `evaluasi_level_3_signatures`
+--
+ALTER TABLE `evaluasi_level_3_signatures`
+  ADD CONSTRAINT `fk_eval3sig_eval3` FOREIGN KEY (`evaluasi_level_3_peserta_id`) REFERENCES `evaluasi_level_3_pesertas` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval3sig_pelatihan` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval3sig_user` FOREIGN KEY (`approver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `knowledge_pengajuan`
 --
 ALTER TABLE `knowledge_pengajuan`
@@ -2255,9 +2649,20 @@ ALTER TABLE `letters`
   ADD CONSTRAINT `letters_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE;
 
 --
+-- Constraints for table `notifikasi`
+--
+ALTER TABLE `notifikasi`
+  ADD CONSTRAINT `notifikasi_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `pelatihan_presenters`
 --
 ALTER TABLE `pelatihan_presenters`
+  ADD CONSTRAINT `fk_pelatihan_presenters_department` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pelatihan_presenters_directorate` FOREIGN KEY (`directorate_id`) REFERENCES `directorates` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pelatihan_presenters_division` FOREIGN KEY (`division_id`) REFERENCES `divisions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pelatihan_presenters_jabatan` FOREIGN KEY (`jabatan_id`) REFERENCES `jabatans` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pelatihan_presenters_superior` FOREIGN KEY (`superior_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `pelatihan_presenters_pelatihan_id_foreign` FOREIGN KEY (`pelatihan_id`) REFERENCES `surat_pengajuan_pelatihans` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `pelatihan_presenters_presenter_id_foreign` FOREIGN KEY (`presenter_id`) REFERENCES `presenters` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `pelatihan_presenters_submitted_by_foreign` FOREIGN KEY (`submitted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,

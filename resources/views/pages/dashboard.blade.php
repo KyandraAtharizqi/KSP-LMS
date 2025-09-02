@@ -13,7 +13,7 @@
             },
             series: [{
                 name: '{{ __('dashboard.letter_transaction') }}',
-                data: [{{ $todayIncomingLetter }},{{ $todayOutgoingLetter }},{{ $todayDispositionLetter }}]
+                data: [{{ $todayIncomingLetter }},{{ $todayOutgoingLetter }},{{ $todayKnowledgeLetter }}]
             }],
             stroke: {
                 curve: 'smooth',
@@ -44,7 +44,7 @@
                             <p class="mb-4">
                                 {{ $currentDate }}
                             </p>
-                            <p style="font-size: smaller" class="text-gray">* {{ __('dashboard.today_report') }}</p>
+                            <p style="font-size: smaller" class="text-gray">{{ __('dashboard.today_report') }}</p>
                         </div>
                     </div>
                     <div class="col-sm-5 text-center text-sm-left">
@@ -94,30 +94,33 @@
                     <x-dashboard-card-simple
                         :label="__('dashboard.incoming_letter')"
                         :value="$todayIncomingLetter"
-                        :daily="true"
+                        :daily="false"
                         color="success"
                         icon="bx-envelope"
                         :percentage="$percentageIncomingLetter"
+                        :acceptedCount="$acceptedSuratPengajuan"
                     />
                 </div>
                 <div class="col-lg-6 col-md-12 col-6 mb-4">
                     <x-dashboard-card-simple
                         :label="__('dashboard.outgoing_letter')"
                         :value="$todayOutgoingLetter"
-                        :daily="true"
+                        :daily="false"
                         color="danger"
                         icon="bx-envelope"
                         :percentage="$percentageOutgoingLetter"
+                        :acceptedCount="$acceptedSuratTugas"
                     />
                 </div>
                 <div class="col-lg-6 col-md-12 col-6 mb-4">
                     <x-dashboard-card-simple
                         :label="__('dashboard.disposition_letter')"
-                        :value="$todayDispositionLetter"
-                        :daily="true"
+                        :value="$todayKnowledgeLetter"
+                        :daily="false"
                         color="primary"
-                        icon="bx-envelope"
-                        :percentage="$percentageDispositionLetter"
+                        icon="bx-brain"
+                        :percentage="$percentageKnowledgeLetter"
+                        :acceptedCount="$acceptedKnowledgeLetter"
                     />
                 </div>
                 <div class="col-lg-6 col-md-12 col-6 mb-4">

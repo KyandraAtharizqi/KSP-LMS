@@ -75,14 +75,14 @@ Route::middleware(['auth'])->group(function () {
     | Profile
     |--------------------------------------------------------------------------
     */
-    Route::get('/profile', [PageController::class, 'profile'])->name('profile.show');
-    Route::post('/profile', [PageController::class, 'profileUpdate'])->name('profile.update');
-    Route::post('/profile/deactivate', [PageController::class, 'deactivate'])
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/deactivate', [PageController::class, 'deactivate'])
         ->name('profile.deactivate')
         ->middleware(['role:staff']);
 
-    Route::post('/profile/upload-signature', [PageController::class, 'uploadSignature'])->name('profile.upload.signature');
-    Route::post('/profile/upload-paraf', [PageController::class, 'uploadParaf'])->name('profile.upload.paraf');
+    Route::post('/profile/upload-signature', [ProfileController::class, 'uploadSignature'])->name('profile.upload.signature');
+    Route::post('/profile/upload-paraf', [ProfileController::class, 'uploadParaf'])->name('profile.upload.paraf');
 
     /*
     |--------------------------------------------------------------------------

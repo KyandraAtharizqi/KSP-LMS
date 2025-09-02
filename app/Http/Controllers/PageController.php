@@ -10,7 +10,10 @@ use App\Models\Attachment;
 use App\Models\Config;
 use App\Models\Disposition;
 use App\Models\Letter;
+use App\Models\PengajuanKnowledge;
 use App\Models\SignatureAndParaf;
+use App\Models\SuratPengajuanPelatihan;
+use App\Models\SuratTugasPelatihan;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -18,7 +21,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Http\Requests\UpdateProfileRequest;
 
 
@@ -26,28 +31,108 @@ class PageController extends Controller
 {
     public function index(Request $request): View
     {
-        $todayIncomingLetter = Letter::incoming()->today()->count();
-        $todayOutgoingLetter = Letter::outgoing()->today()->count();
-        $todayDispositionLetter = Disposition::today()->count();
-        $todayLetterTransaction = $todayIncomingLetter + $todayOutgoingLetter + $todayDispositionLetter;
-
-        $yesterdayIncomingLetter = Letter::incoming()->yesterday()->count();
-        $yesterdayOutgoingLetter = Letter::outgoing()->yesterday()->count();
-        $yesterdayDispositionLetter = Disposition::yesterday()->count();
-        $yesterdayLetterTransaction = $yesterdayIncomingLetter + $yesterdayOutgoingLetter + $yesterdayDispositionLetter;
+        $user = auth()->user();
+        
+        // Filter data berdasarkan role user - menampilkan semua data
+        $baseSuratPengajuanQuery = SuratPengajuanPelatihan::query();
+        $baseSuratTugasQuery = SuratTugasPelatihan::query();
+        $baseKnowledgeQuery = PengajuanKnowledge::query();
+        
+        // Query untuk data yang diterima/disetujui
+        $baseSuratPengajuanAcceptedQuery = SuratPengajuanPelatihan::where('is_accepted', true);
+        $baseSuratTugasAcceptedQuery = SuratTugasPelatihan::where('is_accepted', true);
+        $baseKnowledgeAcceptedQuery = PengajuanKnowledge::where('status', 'approved');
+        
+        // Filter berdasarkan role
+        switch ($user->role) {
+            case 'admin':
+                // Admin bisa melihat semua data
+                break;
+            case 'department_admin':
+                // Department admin hanya melihat data department mereka
+                $baseSuratPengajuanQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                $baseSuratTugasQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                $baseKnowledgeQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                // Filter untuk data yang diterima
+                $baseSuratPengajuanAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                $baseSuratTugasAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                $baseKnowledgeAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                break;
+            case 'division_admin':
+                // Division admin hanya melihat data division mereka
+                $baseSuratPengajuanQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                $baseSuratTugasQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                $baseKnowledgeQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                // Filter untuk data yang diterima
+                $baseSuratPengajuanAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                $baseSuratTugasAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                $baseKnowledgeAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                break;
+            case 'staff':
+            case 'upper_staff':
+            default:
+                // Staff hanya melihat data mereka sendiri
+                $baseSuratPengajuanQuery->where('created_by', $user->id);
+                $baseSuratTugasQuery->where('created_by', $user->id);
+                $baseKnowledgeQuery->where('created_by', $user->id);
+                // Filter untuk data yang diterima
+                $baseSuratPengajuanAcceptedQuery->where('created_by', $user->id);
+                $baseSuratTugasAcceptedQuery->where('created_by', $user->id);
+                $baseKnowledgeAcceptedQuery->where('created_by', $user->id);
+                break;
+        }
+        
+        // Hitung total data
+        $todaySuratPengajuan = $baseSuratPengajuanQuery->count();
+        $todaySuratTugas = $baseSuratTugasQuery->count();
+        $todayKnowledgeLetter = $baseKnowledgeQuery->count();
+        
+        // Hitung data yang diterima/disetujui
+        $acceptedSuratPengajuan = $baseSuratPengajuanAcceptedQuery->count();
+        $acceptedSuratTugas = $baseSuratTugasAcceptedQuery->count();
+        $acceptedKnowledgeLetter = $baseKnowledgeAcceptedQuery->count();
+        
+        $todayLetterTransaction = $todaySuratPengajuan + $todaySuratTugas + $todayKnowledgeLetter;
 
         return view('pages.dashboard', [
             'greeting' => GeneralHelper::greeting(),
             'currentDate' => Carbon::now()->isoFormat('dddd, D MMMM YYYY'),
-            'todayIncomingLetter' => $todayIncomingLetter,
-            'todayOutgoingLetter' => $todayOutgoingLetter,
-            'todayDispositionLetter' => $todayDispositionLetter,
+            'todayIncomingLetter' => $todaySuratPengajuan,
+            'todayOutgoingLetter' => $todaySuratTugas,
+            'todayKnowledgeLetter' => $todayKnowledgeLetter,
             'todayLetterTransaction' => $todayLetterTransaction,
+            'acceptedSuratPengajuan' => $acceptedSuratPengajuan,
+            'acceptedSuratTugas' => $acceptedSuratTugas,
+            'acceptedKnowledgeLetter' => $acceptedKnowledgeLetter,
             'activeUser' => User::active()->count(),
-            'percentageIncomingLetter' => GeneralHelper::calculateChangePercentage($yesterdayIncomingLetter, $todayIncomingLetter),
-            'percentageOutgoingLetter' => GeneralHelper::calculateChangePercentage($yesterdayOutgoingLetter, $todayOutgoingLetter),
-            'percentageDispositionLetter' => GeneralHelper::calculateChangePercentage($yesterdayDispositionLetter, $todayDispositionLetter),
-            'percentageLetterTransaction' => GeneralHelper::calculateChangePercentage($yesterdayLetterTransaction, $todayLetterTransaction),
+            'percentageIncomingLetter' => 0, // Set 0 karena kita tidak hitung persentase lagi
+            'percentageOutgoingLetter' => 0,
+            'percentageKnowledgeLetter' => 0,
+            'percentageLetterTransaction' => 0,
         ]);
     }
 
@@ -70,13 +155,40 @@ class PageController extends Controller
     
             // Handle profile picture HANYA JIKA ADA FILE BARU
             if ($request->hasFile('profile_picture')) {
-                // Hapus foto lama
-                if ($user->profile_picture) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
+                // Hapus foto lama jika bukan URL dari ui-avatars
+                if ($user->profile_picture && !Str::startsWith($user->profile_picture, 'http')) {
+                    Storage::disk('public')->delete($user->profile_picture);
                 }
     
-                // Simpan foto baru
-                $path = $request->file('profile_picture')->store('avatars', 'public');
+                // Pastikan direktori avatars ada
+                Storage::disk('public')->makeDirectory('avatars');
+    
+                // Ambil file dan periksa validitas
+                $file = $request->file('profile_picture');
+                if (!$file->isValid()) {
+                    throw new \Exception('File upload gagal: ' . $file->getError());
+                }
+                
+                // Buat nama file yang unik dengan extension asli
+                $fileName = uniqid('avatar_') . '.' . $file->getClientOriginalExtension();
+                
+                // Simpan foto baru dengan nama yang ditentukan
+                $path = $file->storeAs('avatars', $fileName, 'public');
+                
+                // Pastikan file tersimpan dengan benar
+                if (!Storage::disk('public')->exists($path)) {
+                    throw new \Exception('File gagal disimpan ke storage');
+                }
+                
+                // Debug info
+                Log::info('Profile picture uploaded', [
+                    'path' => $path,
+                    'file_name' => $fileName,
+                    'original_name' => $file->getClientOriginalName(),
+                    'file_size' => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                    'exists' => Storage::disk('public')->exists($path)
+                ]);
     
                 $updateData['profile_picture'] = $path;
             }
@@ -86,6 +198,10 @@ class PageController extends Controller
             return back()->with('success', 'Profil berhasil diperbarui.');
     
         } catch (\Throwable $exception) {
+            Log::error('Profile update error: ' . $exception->getMessage(), [
+                'exception' => $exception,
+                'trace' => $exception->getTraceAsString()
+            ]);
             return back()->with('error', $exception->getMessage());
         }
     }

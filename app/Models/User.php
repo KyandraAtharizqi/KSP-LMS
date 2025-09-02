@@ -113,8 +113,14 @@ class User extends Authenticatable
     public function profilePicture(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) =>
-                $value ?: 'https://ui-avatars.com/api/?background=6D67E4&color=fff&name=' . urlencode($this->name)
+            get: function ($value) {
+                // If value exists and isn't a URL, return as is so we can prepend storage/ in the view
+                if ($value && !str_starts_with($value, 'http')) {
+                    return $value;
+                }
+                // If empty or already a URL, return as is or fallback to avatar
+                return $value ?: 'https://ui-avatars.com/api/?background=6D67E4&color=fff&name=' . urlencode($this->name);
+            }
         );
     }
 
