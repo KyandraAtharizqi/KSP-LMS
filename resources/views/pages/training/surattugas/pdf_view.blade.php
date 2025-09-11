@@ -1,9 +1,24 @@
+
 @php
     use Illuminate\Support\Facades\DB;
 
-    // Pre-sorted collections
-    $parafs = $surat->signaturesAndParafs->where('type', 'paraf')->sortBy('sequence');
-    $signatures = $surat->signaturesAndParafs->where('type', 'signature')->sortBy('sequence');
+    // Get the latest round
+    $latestRound = $surat->signaturesAndParafs->max('round') ?? 1;
+
+    // Pre-sorted collections - filtered by latest round
+    $parafs = $surat->signaturesAndParafs
+        ->where('type', 'paraf')
+        ->where('round', $latestRound)
+        ->sortBy('sequence');
+    
+    $signatures = $surat->signaturesAndParafs
+        ->where('type', 'signature')
+        ->where('round', $latestRound)
+        ->sortBy('sequence');
+    
+    // Calculate counts
+    $parafsCount = $parafs->count();
+    $sigsCount = $signatures->count();
 
     // Helper to build absolute file path for DomPDF
     function stp_pdf_img_path(?string $relPath): ?string {
@@ -18,85 +33,102 @@
     <meta charset="utf-8">
     <title>Surat Tugas Pelatihan - {{ $surat->judul }}</title>
     <style>
-        @page { margin: 25px 25px 40px 25px; }
+        @page { margin: 15px 20px; }
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
-            font-size: 12px;
+            font-size: 8px;
             color: #000;
             margin: 0;
             padding: 0;
+            line-height: 1.2;
         }
         .wrapper {
             width: 100%;
             margin: 0 auto;
+            border: 1px solid #333;
         }
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 16px;
         }
         .header-table td {
             vertical-align: middle;
             text-align: center;
+            border-bottom: 1px solid #000;
+            padding: 5px;
         }
         .header-left { text-align: left; width: 25%; }
-        .header-center { text-align: center; width: 50%; font-weight: bold; font-size: 16px; }
+        .header-center { text-align: center; width: 50%; font-weight: bold; font-size: 10px; }
         .header-right { text-align: right; width: 25%; }
 
         .content-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
         }
         .content-table,
         .content-table th,
         .content-table td {
             border: 1px solid #000;
-            padding: 6px 8px;
+            padding: 3px 4px;
             vertical-align: top;
+            font-size: 8px;
         }
         .label-strong { font-weight: bold; }
 
         .list-ol {
             margin: 0;
-            padding-left: 18px;
+            padding-left: 12px;
         }
         .list-ol li {
-            margin-bottom: 2px;
+            margin-bottom: 1px;
+            font-size: 8px;
         }
 
         .tembusan-wrapper {
-            font-size: 12px;
+            font-size: 8px;
         }
         .tembusan-wrapper ul {
             margin: 0;
-            padding-left: 16px;
+            padding-left: 12px;
         }
         .tembusan-wrapper li {
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
-        .sign-section-wrapper {
+        /* Signature grid */
+        .sign-grid-header {
+            font-size: 8px;
+            color: #888;
+        }
+        .sign-cell {
             text-align: center;
-            font-size: 12px;
+            vertical-align: top;
+            padding: 0 2px;
         }
-        .sign-block {
-            margin-bottom: 30px; /* space between blocks */
+        .sign-image-box {
+            height: 40px;
         }
-        .sign-space {
-            height: 80px; /* reserved space for image */
-            line-height: 80px;
+        .sign-image-box img {
+            height: 35px;
         }
-        .sign-space img {
-            max-height: 60px;
-            max-width: 100%;
+        .sign-blank {
+            height: 35px;
+            border-bottom: 1px solid #000;
         }
         .sign-meta {
-            margin-top: 5px;
-            margin-bottom: 25px; /* extra vertical space after meta */
-            line-height: 1.2;
+            font-size: 8px;
+            margin-top: 2px;
+            line-height: 1.1;
         }
-        .sign-name { font-weight: bold; text-transform: uppercase; }
+        .sign-meta small {
+            display: block;
+            line-height: 1.1;
+            font-size: 8px;
+        }
+        .sign-role {
+            font-size: 8px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -106,19 +138,13 @@
     <table class="header-table">
         <tr>
             <td class="header-left">
-                @php $logo1 = public_path('logoksp.png'); @endphp
-                @if(file_exists($logo1))
-                    <img src="{{ $logo1 }}" alt="Logo" height="40">
-                @endif
+                <img src="{{ public_path('logo.png') }}" alt="Logo" height="25">
             </td>
             <td class="header-center">
                 SURAT TUGAS PELATIHAN
             </td>
             <td class="header-right">
-                @php $logo2 = public_path('path/to/logo_ykan.png'); @endphp
-                @if(file_exists($logo2))
-                    <img src="{{ $logo2 }}" alt="Logo YKAN" height="40">
-                @endif
+                <img src="{{ public_path('logo.png') }}" alt="Logo" height="25">
             </td>
         </tr>
     </table>
@@ -150,11 +176,26 @@
             <td>{{ $surat->pelatihan?->penyelenggara ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label-strong">Hari, Tanggal Pelaksanaan Pelatihan</td>
+            <td><strong>Hari, Tanggal Pelaksanaan Pelatihan</strong></td>
             <td>
-                {{ $surat->pelatihan?->tanggal_mulai?->format('l, d F Y') ?? $surat->tanggal?->format('l, d F Y') }}
-                s.d.
-                {{ $surat->pelatihan?->tanggal_selesai?->format('l, d F Y') ?? '-' }}
+                @php
+                    $pelaksanaan = $surat->pelatihan?->tanggal_pelaksanaan;
+                    if (is_string($pelaksanaan)) {
+                        $pelaksanaan = json_decode($pelaksanaan, true);
+                    }
+                @endphp
+
+                @if (!empty($pelaksanaan))
+                    <ul style="margin:0; padding-left:12px;">
+                        @foreach ($pelaksanaan as $tgl)
+                            <li>{{ \Carbon\Carbon::parse($tgl)->translatedFormat('l, d F Y') }}</li>
+                        @endforeach
+                    </ul>
+                @else
+                    {{ $surat->pelatihan?->tanggal_mulai?->translatedFormat('l, d F Y') ?? '-' }}
+                    s/d 
+                    {{ $surat->pelatihan?->tanggal_selesai?->translatedFormat('l, d F Y') ?? '-' }}
+                @endif
             </td>
         </tr>
         <tr>
@@ -179,82 +220,127 @@
         </tr>
     </table>
 
-    {{-- TEMBUSAN + SIGNATURES --}}
-    <table style="width:100%; margin-top:20px;">
-        <tr>
-            <td style="width:60%; vertical-align:top;">
-                <div class="tembusan-wrapper">
-                    <strong>Tembusan:</strong>
-                    <ul>
-                        <li>Direktur Utama</li>
-                        <li>Manager Terkait</li>
-                        <li>Arsip</li>
-                    </ul>
-                </div>
-            </td>
-            <td style="width:40%; vertical-align:top; text-align:center;">
-                <div class="sign-section-wrapper">
-                    Cilegon, {{ $surat->tanggal?->format('d F Y') }}
-                </div>
-
-                {{-- Paraf blocks --}}
-                @foreach ($parafs as $paraf)
-                    @php
-                        $path = null;
-                        if ($paraf->status === 'approved' && $paraf->user?->registration_id) {
-                            $rel = DB::table('signature_and_parafs')
-                                ->where('registration_id', $paraf->user->registration_id)
-                                ->value('paraf_path');
-                            $path = stp_pdf_img_path($rel);
-                        }
-                    @endphp
-                    <div class="sign-block">
-                        <div class="sign-space">
-                            @if ($path)
-                                <img src="{{ $path }}" alt="Paraf">
-                            @else
-                                (Menunggu Paraf)
-                            @endif
-                        </div>
-                        <div class="sign-meta">
-                            <span class="sign-name">{{ $paraf->user->name }}</span><br>
-                            {{ $paraf->user->registration_id }}<br>
-                            {{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}
-                        </div>
+    <div style="padding: 5px;">
+        <table style="width:100%; margin-top:5px; border-collapse:collapse;">
+            <tr>
+                <td style="width:60%; vertical-align:top;">
+                    <div class="tembusan-wrapper">
+                        <strong>Tembusan:</strong>
+                        <ul>
+                            <li>Direktur Utama</li>
+                            <li>Manager Terkait</li>
+                            <li>Arsip</li>
+                        </ul>
                     </div>
-                @endforeach
-
-                {{-- Signature blocks --}}
-                @foreach ($signatures as $signature)
-                    @php
-                        $path = null;
-                        if ($signature->status === 'approved' && $signature->user?->registration_id) {
-                            $rel = DB::table('signature_and_parafs')
-                                ->where('registration_id', $signature->user->registration_id)
-                                ->value('signature_path');
-                            $path = stp_pdf_img_path($rel);
-                        }
-                    @endphp
-                    <div class="sign-block">
-                        <div class="sign-space">
-                            @if ($path)
-                                <img src="{{ $path }}" alt="Tanda Tangan">
-                            @else
-                                (Menunggu Tanda Tangan)
-                            @endif
-                        </div>
-                        <div class="sign-meta">
-                            <span class="sign-name">{{ $signature->user->name }}</span><br>
-                            {{ $signature->user->registration_id }}<br>
-                            {{ $signature->user->jabatan_full ?? ($signature->user->jabatan->name ?? '-') }}
-                        </div>
+                </td>
+                <td style="width:40%; vertical-align:top; text-align:center;">
+                    <div style="font-size: 8px;">
+                        @if($signatures->count() > 0 && $signatures->first() && $signatures->first()->updated_at)
+                            Cilegon, {{ $signatures->first()->updated_at->format('d F Y') }}
+                        @elseif($surat->tanggal)
+                            Cilegon, {{ $surat->tanggal->format('d F Y') }}
+                        @else
+                            Cilegon, {{ now()->format('d F Y') }}
+                        @endif
                     </div>
-                @endforeach
+                </td>
+            </tr>
+        </table>
 
-            </td>
-        </tr>
-    </table>
-
+        {{-- Approval Section for Surat Tugas - Simplified structure --}}
+        <div style="margin-top:15px;">
+            <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                    <td style="width:60%; vertical-align:top;">
+                        {{-- Paraf section - Up to 3 parafs in one row --}}
+                        @if($parafsCount > 0)
+                            <div style="font-weight:bold; font-size:8px; margin-bottom:4px;">Paraf:</div>
+                            <table style="width:100%; border-collapse:collapse;">
+                                <tr>
+                                    @foreach($parafs->take(3) as $index => $paraf)
+                                        @php
+                                            // Safely get the paraf
+                                            $path = null;
+                                            
+                                            if ($paraf && $paraf->status === 'approved' && $paraf->user?->registration_id) {
+                                                $rel = DB::table('signature_and_parafs')
+                                                    ->where('registration_id', $paraf->user->registration_id)
+                                                    ->value('paraf_path');
+                                                $path = stp_pdf_img_path($rel);
+                                            }
+                                        @endphp
+                                        <td class="sign-cell" style="border:1px solid #ddd; width:33.33%;">
+                                            <div class="sign-image-box">
+                                                @if ($path)
+                                                    <img src="{{ $path }}" alt="Paraf">
+                                                @else
+                                                    <div class="sign-blank"></div>
+                                                @endif
+                                            </div>
+                                            <div class="sign-meta">
+                                                {{ $paraf->user->name ?? '-' }}
+                                                <small>{{ $paraf->user->registration_id ?? '-' }}</small>
+                                                <small>{{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}</small>
+                                            </div>
+                                            <div class="sign-role">(Paraf)</div>
+                                        </td>
+                                    @endforeach
+                                    
+                                    {{-- Fill remaining cells if less than 3 parafs --}}
+                                    @for($i = $parafsCount; $i < 3; $i++)
+                                        <td style="width:33.33%;"></td>
+                                    @endfor
+                                </tr>
+                            </table>
+                        @endif
+                    </td>
+                    <td style="width:40%; vertical-align:top;">
+                        {{-- Signature section - Only one signature --}}
+                        @if($sigsCount > 0)
+                            <div style="font-weight:bold; font-size:8px; margin-bottom:4px; text-align:center;">
+                                Menyetujui
+                            </div>
+                            <div style="text-align:center; border:1px solid #ddd; padding:5px;">
+                                @php
+                                    // Safely get the first signature
+                                    $signature = $signatures->first();
+                                    $path = null;
+                                    
+                                    if ($signature && $signature->status === 'approved' && $signature->user?->registration_id) {
+                                        $rel = DB::table('signature_and_parafs')
+                                            ->where('registration_id', $signature->user->registration_id)
+                                            ->value('signature_path');
+                                        $path = stp_pdf_img_path($rel);
+                                    }
+                                @endphp
+                                
+                                <div class="sign-image-box">
+                                    @if ($path)
+                                        <img src="{{ $path }}" alt="Tanda Tangan">
+                                    @else
+                                        <div class="sign-blank"></div>
+                                    @endif
+                                </div>
+                                <div class="sign-meta">
+                                    {{ $signature->user->name ?? '-' }}
+                                    <small>{{ $signature->user->registration_id ?? '-' }}</small>
+                                    <small>{{ $signature->user->jabatan_full ?? ($signature->user->jabatan->name ?? '-') }}</small>
+                                </div>
+                                <div class="sign-role">(Tanda Tangan)</div>
+                            </div>
+                        @endif
+                    </td>
+                </tr>
+            </table>
+            
+            {{-- Show message if no signatures or parafs --}}
+            @if($parafsCount == 0 && $sigsCount == 0)
+                <div style="margin:10px 0; text-align:center; font-style:italic; font-size:8px; color:#888;">
+                    Dokumen ini belum memiliki tanda tangan atau paraf.
+                </div>
+            @endif
+        </div>
+    </div>
 </div>
 </body>
 </html>

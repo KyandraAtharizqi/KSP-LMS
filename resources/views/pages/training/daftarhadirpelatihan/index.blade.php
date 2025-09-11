@@ -15,7 +15,7 @@
             {{-- Search Bar --}}
             <form method="GET" action="{{ route('training.daftarhadirpelatihan.index') }}" class="mb-3">
                 <div class="input-group input-group-lg">
-                    <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari judul atau kode pelatihan (contoh: Leadership / KSP-001)">
+                    <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari judul atau kode pelatihan">
                     <button type="submit" class="btn btn-primary px-4">
                         <i class="bx bx-search"></i> Cari
                     </button>
@@ -29,10 +29,8 @@
                 <table class="table table-striped table-bordered table-hover">
                     <thead class="table-light">
                         <tr>
-                            <th>Kode Pelatihan</th>
+                            <th>Kode Pelatihan (ID)</th>
                             <th>Judul</th>
-                            <th>Tanggal</th>
-                            <th>Tempat</th>
                             <th>Penyelenggara</th>
                             <th class="text-nowrap">Aksi</th>
                         </tr>
@@ -40,14 +38,8 @@
                     <tbody>
                         @forelse($pelatihans as $pelatihan)
                             <tr>
-                                <td>{{ $pelatihan->kode_pelatihan }}</td>
+                                <td>{{ $pelatihan->kode_pelatihan }} ({{ $pelatihan->id }})</td>
                                 <td>{{ $pelatihan->judul }}</td>
-                                <td>
-                                    {{ $pelatihan->tanggal_mulai?->format('d M Y') ?? '-' }}
-                                    s.d.
-                                    {{ $pelatihan->tanggal_selesai?->format('d M Y') ?? '-' }}
-                                </td>
-                                <td>{{ $pelatihan->tempat }}</td>
                                 <td>{{ $pelatihan->penyelenggara }}</td>
                                 <td class="text-nowrap">
                                     <a href="{{ route('training.daftarhadirpelatihan.show', $pelatihan->id) }}" class="btn btn-sm btn-primary mb-1">
@@ -57,9 +49,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center fw-bold">Tidak ada pelatihan tersedia.</td>
+                                <td colspan="4" class="text-center fw-bold">Tidak ada pelatihan tersedia.</td>
                             </tr>
                         @endforelse
+
                     </tbody>
                 </table>
             </div>

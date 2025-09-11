@@ -42,14 +42,13 @@
                         <div data-i18n="Surat Tugas Pelatihan">Surat Tugas Pelatihan</div>
                     </a>
                 </li>
-                <!-- ✅ Daftar Hadir -->
                 <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.daftarhadirpelatihan.index') ? 'active' : '' }}">
                     <a href="{{ route('training.daftarhadirpelatihan.index') }}" class="menu-link">
                         <div data-i18n="Daftar Hadir">Daftar Hadir</div>
                     </a>
                 </li>
 
-                <!-- ✅ Evaluation Submenu -->
+                <!-- Evaluation Submenu -->
                 <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasi-level-*') ? 'active open' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <div data-i18n="Evaluation">Evaluation</div>
@@ -70,29 +69,25 @@
                                 <div data-i18n="Evaluation 3 Peserta">Evaluasi Level 3 (Peserta)</div>
                             </a>
                         </li>
-
-                        <!-- ✅ Evaluasi Level 3 Atasan -->
                         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasilevel3.atasan.*') ? 'active' : '' }}">
                             <a href="{{ route('evaluasi-level-3.atasan.index') }}" class="menu-link">
                                 <i class="menu-icon tf-icons bx bx-user-check"></i>
                                 <div data-i18n="Evaluation Atasan">Evaluasi Level 3 (Atasan)</div>
                             </a>
                         </li>
-
-                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation.atasan.index') ? 'active' : '' }}">
-                            <a href="{{ route('training.evaluation.atasan.index') }}" class="menu-link">
-                                <div data-i18n="Evaluation Atasan">Evaluation Atasan</div>
-                            </a>
-                        </li>
-                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation.rekap.index') ? 'active' : '' }}">
-                            <a href="{{ route('training.evaluation.rekap.index') }}" class="menu-link">
-                                <div data-i18n="Rekapitulasi Jam">Rekapitulasi Jam</div>
-                            </a>
-                        </li>
                     </ul>
+                </li>
+
+                <!-- ✅ Pelatihan Log / Rekap (TOP LEVEL UNDER TRAINING) -->
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.pelatihanlog.*') ? 'active' : '' }}">
+                    <a href="{{ route('training.pelatihanlog.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                        <div data-i18n="Pelatihan Log">Pelatihan Log / Rekap</div>
+                    </a>
                 </li>
             </ul>
         </li>
+
 
         <!-- 👇 Knowledge Sharing Menu -->
         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.*') ? 'active open' : '' }}">

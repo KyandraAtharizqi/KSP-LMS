@@ -30,13 +30,11 @@
                 <table class="table table-striped table-bordered">
                     <thead class="table-light">
                         <tr>
-                            <th>Kode Pelatihan</th>
+                            <th>Kode Pelatihan (ID)</th>
                             <th>Nama Pelatihan</th>
-                            <th>Tanggal Pelaksanaan</th>
-                            <th>Tempat</th>
                             <th>Penyelenggara</th>
                             <th>Peserta</th>
-                            <th>Atasan</th>
+                            <th>Atasan (Saat Pengajuan)</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Aksi</th>
                         </tr>
@@ -52,33 +50,11 @@
                                 {{-- For admin: loop every evaluation record that exists --}}
                                 @foreach ($pelatihan->evaluasiLevel1 as $evaluasi)
                                     <tr>
-                                        <td><strong>{{ $pelatihan->kode_pelatihan }}</strong></td>
+                                        <td><strong>{{ $pelatihan->kode_pelatihan }} ({{ $pelatihan->id }})</strong></td>
                                         <td>{{ $pelatihan->judul }}</td>
-                                        <td>
-                                            {{ $pelatihan->tanggal_mulai->format('d M Y') }} -
-                                            {{ $pelatihan->tanggal_selesai->format('d M Y') }}
-                                        </td>
-                                        <td>{{ $pelatihan->tempat }}</td>
                                         <td>{{ $pelatihan->penyelenggara }}</td>
                                         <td>{{ $evaluasi->user->name ?? '-' }}</td>
-
-                                        {{-- ✅ Superior dropdown (admin only) --}}
-                                        <td>
-                                            <form action="{{ route('training.evaluasilevel1.updateSuperior', $evaluasi->id) }}" method="POST">
-                                                @csrf
-                                                @method('PUT')
-                                                <select name="superior_id" class="form-select form-select-sm" onchange="this.form.submit()">
-                                                    <option value="">-- Pilih Atasan --</option>
-                                                    @foreach ($availableSuperiors as $superior)
-                                                        <option value="{{ $superior->id }}"
-                                                            {{ $evaluasi->superior_id == $superior->id ? 'selected' : '' }}>
-                                                            {{ $superior->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </form>
-                                        </td>
-
+                                        <td>{{ $evaluasi->superior?->name ?? '-' }}</td>
                                         <td class="text-center">
                                             @if (!$evaluasi->is_submitted)
                                                 <span class="badge bg-warning text-dark fw-bold">Belum Terkirim</span>
@@ -88,10 +64,12 @@
                                         </td>
                                         <td class="text-center">
                                             @if ($evaluasi->is_submitted)
-                                                <a href="{{ route('training.evaluasilevel1.show', $pelatihan->id) }}" class="btn btn-sm btn-outline-secondary mb-1">
+                                                <a href="{{ route('training.evaluasilevel1.show', ['pelatihan' => $pelatihan->id, 'user' => $evaluasi->user_id]) }}" 
+                                                   class="btn btn-sm btn-outline-secondary mb-1">
                                                     <i class="bx bx-show"></i> Lihat
                                                 </a>
-                                                <a href="{{ route('training.evaluasilevel1.pdf', $pelatihan->id) }}" class="btn btn-sm btn-success mb-1">
+                                                <a href="{{ route('training.evaluasilevel1.pdf', ['pelatihan' => $pelatihan->id, 'user' => $evaluasi->user_id]) }}" 
+                                                   class="btn btn-sm btn-success mb-1">
                                                     <i class="bx bx-download"></i> PDF
                                                 </a>
                                             @else
@@ -109,13 +87,8 @@
 
                                 @if ($evaluasi || $isParticipant)
                                     <tr>
-                                        <td><strong>{{ $pelatihan->kode_pelatihan }}</strong></td>
+                                        <td><strong>{{ $pelatihan->kode_pelatihan }} ({{ $pelatihan->id }})</strong></td>
                                         <td>{{ $pelatihan->judul }}</td>
-                                        <td>
-                                            {{ $pelatihan->tanggal_mulai->format('d M Y') }} -
-                                            {{ $pelatihan->tanggal_selesai->format('d M Y') }}
-                                        </td>
-                                        <td>{{ $pelatihan->tempat }}</td>
                                         <td>{{ $pelatihan->penyelenggara }}</td>
                                         <td>{{ $evaluasi?->user->name ?? $user->name }}</td>
                                         <td>{{ $evaluasi?->superior?->name ?? '-' }}</td>
@@ -137,10 +110,11 @@
                                                         Isi Evaluasi
                                                     </a>
                                                 @elseif ($evaluasi->is_submitted)
-                                                    <a href="{{ route('training.evaluasilevel1.show', $pelatihan->id) }}" class="btn btn-sm btn-outline-secondary mb-1">
+                                                    {{-- FIXED: Always pass user parameter for consistent routing --}}
+                                                    <a href="{{ route('training.evaluasilevel1.show', ['pelatihan' => $pelatihan->id, 'user' => $user->id]) }}" class="btn btn-sm btn-outline-secondary mb-1">
                                                         <i class="bx bx-show"></i> Lihat
                                                     </a>
-                                                    <a href="{{ route('training.evaluasilevel1.pdf', $pelatihan->id) }}" class="btn btn-sm btn-success mb-1">
+                                                    <a href="{{ route('training.evaluasilevel1.pdf', ['pelatihan' => $pelatihan->id, 'user' => $user->id]) }}" class="btn btn-sm btn-success mb-1">
                                                         <i class="bx bx-download"></i> PDF
                                                     </a>
                                                 @endif
@@ -157,7 +131,7 @@
                             @endif
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center">Tidak ada evaluasi tersedia.</td>
+                                <td colspan="7" class="text-center">Tidak ada evaluasi tersedia.</td>
                             </tr>
                         @endforelse
                     </tbody>

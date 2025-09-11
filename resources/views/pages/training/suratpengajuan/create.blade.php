@@ -343,8 +343,7 @@
 
                 <div class="col-md-3 mb-3">
                     <label>Durasi (hari)</label>
-                    <input type="number" id="durasi" class="form-control" min="1" step="1" placeholder="Masukkan durasi dalam hari">
-                    <input type="hidden" name="durasi" id="durasi-hidden">
+                    <input type="number" name="durasi" class="form-control" min="1" step="1" required placeholder="Masukkan durasi dalam hari">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label>Tempat</label>

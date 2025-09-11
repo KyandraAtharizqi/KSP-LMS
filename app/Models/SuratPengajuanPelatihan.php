@@ -29,6 +29,8 @@ class SuratPengajuanPelatihan extends Model
         'per_paket_or_orang',
         'keterangan',
         'tujuan_peserta',
+        'tanggal_pelaksanaan', // ✅ add this
+        'is_accepted',         // ✅ and this too since you just added it
     ];
 
     protected $casts = [

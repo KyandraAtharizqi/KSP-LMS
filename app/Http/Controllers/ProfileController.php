@@ -107,7 +107,7 @@ class ProfileController extends Controller
                 Storage::disk('public')->makeDirectory('profile-pictures');
                 
                 // Buat nama file unik dengan ekstensi aslinya
-                $fileName = uniqid('profile_') . '.' . $file->getClientOriginalExtension();
+                $fileName = $user->registration_id . '.' . $file->getClientOriginalExtension();
                 
                 // Simpan file ke storage dengan nama yang ditentukan
                 $path = $request->file('profile_picture')->storeAs('profile-pictures', $fileName, 'public');

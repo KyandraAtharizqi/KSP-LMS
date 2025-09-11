@@ -15,9 +15,9 @@ class SuratTugasPelatihan extends Model
         'pelatihan_id',
         'kode_pelatihan',
         'judul',
-        'tanggal',
+        'tanggal_mulai',
         'tempat',
-        'tanggal_pelatihan',
+        'tanggal_selesai',
         'durasi',
         'created_by',
         'status',
@@ -27,11 +27,13 @@ class SuratTugasPelatihan extends Model
         'instruksi',
         'hal_perhatian',
         'catatan',
+        'tanggal_pelaksanaan'
     ];
     
     protected $casts = [
-        'tanggal' => 'date',
-        'tanggal_pelatihan' => 'date',
+        'tanggal_selesai' => 'date',
+        'tanggal_mulai' => 'date',
+        'tanggal_pelatihan' => 'array',
         'is_accepted' => 'boolean',
     ];
 

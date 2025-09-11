@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold mb-4">Konfirmasi Persetujuan</h4>
+    <h4 class="fw-bold mb-4">Konfirmasi Persetujuan Surat Tugas</h4>
 
     <div class="card">
         <div class="card-body">
@@ -19,14 +19,23 @@
                 <h5>Detail Surat Tugas</h5>
                 <p><strong>Kode Pelatihan:</strong> {{ $surat->kode_pelatihan ?? '-' }}</p>
                 <p><strong>Judul:</strong> {{ $surat->judul ?? '-' }}</p>
-                <p><strong>Tanggal Pelatihan:</strong>
-                    {{ optional($surat->pelatihan->tanggal_mulai)->format('d M Y') ?? '-' }} s.d.
-                    {{ optional($surat->pelatihan->tanggal_selesai)->format('d M Y') ?? '-' }}
+                <p><strong>Tanggal Mulai:</strong> {{ $surat->tanggal_mulai ? \Carbon\Carbon::parse($surat->tanggal_mulai)->format('d M Y') : '-' }}</p>
+                <p><strong>Tanggal Selesai:</strong> {{ $surat->tanggal_selesai ? \Carbon\Carbon::parse($surat->tanggal_selesai)->format('d M Y') : '-' }}</p>
+                <p><strong>Tanggal Pelaksanaan:</strong>
+                    @if ($surat->tanggal_pelaksanaan)
+                        @foreach (json_decode($surat->tanggal_pelaksanaan, true) as $tgl)
+                            <span class="badge bg-primary">{{ \Carbon\Carbon::parse($tgl)->format('d M Y') }}</span>
+                        @endforeach
+                    @else
+                        -
+                    @endif
                 </p>
+                <p><strong>Durasi:</strong> {{ $surat->durasi ?? '-' }}</p>
+                <p><strong>Tempat:</strong> {{ $surat->tempat ?? '-' }}</p>
             </div>
 
             {{-- Form persetujuan --}}
-            <form action="{{ route('training.surattugas.approve', ['id' => $surat->id, 'approval' => $approval->id]) }}" method="POST">
+            <form action="{{ route('training.surattugas.approve', [$surat->id, $approval->id]) }}" method="POST">
                 @csrf
                 <div class="d-flex justify-content-end">
                     <a href="{{ route('training.surattugas.index') }}" class="btn btn-secondary me-2">Batal</a>
@@ -35,6 +44,7 @@
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>

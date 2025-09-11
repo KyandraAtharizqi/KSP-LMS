@@ -391,21 +391,30 @@
 
 <!-- Adjusted Edit Modal -->
 <div class="modal fade" id="editModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <form class="modal-content" method="post" action="">
             @csrf @method('PUT')
             <div class="modal-header">
                 <h5 class="modal-title">Edit Pengguna</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
                 <input type="hidden" name="id" id="id">
+
+                {{-- ================= PROFILE (not recorded in history) ================= --}}
+                <h6 class="fw-bold text-primary mb-2">👤 Informasi Umum</h6>
                 <x-input-form name="name" label="Nama" />
                 <x-input-form name="registration_id" label="Registration ID" />
                 <x-input-form name="email" label="Email" type="email" />
                 <x-input-form name="phone" label="Phone" />
                 <x-input-form name="nik" label="NIK" />
                 <x-input-form name="address" label="Alamat" type="textarea" />
+
+                <hr class="my-3">
+
+                {{-- ================= POSITION (logged in UserPositionHistory) ================= --}}
+                <h6 class="fw-bold text-success mb-2">🏢 Posisi & Struktur Organisasi</h6>
                 <x-input-form name="superior_registration_id" label="Superior Registration ID" />
                 <x-select-form name="jabatan_id" label="Jabatan" :options="$jabatans" id="jabatan_id" />
                 <x-input-form name="jabatan_full" label="Jabatan Lengkap (jika ada)" id="jabatan_full" />
@@ -415,12 +424,19 @@
                 <x-input-form name="golongan" label="Golongan (opsional)" id="golongan" />
                 <x-input-form name="effective_date" label="Tanggal Efektif Posisi" type="date" />
 
+                <hr class="my-3">
+
+                {{-- ================= SYSTEM & ROLE (not recorded in history) ================= --}}
+                <h6 class="fw-bold text-warning mb-2">⚙️ Pengaturan Sistem</h6>
                 @if(auth()->user()->role === \App\Enums\Role::ADMIN)
-                    <select name="role" class="form-select mt-2">
-                        @foreach ($roles as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
+                    <div class="mb-2">
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select">
+                            @foreach ($roles as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 @endif
 
                 <div class="form-check mt-2">
@@ -432,6 +448,7 @@
                     <label class="form-check-label" for="reset_password">Reset Password</label>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
                 <button type="submit" class="btn btn-primary">Perbarui</button>

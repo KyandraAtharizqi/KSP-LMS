@@ -30,6 +30,11 @@ use App\Http\Controllers\EvaluasiLevel1Controller;
 use App\Http\Controllers\EvaluasiLevel3PesertaController;
 use App\Http\Controllers\EvaluasiLevel3AtasanController;
 
+
+use App\Http\Controllers\PelatihanLogController;
+
+
+
 use App\Http\Controllers\TrainingEvaluation2Controller;
 use App\Http\Controllers\TrainingEvaluationAtasanController;
 use App\Http\Controllers\TrainingEvaluationRekapController;
@@ -206,7 +211,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Assign signers/parafs
         Route::get('/{id}/assign', [SuratTugasPelatihanController::class, 'assignView'])->name('assign.view');
-        Route::post('/assign',     [SuratTugasPelatihanController::class, 'assignSave'])->name('assign.submit');
+        Route::post('/{id}/assign',     [SuratTugasPelatihanController::class, 'assignSave'])->name('assign.submit');
 
         // Approve / reject
         Route::get('/{id}/approve/{approval}', [SuratTugasPelatihanController::class, 'approveView'])->name('approve.view');
@@ -229,6 +234,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{pelatihan}', [DaftarHadirPelatihanController::class, 'show'])
             ->whereNumber('pelatihan')
             ->name('show');
+       
+        Route::post('/{pelatihan}/add-day', [DaftarHadirPelatihanController::class, 'addDay'])
+            ->name('addDay');
+
+        Route::delete('/{pelatihan}/remove-day/{statusId}', [DaftarHadirPelatihanController::class, 'removeDay'])->name('removeDay');
+
+
 
         // View daftar hadir for a specific day
         Route::get('/{pelatihan}/day/{date}', [DaftarHadirPelatihanController::class, 'day'])
@@ -271,13 +283,14 @@ Route::middleware(['auth'])->group(function () {
         | Placeholder routes – implement controllers as needed.
         |--------------------------------------------------------------------------
         */
-
         Route::prefix('training/evaluasi-level-1')->as('training.evaluasilevel1.')->group(function () {
             Route::get('/', [EvaluasiLevel1Controller::class, 'index'])->name('index');
             Route::get('/{pelatihan}/create', [EvaluasiLevel1Controller::class, 'create'])->name('create');
             Route::post('/{pelatihan}', [EvaluasiLevel1Controller::class, 'store'])->name('store');
-            Route::get('/{pelatihan}/show', [EvaluasiLevel1Controller::class, 'show'])->name('show');
-            Route::get('/{pelatihan}/pdf', [EvaluasiLevel1Controller::class, 'pdfView'])->name('pdf');
+            Route::get('/{pelatihan}/{user?}/pdf', [EvaluasiLevel1Controller::class, 'pdfView'])->name('pdf');
+            Route::get('/{pelatihan}/{user?}', [EvaluasiLevel1Controller::class, 'show'])->name('show');
+            
+        
 
             // ✅ Only this part changes
             Route::put('/{evaluasi}/update-superior', [EvaluasiLevel1Controller::class, 'updateSuperior'])
@@ -329,6 +342,23 @@ Route::middleware(['auth'])->group(function () {
         // Rekapitulasi Jam (hours accumulation / summary across trainings)
         Route::prefix('training/evaluation/rekap')->as('training.evaluation.rekap.')->group(function () {
             Route::get('/', [TrainingEvaluationRekapController::class, 'index'])->name('index');
+        });
+
+
+
+        // Pelatihan Log (audit trail / history of changes)
+        Route::prefix('training/pelatihan-log')->as('training.pelatihanlog.')->group(function () {
+            // Detailed log
+            Route::get('/', [PelatihanLogController::class, 'index'])->name('index');
+
+            // Summarized rekap (with pengajuan/current choice)
+            Route::get('/rekap', [PelatihanLogController::class, 'rekap'])->name('rekap');
+
+            // (Optional) individual detail view
+            Route::get('/{pelatihan}/show', [PelatihanLogController::class, 'show'])->name('show');
+
+            // (Optional) export (Excel/PDF)
+            Route::get('/{pelatihan}/export', [PelatihanLogController::class, 'export'])->name('export');
         });
 
     

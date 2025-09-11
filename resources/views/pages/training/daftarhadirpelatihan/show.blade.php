@@ -6,6 +6,21 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold mb-4">Daftar Hadir Pelatihan - {{ $pelatihan->judul }}</h4>
 
+    <!-- Alert Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <!-- Pelatihan Info -->
     <div class="card mb-3">
         <div class="card-header">
@@ -30,6 +45,30 @@
         </div>
     </div>
 
+    <!-- Add Date Form -->
+    @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'department_admin' && optional(auth()->user()->department)->name === 'Human Capital'))
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Tambah Tanggal Daftar Hadir</h5>
+            <form method="POST" action="{{ route('training.daftarhadirpelatihan.addDay', $pelatihan->id) }}" class="d-flex align-items-center gap-2 mb-0">
+                @csrf
+                <input type="date" 
+                       class="form-control form-control-sm @error('date') is-invalid @enderror" 
+                       id="date" 
+                       name="date" 
+                       value="{{ old('date') }}"
+                       required>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bx bx-plus"></i> Tambah
+                </button>
+                @error('date')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </form>
+        </div>
+    </div>
+    @endif
+
     <!-- Attendance Days -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -44,28 +83,34 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="fw-bold">Tanggal</th>
-                            <th class="fw-bold">Presenter Internal</th>
-                            <th class="fw-bold">Presenter Eksternal</th>
-                            <th class="fw-bold">Status</th>
-                            <th class="fw-bold text-nowrap">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pelatihan->daftarHadirStatus as $status)
+            @if($pelatihan->daftarHadirStatus->isEmpty())
+                <div class="text-center py-4">
+                    <i class="bx bx-calendar-x display-1 text-muted"></i>
+                    <h5 class="mt-3 text-muted">Belum ada tanggal daftar hadir</h5>
+                    <p class="text-muted">Tambahkan tanggal menggunakan form di atas untuk mulai mengelola kehadiran.</p>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <td>{{ $status->formattedDate() }}</td>
+                                <th class="fw-bold">Tanggal</th>
+                                <th class="fw-bold">Presenter Internal</th>
+                                <th class="fw-bold">Presenter Eksternal</th>
+                                <th class="fw-bold">Status</th>
+                                <th class="fw-bold text-nowrap">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($pelatihan->daftarHadirStatus->sortBy('date') as $day)
+                            <tr>
+                                <td>{{ $day->formattedDate() }}</td>
 
-                                {{-- Internal Presenters --}}
                                 <td>
                                     @php
-                                        $internal = $pelatihan->presenters()
+                                        $internal = $day->presenters()
                                             ->where('type', 'internal')
-                                            ->where('date', $status->date->toDateString())
+                                            ->whereDate('date', $day->date->toDateString())
                                             ->with('user')
                                             ->get();
                                     @endphp
@@ -80,12 +125,11 @@
                                     @endif
                                 </td>
 
-                                {{-- External Presenters --}}
                                 <td>
                                     @php
-                                        $external = $pelatihan->presenters()
+                                        $external = $day->presenters()
                                             ->where('type', 'external')
-                                            ->where('date', $status->date->toDateString())
+                                            ->whereDate('date', $day->date->toDateString())
                                             ->with('presenter')
                                             ->get();
                                     @endphp
@@ -100,56 +144,52 @@
                                     @endif
                                 </td>
 
-                                {{-- Status --}}
                                 <td>
-                                    <span class="badge bg-{{ $status->is_submitted ? 'success' : 'warning' }}">
-                                        {{ $status->submittedLabel() }}
+                                    <span class="badge bg-{{ $day->is_submitted ? 'success' : 'warning' }}">
+                                        {{ $day->submittedLabel() }}
                                     </span>
                                 </td>
 
-                                {{-- Action --}}
                                 <td class="text-nowrap">
-                                    @php
-                                        $submitted = \App\Models\PelatihanPresenter::where('pelatihan_id', $pelatihan->id)
-                                            ->whereDate('date', $status->date->toDateString())
-                                            ->where('is_submitted', true)
-                                            ->exists();
-                                    @endphp
-
-                                    @if($submitted)
-                                        {{-- Preview --}}
-                                        <a href="{{ route('training.daftarhadirpelatihan.preview', [$pelatihan->id, $status->date->toDateString()]) }}" 
+                                    @if($day->is_submitted)
+                                        <a href="{{ route('training.daftarhadirpelatihan.preview', [$pelatihan->id, $day->date->toDateString()]) }}" 
                                         class="btn btn-sm btn-info mb-1" target="_blank">
                                             <i class="bx bx-show"></i> Preview
                                         </a>
-
-                                        {{-- Download --}}
-                                        <a href="{{ route('training.daftarhadirpelatihan.download', [$pelatihan->id, $status->date->toDateString()]) }}" 
+                                        <a href="{{ route('training.daftarhadirpelatihan.download', [$pelatihan->id, $day->date->toDateString()]) }}" 
                                         class="btn btn-sm btn-success mb-1" target="_blank">
                                             <i class="bx bx-download"></i> Download
                                         </a>
-
-                                        {{-- Kelola Kehadiran (after Download) --}}
-                                        <a href="{{ route('training.daftarhadirpelatihan.day', [$pelatihan->id, $status->date->toDateString()]) }}" 
+                                        <a href="{{ route('training.daftarhadirpelatihan.day', [$pelatihan->id, $day->date->toDateString()]) }}" 
                                         class="btn btn-sm btn-primary mb-1">
                                             <i class="bx bx-list-check"></i> Kelola Kehadiran
                                         </a>
                                     @else
-                                        <button class="btn btn-sm btn-secondary" disabled>
-                                            <i class="bx bx-time-five"></i> Menunggu Submit Presenter
-                                        </button>
+                                        <a href="{{ route('training.daftarhadirpelatihan.day', [$pelatihan->id, $day->date->toDateString()]) }}" 
+                                        class="btn btn-sm btn-primary mb-1">
+                                            <i class="bx bx-list-check"></i> Kelola Kehadiran
+                                        </a>
+                                        
+                                        @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'department_admin' && optional(auth()->user()->department)->name === 'Human Capital'))
+                                            <form method="POST" 
+                                                  action="{{ route('training.daftarhadirpelatihan.removeDay', [$pelatihan->id, $day->id]) }}" 
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus tanggal {{ $day->formattedDate() }}? Data kehadiran pada tanggal ini akan hilang.')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger mb-1">
+                                                    <i class="bx bx-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </td>
-
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center fw-bold">Belum ada daftar hadir.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 </div>

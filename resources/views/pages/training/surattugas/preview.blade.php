@@ -103,16 +103,40 @@
                 <tr>
                     <td><strong>Nama Instruktur / Lembaga</strong></td>
                     <td>{{ $surat->pelatihan?->penyelenggara ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Hari, Tanggal Pelaksanaan Pelatihan</strong></td>
-                    <td>
-                        {{ $surat->pelatihan?->tanggal_mulai?->format('l, d F Y') ?? $surat->tanggal?->format('l, d F Y') }}
-                        s.d.
-                        {{ $surat->pelatihan?->tanggal_selesai?->format('l, d F Y') ?? '-' }}
-                    </td>
-                </tr>
-                <tr>
+                    <tr>
+                        <td><strong>Tanggal Mulai</strong></td>
+                        <td>
+                            {{ $surat->pelatihan?->tanggal_mulai?->translatedFormat('l, d F Y') ?? '-' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tanggal Selesai</strong></td>
+                        <td>
+                            {{ $surat->pelatihan?->tanggal_selesai?->translatedFormat('l, d F Y') ?? '-' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rincian Hari/Tanggal Pelaksanaan</strong></td>
+                        <td>
+                            @php
+                                $pelaksanaan = $surat->pelatihan?->tanggal_pelaksanaan;
+                                if (is_string($pelaksanaan)) {
+                                    $pelaksanaan = json_decode($pelaksanaan, true);
+                                }
+                            @endphp
+
+                            @if (!empty($pelaksanaan))
+                                <ul class="mb-0 ps-3">
+                                    @foreach ($pelaksanaan as $tgl)
+                                        <li>{{ \Carbon\Carbon::parse($tgl)->translatedFormat('l, d F Y') }}</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                -
+                            @endif
+                        </td>
+                    </tr>
+
                     <td><strong>Tempat Pelaksanaan Pelatihan</strong></td>
                     <td>{{ $surat->tempat }}</td>
                 </tr>
@@ -148,8 +172,6 @@
                 </div>
 
                 <div class="col-5 text-center">
-                    <p>Cilegon, {{ $surat->tanggal?->format('d F Y') }}</p>
-
                     @php
                         // Load all signature & paraf file paths once
                         $sapMap = DB::table('signature_and_parafs')
@@ -157,10 +179,33 @@
                             ->get()
                             ->keyBy('registration_id');
 
-                        $parafs = $surat->signaturesAndParafs->where('type', 'paraf')->sortBy('sequence');
-                        $signatures = $surat->signaturesAndParafs->where('type', 'signature')->sortBy('sequence');
+                        // Get the latest round
+                        $latestRound = $surat->signaturesAndParafs->max('round') ?? 1;
+
+                        // Filter by the latest round
+                        $parafs = $surat->signaturesAndParafs
+                            ->where('type', 'paraf')
+                            ->where('round', $latestRound)
+                            ->sortBy('sequence');
+                            
+                        $signatures = $surat->signaturesAndParafs
+                            ->where('type', 'signature')
+                            ->where('round', $latestRound)
+                            ->sortBy('sequence');
+                            
+                        // Get the latest signature's date
+                        $latestApprovedSignature = $signatures
+                            ->where('status', 'approved')
+                            ->sortByDesc('signed_at')
+                            ->first();
+                        
+                        $documentDate = $latestApprovedSignature && $latestApprovedSignature->signed_at 
+                            ? $latestApprovedSignature->signed_at
+                            : ($surat->tanggal ?? now());
                     @endphp
 
+                    <p>Cilegon, {{ $documentDate->format('d F Y') }}</p>
+                    
                     {{-- Tampilkan Paraf --}}
                     @foreach ($parafs as $paraf)
                         @php

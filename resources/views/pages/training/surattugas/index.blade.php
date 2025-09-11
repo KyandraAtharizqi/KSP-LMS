@@ -50,117 +50,147 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($suratTugasList as $surat)
+                        @forelse ($suratList as $surat)
                             @php
                                 $user = auth()->user();
                                 $canAssign = $user->role === 'admin' || $user->role === 'department_admin';
 
-                                // Use approvals (same as pengajuan page style)
-                                $allApprovals = $surat->approvals;
+                                // detect model type
+                                $isTugas = $surat instanceof \App\Models\SuratTugasPelatihan;
+                                $tugas = $isTugas ? $surat : $surat->suratTugas;
+                                $pengajuan = $isTugas ? $surat->pelatihan : $surat;
 
-                                $latestRound = $allApprovals->max('round');
-                                $ditolakInLatestRound = $allApprovals
-                                    ->where('round', $latestRound)
-                                    ->contains(fn($step) => $step->status === 'rejected');
+                                $allApprovals = $tugas?->signaturesAndParafs ?? collect();
+                                $latestRound = $allApprovals->max('round') ?? 1;
+                                $latestApprovals = $allApprovals->where('round', $latestRound);
 
-                                $approvalNeeded = ($allApprovals->isEmpty() || $ditolakInLatestRound) && !$surat->is_accepted;
+                                // approvalNeeded now only cares about the latest round
+                                $approvalNeeded = !$tugas || $latestApprovals->where('status', 'rejected')->isNotEmpty();
 
-                                $latestRound = $allApprovals->max('round');
-
-                                $activeStep = $allApprovals
-                                    ->where('round', $latestRound)
+                                // active step for this user (latest round only)
+                                $activeStep = $latestApprovals
                                     ->sortBy('sequence')
                                     ->first(fn($step) => $step->status === 'pending');
 
                                 $currentApproval = ($activeStep && $activeStep->user_id == $user->id) ? $activeStep : null;
-
                             @endphp
+
                             <tr>
-                                <td>{{ $surat->pelatihan?->kode_pelatihan ?? '-' }}</td>
-                                <td>{{ $surat->judul }}</td>
+                                <td>{{ $pengajuan->kode_pelatihan }} ({{ $pengajuan->id }})</td>
+                                <td>{{ $pengajuan->judul }}</td>
                                 <td>
-                                    {{ $surat->pelatihan?->tanggal_mulai?->format('d M Y') ?? '-' }}
-                                    s.d.
-                                    {{ $surat->pelatihan?->tanggal_selesai?->format('d M Y') ?? '-' }}
+                                    @if ($tugas)
+                                        {{ $tugas->tanggal_mulai?->format('d M Y') ?? '-' }}
+                                        s.d
+                                        {{ $tugas->tanggal_selesai?->format('d M Y') ?? '-' }}
+                                    @else
+                                        -
+                                    @endif
                                 </td>
-                                <td>{{ $surat->pelatihan?->durasi ?? '-' }} hari</td>
-                                <td>{{ $surat->tempat }}</td>
+                                <td>{{ $tugas?->durasi ?? '-' }}</td>
+                                <td>{{ $tugas?->tempat ?? '-' }}</td>
                                 <td>
-                                    @if ($surat->is_accepted)
+                                    @if (!$tugas)
+                                        <span class="badge bg-secondary fw-bold">Belum Ditugaskan</span>
+                                    @elseif ($tugas->is_accepted)
                                         <span class="badge bg-success fw-bold">Selesai</span>
-                                    @elseif ($ditolakInLatestRound)
+                                    @elseif ($latestApprovals->where('status','rejected')->isNotEmpty())
                                         <span class="badge bg-danger fw-bold">Ditolak</span>
                                     @elseif ($approvalNeeded)
                                         <span class="badge bg-secondary fw-bold">Belum Ditugaskan</span>
                                     @else
-                                    <span class="badge bg-warning text-dark fw-bold">Dalam Proses</span>
+                                        <span class="badge bg-warning text-dark fw-bold">Dalam Proses</span>
                                     @endif
                                 </td>
-                                <td>{{ $surat->creator?->name ?? '-' }}</td>
+                                <td>{{ $pengajuan->creator?->name ?? '-' }}</td>
                                 <td class="text-nowrap">
-                                    <a href="{{ route('training.surattugas.preview', $surat->id) }}" class="btn btn-sm btn-primary mb-1">
+                                    {{-- Preview --}}
+                                    <a href="{{ route('training.surattugas.preview', $tugas->id) }}" class="btn btn-sm btn-primary mb-1">
                                         <i class="bx bx-show"></i> Preview
                                     </a>
 
-                                    @if ($surat->is_accepted)
-                                        <a href="{{ route('training.surattugas.download', $surat->id) }}" class="btn btn-sm btn-success mb-1">
+                                    {{-- Download --}}
+                                    @if ($tugas && $tugas->is_accepted)
+                                        <a href="{{ route('training.surattugas.download', $pengajuan->id) }}" class="btn btn-sm btn-success mb-1">
                                             <i class="bx bx-download"></i> Download
                                         </a>
-
-                                        {{-- Move Lihat Status AFTER Download --}}
-                                        <button
-                                            class="btn btn-sm btn-outline-secondary mb-1"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#trackerModal-{{ $surat->id }}">
-                                            🔍 Lihat Status
-                                        </button>
-                                    @else
-                                        @if ($approvalNeeded && $canAssign)
-                                            <a href="{{ route('training.surattugas.assign.view', $surat->id) }}" class="btn btn-sm btn-info mb-1">
-                                                <i class="bx bx-user-plus"></i> Assign
-                                            </a>
-                                        @endif
-
-                                        @if ($currentApproval)
-                                            <div class="btn-group btn-group-sm ms-1" role="group">
-                                                <a href="{{ route('training.surattugas.approve.view', [$surat->id, $currentApproval->id]) }}" class="btn btn-success mb-1">
-                                                    <i class="bx bx-check"></i> Approve
-                                                </a>
-                                                <a href="{{ route('training.surattugas.reject.view', [$surat->id, $currentApproval->id]) }}" class="btn btn-danger mb-1">
-                                                    <i class="bx bx-x"></i> Reject
-                                                </a>
-                                            </div>
-                                        @endif
-
-                                        {{-- Show Lihat Status after all other actions --}}
-                                        <button
-                                            class="btn btn-sm btn-outline-secondary mb-1"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#trackerModal-{{ $surat->id }}">
-                                            🔍 Lihat Status
-                                        </button>
                                     @endif
-                                </td>
 
+                                    {{-- Assign --}}
+                                    @if ($approvalNeeded && $canAssign)
+                                        <a href="{{ route('training.surattugas.assign.view', $pengajuan->id) }}" class="btn btn-sm btn-info mb-1">
+                                            <i class="bx bx-user-plus"></i> Assign
+                                        </a>
+                                    @endif
+
+                                    {{-- Approve / Reject --}}
+                                    {{-- Approve / Reject --}}
+                                    @if ($currentApproval)
+                                        <div class="btn-group btn-group-sm mb-1" role="group">
+                                            <a href="{{ route('training.surattugas.approve.view', [$tugas->id, $currentApproval->id]) }}" class="btn btn-success">
+                                                <i class="bx bx-check"></i> Approve
+                                            </a>
+                                            <a href="{{ route('training.surattugas.reject.view', [$tugas->id, $currentApproval->id]) }}" class="btn btn-danger">
+                                                <i class="bx bx-x"></i> Reject
+                                            </a>
+                                        </div>
+                                    @endif
+
+
+                                    {{-- Tracker / History --}}
+                                    <button
+                                        class="btn btn-sm btn-outline-secondary mb-1"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#trackerModal-{{ $pengajuan->id }}">
+                                        🔍 Lihat Status
+                                    </button>
+                                </td>
                             </tr>
 
-                            {{-- Tracker / History modal (pengajuan style) --}}
-                            <div class="modal fade" id="trackerModal-{{ $surat->id }}" tabindex="-1" aria-labelledby="trackerLabel-{{ $surat->id }}" aria-hidden="true">
+                            {{-- Tracker modal --}}
+                            <div class="modal fade" id="trackerModal-{{ $pengajuan->id }}" tabindex="-1" aria-labelledby="trackerLabel-{{ $pengajuan->id }}" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-dialog-scrollable">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="trackerLabel-{{ $surat->id }}">📋 Riwayat Persetujuan - {{ $surat->pelatihan?->kode_pelatihan ?? $surat->kode_pelatihan }}</h5>
+                                            <h5 class="modal-title" id="trackerLabel-{{ $pengajuan->id }}">
+                                                📋 Riwayat Persetujuan - {{ $pengajuan->kode_pelatihan }} ({{ $pengajuan->id }})
+                                            </h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{-- summary line using model helper, mirroring pengajuan --}}
-                                            @php $summary = $surat->getApprovalStatus(); @endphp
+                                            @php 
+                                                $summary = [];
+                                                if ($tugas) {
+                                                    $latestRound = $allApprovals->max('round') ?? 1;
+                                                    $currentRoundSteps = $allApprovals->where('round', $latestRound);
+
+                                                    if ($currentRoundSteps->where('status', 'rejected')->isNotEmpty()) {
+                                                        $rejected = $currentRoundSteps->firstWhere('status', 'rejected');
+                                                        $summary = [
+                                                            'status' => 'rejected',
+                                                            'message' => "❌ Ditolak oleh {$rejected->user->name}",
+                                                            'reason'  => $rejected->rejection_reason ?? '-',
+                                                        ];
+                                                    } elseif ($currentRoundSteps->where('status','pending')->isNotEmpty()) {
+                                                        $next = $currentRoundSteps->where('status','pending')->sortBy('sequence')->first();
+                                                        $summary = [
+                                                            'status' => 'in_approval',
+                                                            'message' => "⏳ Menunggu persetujuan dari {$next->user->name}",
+                                                        ];
+                                                    } else {
+                                                        $summary = [
+                                                            'status' => 'approved',
+                                                            'message' => '✅ Disetujui sepenuhnya',
+                                                        ];
+                                                    }
+                                                }
+                                            @endphp
                                             <div class="alert
                                                 @if(($summary['status'] ?? '') === 'approved') alert-success
                                                 @elseif(($summary['status'] ?? '') === 'rejected') alert-danger
                                                 @elseif(($summary['status'] ?? '') === 'in_approval') alert-warning
                                                 @else alert-secondary @endif">
-                                                {{ $summary['message'] ?? 'Status tidak tersedia' }}
+                                                {{ $summary['message'] ?? 'Belum ada status' }}
                                                 @isset($summary['reason'])
                                                     <br><small>Alasan: {{ $summary['reason'] }}</small>
                                                 @endisset
@@ -169,38 +199,36 @@
                                             @if ($allApprovals->isEmpty())
                                                 <p class="text-muted">Belum ada riwayat persetujuan.</p>
                                             @else
-                                                <ul class="list-group">
-                                                    @foreach ($allApprovals->sortBy([['round','asc'],['sequence','asc']]) as $step)
-                                                        <li class="list-group-item d-flex justify-content-between align-items-start">
-                                                            <div class="ms-2 me-auto">
-                                                                <div>
-                                                                    <strong>
-                                                                        {{ ucfirst($step->type) }} -
-                                                                        {{ $step->user->name ?? '-' }}
-                                                                        ({{ $step->user->registration_id ?? '-' }},
-                                                                        {{ $step->user->jabatan_full ?? '-' }})
-                                                                    </strong>
+                                                @foreach ($allApprovals->groupBy('round') as $round => $steps)
+                                                    <h6 class="mt-3">Round {{ $round }}</h6>
+                                                    <ul class="list-group mb-3">
+                                                        @foreach ($steps->sortBy('sequence') as $step)
+                                                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                                                <div class="ms-2 me-auto">
+                                                                    <div>
+                                                                        <strong>
+                                                                            {{ ucfirst($step->type) }} - {{ $step->user->name ?? '-' }}
+                                                                            ({{ $step->user->registration_id ?? '-' }}, {{ $step->user->jabatan_full ?? '-' }})
+                                                                        </strong>
+                                                                    </div>
+                                                                    <small>Step {{ $step->sequence }}</small><br>
+                                                                    @if ($step->status === 'approved')
+                                                                        <span class="badge bg-success">
+                                                                            ✅ Disetujui - {{ $step->signed_at?->format('d M Y H:i') ?? ($step->updated_at?->format('d M Y H:i') ?? '-') }}
+                                                                        </span>
+                                                                    @elseif ($step->status === 'rejected')
+                                                                        <span class="badge bg-danger">
+                                                                            ❌ Ditolak - {{ $step->signed_at?->format('d M Y H:i') ?? ($step->updated_at?->format('d M Y H:i') ?? '-') }}
+                                                                        </span>
+                                                                        <br><small>Alasan: {{ $step->rejection_reason ?? '-' }}</small>
+                                                                    @else
+                                                                        <span class="badge bg-secondary">⏳ Menunggu Tindakan</span>
+                                                                    @endif
                                                                 </div>
-                                                                <small>Round {{ $step->round }}, Step {{ $step->sequence }}</small><br>
-
-                                                                @if ($step->status === 'approved')
-                                                                    <span class="badge bg-success">
-                                                                        ✅ Disetujui -
-                                                                        {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : ($step->updated_at?->format('d M Y H:i') ?? '-') }}
-                                                                    </span>
-                                                                @elseif ($step->status === 'rejected')
-                                                                    <span class="badge bg-danger">
-                                                                        ❌ Ditolak -
-                                                                        {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : ($step->updated_at?->format('d M Y H:i') ?? '-') }}
-                                                                    </span><br>
-                                                                    <small>Alasan: {{ $step->rejection_reason ?? '-' }}</small>
-                                                                @else
-                                                                    <span class="badge bg-secondary">⏳ Menunggu Tindakan</span>
-                                                                @endif
-                                                            </div>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @endforeach
                                             @endif
                                         </div>
                                         <div class="modal-footer">

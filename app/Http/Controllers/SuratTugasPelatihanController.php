@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SuratPengajuanPelatihan;
 use App\Models\SuratTugasPelatihan;
 use App\Models\SuratTugasPelatihanSignatureAndParaf;
 use App\Models\SignatureAndParaf;
 use App\Models\User;
-use App\Models\DaftarHadirPelatihanStatus; // NEW
+use App\Models\DaftarHadirPelatihanStatus;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,13 +23,6 @@ class SuratTugasPelatihanController extends Controller
      |  ACCESS HELPERS
      | -----------------------------------------------------------------*/
 
-    /**
-     * Global "list area" access: can see ALL Surat Tugas entries.
-     *
-     * - role = admin
-     * - OR user ID in config('training.signature_users')
-     * - OR role = department_admin AND department name = "Human Capital"
-     */
     protected function userCanAccessListArea(User $user): bool
     {
         if ($user->role === 'admin') {
@@ -50,15 +44,6 @@ class SuratTugasPelatihanController extends Controller
         return false;
     }
 
-    /**
-     * Document-level access: can this user view THIS Surat Tugas?
-     *
-     * Allowed if:
-     * - user has global list access, OR
-     * - user is the surat creator, OR
-     * - user is assigned as paraf/signature, OR
-     * - user is a participant in the related pelatihan.
-     */
     protected function userCanViewSurat(User $user, SuratTugasPelatihan $surat): bool
     {
         if ($this->userCanAccessListArea($user)) {
@@ -69,7 +54,6 @@ class SuratTugasPelatihanController extends Controller
             return true;
         }
 
-        // ensure relation loaded; if not, lazy-load
         if (!$surat->relationLoaded('signaturesAndParafs')) {
             $surat->load('signaturesAndParafs');
         }
@@ -94,50 +78,67 @@ class SuratTugasPelatihanController extends Controller
      |  INDEX
      | -----------------------------------------------------------------*/
 
-    /**
-     * List Surat Tugas Pelatihan.
-     *
-     * Global users see all records.
-     * Ordinary users see only surat where they are creator, paraf/sign, or participant.
-     */
     public function index(Request $request): View
     {
         $user = Auth::user();
 
-        $query = SuratTugasPelatihan::query()
-            ->with(['creator', 'signaturesAndParafs.user', 'pelatihan']);
+        // case 1: surat tugas already exists
+        $tugasQuery = SuratTugasPelatihan::query()
+            ->with([
+                'creator',
+                'pelatihan.participants.user',
+                'signaturesAndParafs.user',
+            ]);
 
-        // Restrict visibility for ordinary users
+        // case 2: belum ada surat tugas, tapi pengajuan sudah diterima
+        $pengajuanQuery = SuratPengajuanPelatihan::query()
+            ->with([
+                'creator',
+                'participants.user',
+                'signatures.user',
+            ])
+            ->where('is_accepted', 1)
+            ->whereDoesntHave('suratTugas'); // belum dibuatkan surat tugas
+
         if (!$this->userCanAccessListArea($user)) {
-            $query->where(function ($q) use ($user) {
+            $tugasQuery->where(function ($q) use ($user) {
                 $q->where('created_by', $user->id)
-                ->orWhereHas('signaturesAndParafs', function ($sq) use ($user) {
-                    $sq->where('user_id', $user->id);
-                })
-                ->orWhereHas('pelatihan.participants', function ($pq) use ($user) {
-                    $pq->where('user_id', $user->id);
-                });
+                ->orWhereHas('signaturesAndParafs', fn($sq) => $sq->where('user_id', $user->id))
+                ->orWhereHas('pelatihan.participants', fn($pq) => $pq->where('user_id', $user->id));
+            });
+
+            $pengajuanQuery->where(function ($q) use ($user) {
+                $q->where('created_by', $user->id)
+                ->orWhereHas('signatures', fn($sq) => $sq->where('user_id', $user->id))
+                ->orWhereHas('participants', fn($pq) => $pq->where('user_id', $user->id));
             });
         }
 
-        // Search by judul or kode pelatihan (local fields or related pelatihan)
         if ($search = trim($request->q ?? '')) {
-            $query->where(function ($q) use ($search) {
+            $tugasQuery->where(function ($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
-                ->orWhere('kode_pelatihan', 'like', "%{$search}%")
-                ->orWhereHas('pelatihan', function ($pel) use ($search) {
-                    $pel->where('kode_pelatihan', 'like', "%{$search}%")
-                        ->orWhere('judul', 'like', "%{$search}%");
-                });
+                ->orWhere('kode_pelatihan', 'like', "%{$search}%");
+            });
+
+            $pengajuanQuery->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                ->orWhere('kode_pelatihan', 'like', "%{$search}%");
             });
         }
 
-        $suratTugasList = $query->latest()->get();
+        $suratTugasList = $tugasQuery->latest()->get();
+        $suratPengajuanList = $pengajuanQuery->latest()->get();
+
+        // gabung dua koleksi
+        $allSurat = $suratTugasList->merge($suratPengajuanList);
+
         $users = User::orderBy('name')->get();
 
-        return view('pages.training.surattugas.index', compact('suratTugasList', 'users'));
+        return view('pages.training.surattugas.index', [
+            'suratList' => $allSurat,
+            'users' => $users,
+        ]);
     }
-
 
     /* -----------------------------------------------------------------
      |  PREVIEW
@@ -158,7 +159,6 @@ class SuratTugasPelatihanController extends Controller
             return $this->denyAccessRedirect();
         }
 
-        // Build map of available signature/paraf images
         $regIds = collect()
             ->merge($surat->signaturesAndParafs->pluck('user.registration_id')->filter());
 
@@ -176,41 +176,84 @@ class SuratTugasPelatihanController extends Controller
     }
 
     /* -----------------------------------------------------------------
-     |  ASSIGN (Privileged Only)
+     |  ASSIGN
      | -----------------------------------------------------------------*/
 
     public function assignView($id): View|RedirectResponse
     {
-        $suratTugas = SuratTugasPelatihan::with(['pelatihan', 'signaturesAndParafs'])->findOrFail($id);
-        $user = Auth::user();
+        $suratTugas = SuratTugasPelatihan::with(['pelatihan', 'signaturesAndParafs.user'])->find($id);
 
+        if (!$suratTugas) {
+            $suratPengajuan = SuratPengajuanPelatihan::findOrFail($id);
+        } else {
+            $suratPengajuan = $suratTugas->pelatihan;
+        }
+
+        $user = Auth::user();
         if (!$this->userCanAssign($user)) {
             return $this->denyAccessRedirect();
         }
 
-        // latest rejection info
-        $latestRejection = $suratTugas->signaturesAndParafs()
+        $latestRejection = $suratTugas?->signaturesAndParafs()
             ->where('status', 'rejected')
             ->latest('updated_at')
             ->first();
 
         $users = $this->getAssignableUsers();
 
-        return view('pages.training.surattugas.assign', compact('suratTugas', 'users', 'latestRejection'));
+        $existingSuratTugas = $suratTugas;
+        $existingParafs = $suratTugas
+            ? $suratTugas->signaturesAndParafs
+                ->where('type', 'paraf')
+                ->map(fn($p) => [
+                    'id' => $p->user_id,
+                    'name' => $p->user->name,
+                    'registration_id' => $p->user->registration_id,
+                    'jabatan_full' => $p->user->jabatan_full,
+                ])->toArray()
+            : [];
+
+        $existingSignature = $suratTugas
+            ? $suratTugas->signaturesAndParafs
+                ->firstWhere('type', 'signature')?->user
+            : null;
+
+        if ($existingSignature) {
+            $existingSignature = [
+                'id' => $existingSignature->id,
+                'name' => $existingSignature->name,
+                'registration_id' => $existingSignature->registration_id,
+                'jabatan_full' => $existingSignature->jabatan_full,
+            ];
+        }
+
+        return view('pages.training.surattugas.assign', compact(
+            'suratPengajuan',
+            'existingSuratTugas',
+            'existingParafs',
+            'existingSignature',
+            'users',
+            'latestRejection'
+        ));
     }
 
-    public function assignSave(Request $request): RedirectResponse
+    public function assignSave(Request $request, $id): RedirectResponse
     {
         $request->validate([
-            'surat_tugas_id' => 'required|exists:surat_tugas_pelatihans,id',
-            'paraf_users'    => 'nullable|array|max:3',
-            'paraf_users.*'  => 'nullable|exists:users,id',
-            'signature_user' => 'required|exists:users,id',
-            'tujuan'         => 'nullable|string',
-            'waktu'          => 'nullable|string',
-            'instruksi'      => 'nullable|string',
-            'hal_perhatian'  => 'nullable|string',
-            'catatan'        => 'nullable|string',
+            'tempat'                => 'required|string|max:255',
+            'durasi'                => 'required|string|max:100',
+            'paraf_users'           => 'nullable|array|max:3',
+            'paraf_users.*'         => 'nullable|exists:users,id',
+            'signature_user'        => 'required|exists:users,id',
+            'tujuan'                => 'nullable|string',
+            'waktu'                 => 'nullable|string',
+            'instruksi'             => 'nullable|string',
+            'hal_perhatian'         => 'nullable|string',
+            'catatan'               => 'nullable|string',
+            'tanggal_mulai'         => 'required|date',
+            'tanggal_selesai'       => 'required|date|after_or_equal:tanggal_mulai',
+            'tanggal_pelaksanaan'   => 'nullable|array',
+            'tanggal_pelaksanaan.*' => 'nullable|date',
         ]);
 
         $user = Auth::user();
@@ -218,17 +261,27 @@ class SuratTugasPelatihanController extends Controller
             return $this->denyAccessRedirect();
         }
 
-        $surat = SuratTugasPelatihan::with('pelatihan')->findOrFail($request->surat_tugas_id);
+        // Source pelatihan (immutable after tugas is created)
+        $suratPengajuan = SuratPengajuanPelatihan::findOrFail($id);
+
+        // Find or create the Surat Tugas
+        $surat = SuratTugasPelatihan::firstOrCreate(
+            ['pelatihan_id' => $suratPengajuan->id],
+            [
+                'kode_pelatihan' => $suratPengajuan->kode_pelatihan,
+                'judul'          => $suratPengajuan->judul,
+                'created_by'     => $user->id,
+                'is_accepted'    => false,
+            ]
+        );
 
         $parafIds    = array_filter(array_map('intval', $request->input('paraf_users', [])));
         $signatureId = (int) $request->input('signature_user');
 
-        // Remove signature user from paraf if included
+        // Ensure no duplication
         $parafIds = array_diff($parafIds, [$signatureId]);
 
-        // Validate IDs
         $allowedIds = $this->getAssignableUsers()->pluck('id')->all();
-
         if (!in_array($signatureId, $allowedIds, true)) {
             return back()->withErrors(['signature_user' => 'Penandatangan tidak valid.'])->withInput();
         }
@@ -238,33 +291,34 @@ class SuratTugasPelatihanController extends Controller
             }
         }
 
-        // preload users
         $allUserIds = array_merge($parafIds, [$signatureId]);
         $usersMap   = User::whereIn('id', $allUserIds)->get()->keyBy('id');
 
-        // kode pelatihan
-        $kodePelatihan = $surat->kode_pelatihan
-            ?? optional($surat->pelatihan)->kode_pelatihan
-            ?? ('TUGAS-' . $surat->id);
+        $kodePelatihan = $surat->kode_pelatihan ?? ('TUGAS-' . $surat->id);
 
         DB::transaction(function () use ($surat, $parafIds, $signatureId, $usersMap, $kodePelatihan, $request, $user) {
-            // update surat tugas details + assigner
+            // Update Surat Tugas info ONLY (not Surat Pengajuan)
             $surat->update([
-                'tujuan'        => $request->input('tujuan'),
-                'waktu'         => $request->input('waktu'),
-                'instruksi'     => $request->input('instruksi'),
-                'hal_perhatian' => $request->input('hal_perhatian'),
-                'catatan'       => $request->input('catatan'),
-                'created_by'    => $user->id, // mark latest assigner
-                'is_accepted'   => false,     // reset acceptance
+                'tempat'               => $request->input('tempat'),
+                'durasi'               => $request->input('durasi'),
+                'tujuan'               => $request->input('tujuan'),
+                'waktu'                => $request->input('waktu'),
+                'instruksi'            => $request->input('instruksi'),
+                'hal_perhatian'        => $request->input('hal_perhatian'),
+                'catatan'              => $request->input('catatan'),
+                'tanggal_mulai'        => $request->input('tanggal_mulai'),
+                'tanggal_selesai'      => $request->input('tanggal_selesai'),
+                'tanggal_pelaksanaan'  => json_encode($request->input('tanggal_pelaksanaan', [])),
+                'created_by'           => $user->id,
+                'is_accepted'          => false,
             ]);
 
-            // determine new round
-            $latestRound = $surat->signaturesAndParafs()->max('round') ?? 0;
-            $round = $latestRound + 1;
+            // Determine next round
+            $lastRound = $surat->signaturesAndParafs()->max('round') ?? 0;
+            $round = $lastRound + 1;
             $sequence = 1;
 
-            // create paraf rows
+            // Insert parafs
             foreach ($parafIds as $userId) {
                 $u = $usersMap[$userId] ?? null;
                 if (!$u) continue;
@@ -288,7 +342,7 @@ class SuratTugasPelatihanController extends Controller
                 ]);
             }
 
-            // create signature row
+            // Insert signature
             $sigUser = $usersMap[$signatureId] ?? null;
             if ($sigUser) {
                 SuratTugasPelatihanSignatureAndParaf::create([
@@ -312,12 +366,9 @@ class SuratTugasPelatihanController extends Controller
         });
 
         return redirect()->route('training.surattugas.index')
-            ->with('success', 'Penandatangan dan paraf berhasil ditetapkan untuk putaran baru.');
+            ->with('success', 'Penandatangan dan paraf berhasil ditetapkan.');
     }
 
-    /**
-     * Helper: who can assign?
-     */
     protected function userCanAssign(User $user): bool
     {
         $isAdmin = $user->role === 'admin';
@@ -356,22 +407,17 @@ class SuratTugasPelatihanController extends Controller
             return $this->denyAccessRedirect();
         }
 
-        // mark approved w/ timestamp
         $approval->update([
             'status'    => 'approved',
             'signed_at' => now(),
         ]);
 
-        // still pending?
         $pending = $surat->signaturesAndParafs()->where('status', 'pending')->count();
         if ($pending === 0) {
-            // final accept
             $surat->update(['is_accepted' => true]);
-
-            // auto-create Daftar Hadir Pelatihan Status rows for each day
+            /*
             $pelatihan = $surat->pelatihan;
             if ($pelatihan && $pelatihan->tanggal_mulai && $pelatihan->durasi) {
-                // Get the kode_pelatihan
                 $kodePelatihan = $surat->kode_pelatihan
                     ?? $pelatihan->kode_pelatihan
                     ?? ('TUGAS-' . $surat->id);
@@ -382,11 +428,11 @@ class SuratTugasPelatihanController extends Controller
                         'pelatihan_id' => $pelatihan->id,
                         'date'         => $start->copy()->addDays($i)->toDateString(),
                     ], [
-                        // Default values when creating new record
                         'kode_pelatihan' => $kodePelatihan,
                     ]);
                 }
             }
+            */
         }
 
         return redirect()
@@ -418,29 +464,30 @@ class SuratTugasPelatihanController extends Controller
         }
 
         DB::transaction(function () use ($approval, $surat, $request) {
-            // mark current as rejected
+            // Mark current approval as rejected with reason
             $approval->update([
                 'status'           => 'rejected',
                 'rejection_reason' => $request->reason,
                 'signed_at'        => now(),
             ]);
 
-            // auto-reject later sequence in SAME round
+            // Auto reject all later approvals in same round
             SuratTugasPelatihanSignatureAndParaf::where('surat_tugas_id', $surat->id)
                 ->where('round', $approval->round)
                 ->where('sequence', '>', $approval->sequence)
                 ->where('status', 'pending')
                 ->update([
-                    'status' => 'rejected',
+                    'status'           => 'rejected',
+                    'rejection_reason' => 'Auto rejected due to earlier rejection. Original reason: ' . $request->reason,
+                    'signed_at'        => now(),
                 ]);
 
-            // reset surat acceptance flag
             $surat->update(['is_accepted' => false]);
         });
 
         return redirect()
             ->route('training.surattugas.index')
-            ->with('warning', 'Surat ditolak. Semua approval berikutnya dalam putaran ini otomatis ditolak.');
+            ->with('warning', 'Surat ditolak. Semua approval berikutnya otomatis ditolak dengan alasan bawaan.');
     }
 
     /* -----------------------------------------------------------------
@@ -499,17 +546,10 @@ class SuratTugasPelatihanController extends Controller
             return redirect()->back()->with('error', $msg);
         }
 
-        if (Route::has('home')) {
-            return redirect()->route('home')->with('error', $msg);
-        }
-        if (Route::has('training.surattugas.index')) {
-            return redirect()->route('training.surattugas.index')->with('error', $msg);
-        }
-        if (Route::has('training.suratpengajuan.index')) {
-            return redirect()->route('training.suratpengajuan.index')->with('error', $msg);
-        }
-        if (Route::has('user.index')) {
-            return redirect()->route('user.index')->with('error', $msg);
+        foreach (['home', 'training.surattugas.index', 'training.suratpengajuan.index', 'user.index'] as $route) {
+            if (Route::has($route)) {
+                return redirect()->route($route)->with('error', $msg);
+            }
         }
 
         abort(403, $msg);
@@ -519,11 +559,6 @@ class SuratTugasPelatihanController extends Controller
      |  ASSIGNABLE USERS SOURCE
      | -----------------------------------------------------------------*/
 
-    /**
-     * Users allowed to be selected as paraf/signature:
-     * - Directors in the "Human Capital & Finance" directorate
-     * - Anyone in the "Human Capital" department
-     */
     protected function getAssignableUsers()
     {
         return User::where(function ($outer) {

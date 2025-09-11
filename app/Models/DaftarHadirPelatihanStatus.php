@@ -85,4 +85,6 @@ class DaftarHadirPelatihanStatus extends Model
     {
         return $this->hasMany(PelatihanPresenter::class, 'pelatihan_id', 'pelatihan_id');
     }
+
+
 }

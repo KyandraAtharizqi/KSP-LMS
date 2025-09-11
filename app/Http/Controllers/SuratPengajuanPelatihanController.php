@@ -477,22 +477,6 @@ class SuratPengajuanPelatihanController extends Controller
             if ($allCompleted) {
                 // Mark SuratPengajuanPelatihan as accepted
                 $surat->update(['is_accepted' => 1]);
-
-                // Optionally, create SuratTugasPelatihan only if it doesn't exist
-                if (!\App\Models\SuratTugasPelatihan::where('pelatihan_id', $surat->id)->exists()) {
-                    \App\Models\SuratTugasPelatihan::create([
-                        'pelatihan_id'        => $surat->id,
-                        'kode_pelatihan'      => $surat->kode_pelatihan,
-                        'judul'               => $surat->judul,
-                        'tanggal'             => now()->toDateString(),
-                        'tempat'              => $surat->tempat,
-                        'tanggal_pelatihan'   => $surat->tanggal_mulai,
-                        'tanggal_pelaksanaan' => null,
-                        'durasi'              => $surat->durasi,
-                        'status'              => 'draft',
-                        'is_accepted'         => false,
-                    ]);
-                }
             }
         });
 

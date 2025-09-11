@@ -18,22 +18,14 @@ class DaftarHadirPelatihanController extends Controller
      * ===============================================================*/
     public function index(Request $request)
     {
-        $user = Auth::user();
-
         $q = SuratPengajuanPelatihan::query()
-            ->with(['suratTugas', 'participants.user'])
-            ->whereHas('suratTugas', fn($st) => $st->where('is_accepted', 1));
-
-        // Non-admins only see pelatihans they participate in.
-        if (!$this->userCanSeeAll($user)) {
-            $q->whereHas('participants', fn($p) => $p->where('user_id', $user->id));
-        }
+            ->where('is_accepted', 1);
 
         // Search (kode / judul)
         if ($s = trim($request->q ?? '')) {
             $q->where(function ($w) use ($s) {
                 $w->where('kode_pelatihan', 'like', "%{$s}%")
-                  ->orWhere('judul', 'like', "%{$s}%");
+                ->orWhere('judul', 'like', "%{$s}%");
             });
         }
 
@@ -42,9 +34,10 @@ class DaftarHadirPelatihanController extends Controller
         return view('pages.training.daftarhadirpelatihan.index', compact('pelatihans'));
     }
 
+
     /* ===============================================================
-     | SHOW – training-level page (list all days, presenter per day)
-     * ===============================================================*/
+    | SHOW – training-level page (list all days, presenter per day)
+    * ===============================================================*/
     public function show($pelatihanId)
     {
         $user = Auth::user();
@@ -52,18 +45,80 @@ class DaftarHadirPelatihanController extends Controller
         $pelatihan = SuratPengajuanPelatihan::with(['suratTugas', 'daftarHadirStatus'])
             ->findOrFail($pelatihanId);
 
-        if (!$this->isSuratTugasAccepted($pelatihan)) {
-            abort(Response::HTTP_FORBIDDEN, 'Daftar hadir belum dapat diisi: Surat Tugas belum disetujui.');
-        }
-
         if (!$this->userCanAccessPelatihan($user, $pelatihan)) {
             abort(Response::HTTP_FORBIDDEN);
         }
 
-        $this->ensureDayStatusRows($pelatihan);
+        // REMOVED: $this->ensureDayStatusRows($pelatihan);
+        // Now we only load existing status rows without auto-generating them
         $pelatihan->load('daftarHadirStatus');
 
         return view('pages.training.daftarhadirpelatihan.show', compact('pelatihan'));
+    }
+
+    /* ===============================================================
+    | ADD DAY – Add a new date manually
+    * ===============================================================*/
+    /* ===============================================================
+    | ADD DAY – Add a new date manually
+    * ===============================================================*/
+    public function addDay(Request $request, $pelatihanId)
+    {
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        $user = Auth::user();
+        $pelatihan = SuratPengajuanPelatihan::findOrFail($pelatihanId);
+
+        if (!$this->userCanManageAttendance($user, $pelatihan)) {
+            abort(Response::HTTP_FORBIDDEN);
+        }
+
+        // Check if date already exists
+        $exists = $pelatihan->daftarHadirStatus()->whereDate('date', $request->date)->exists();
+        if ($exists) {
+            return back()->with('error', 'Tanggal ini sudah ada di daftar hadir.');
+        }
+
+        // Directly create without validating against start/end date
+        $pelatihan->daftarHadirStatus()->create([
+            'date' => $request->date,
+            'is_submitted' => false,
+        ]);
+
+        return back()->with('success', 'Tanggal daftar hadir berhasil ditambahkan.');
+    }
+
+
+    /* ===============================================================
+    | REMOVE DAY – Remove a date (only if not submitted)
+    * ===============================================================*/
+    public function removeDay(Request $request, $pelatihanId, $statusId)
+    {
+        $user = Auth::user();
+        $pelatihan = SuratPengajuanPelatihan::findOrFail($pelatihanId);
+
+        if (!$this->userCanManageAttendance($user, $pelatihan)) {
+            abort(Response::HTTP_FORBIDDEN);
+        }
+
+        $status = DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihan->id)
+            ->where('id', $statusId)
+            ->firstOrFail();
+
+        if ($status->is_submitted) {
+            return back()->with('error', 'Tidak dapat menghapus tanggal yang sudah disubmit.');
+        }
+
+        // Delete related attendance records
+        DaftarHadirPelatihan::where('pelatihan_id', $pelatihan->id)
+            ->whereDate('date', $status->date)
+            ->delete();
+
+        $status->delete();
+
+        return back()->with('success', 'Tanggal berhasil dihapus dari daftar hadir.');
     }
 
     /* ===============================================================
@@ -76,9 +131,11 @@ class DaftarHadirPelatihanController extends Controller
         $pelatihan = SuratPengajuanPelatihan::with(['suratTugas', 'participants.user'])
             ->findOrFail($pelatihanId);
 
+        /*    
         if (!$this->isSuratTugasAccepted($pelatihan)) {
             abort(Response::HTTP_FORBIDDEN, 'Daftar hadir belum dapat diisi: Surat Tugas belum disetujui.');
         }
+        */
 
         if (!$this->userCanAccessPelatihan($user, $pelatihan)) {
             abort(Response::HTTP_FORBIDDEN);
@@ -86,10 +143,17 @@ class DaftarHadirPelatihanController extends Controller
 
         $day = Carbon::parse($date)->toDateString();
 
-        $status = DaftarHadirPelatihanStatus::firstOrCreate([
-            'pelatihan_id' => $pelatihan->id,
-            'date'         => $day,
-        ]);
+        // Changed from firstOrCreate to just find - don't auto-create
+        $status = DaftarHadirPelatihanStatus::where('pelatihan_id', $pelatihan->id)
+            ->where('date', $day)
+            ->first();
+
+        // If the date doesn't exist, redirect back with error
+        if (!$status) {
+            return redirect()
+                ->route('training.daftarhadirpelatihan.show', $pelatihan->id)
+                ->with('error', 'Tanggal ini belum ditambahkan ke daftar hadir. Silakan tambahkan terlebih dahulu.');
+        }
 
         $attendances = DaftarHadirPelatihan::where('pelatihan_id', $pelatihan->id)
             ->whereDate('date', $day)
@@ -102,7 +166,6 @@ class DaftarHadirPelatihanController extends Controller
             'attendances' => $attendances,
         ]);
     }
-
     /* ===============================================================
      | IMPORT – CSV batch update with DATE VALIDATION
      * ===============================================================*/

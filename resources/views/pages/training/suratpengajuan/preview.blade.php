@@ -8,19 +8,20 @@
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;
+            font-size: 8px;
         }
         .form-container {
             background-color: #ffffff;
-            border: 2px solid #333;
+            border: 1px solid #333;
             max-width: 800px;
             margin: 0 auto;
         }
         .header {
             background-color: #ffffff;
             color: #000;
-            padding: 10px 15px;
+            padding: 5px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 8px;
             display: flex;
             align-items: center;
         }
@@ -28,32 +29,33 @@
             background-color: #333;
             color: #ffffff;
             text-align: center;
-            padding: 8px;
+            padding: 4px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 8px;
         }
         .form-content {
-            padding: 15px;
+            padding: 5px;
         }
         .form-section {
             border: 1px solid #333;
             margin-bottom: 0;
+            margin-top: 3px;
         }
         .section-header {
             background-color: #ffffff;
-            padding: 6px 10px;
+            padding: 3px 5px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 8px;
             border-bottom: 0;
         }
         .section-content {
-            padding: 2px 10px 10px 10px;
+            padding: 2px 5px 5px 5px;
         }
         .field-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 5px;
+            gap: 8px;
+            margin-bottom: 2px;
         }
         .field {
             flex: 1;
@@ -61,54 +63,56 @@
         }
         .field-label {
             font-weight: bold;
-            font-size: 12px;
-            margin-bottom: 5px;
+            font-size: 8px;
+            margin-bottom: 2px;
             display: block;
         }
         .field-value {
             border: 1px solid #999;
-            padding: 5px 8px;
+            padding: 2px 4px;
             background-color: #ffffff;
-            min-height: 18px;
-            font-size: 12px;
+            min-height: 10px;
+            font-size: 8px;
         }
         .participants-list {
-            margin-top: 10px;
+            margin-top: 3px;
         }
         .participant-item {
-            padding: 5px 0;
+            padding: 2px 0;
             border-bottom: 1px solid #eee;
-            font-size: 12px;
+            font-size: 8px;
         }
         .sign-grid-header {
-            font-size: 10px;
+            font-size: 8px;
             color: #888;
         }
         .sign-cell {
             text-align: center;
             vertical-align: top;
-            padding: 0 5px;
+            padding: 0 2px;
         }
         .sign-image-box {
-            height: 60px;
+            height: 40px;
         }
         .sign-image-box img {
-            height: 50px;
+            height: 35px;
         }
         .sign-blank {
-            height: 50px;
+            height: 35px;
             border-bottom: 1px solid #000;
         }
         .sign-meta {
-            font-size: 12px;
-            margin-top: 4px;
+            font-size: 8px;
+            margin-top: 2px;
+            line-height: 1.1;
         }
         .sign-meta small {
             display: block;
             line-height: 1.1;
+            font-size: 8px;
         }
         .sign-role {
-            font-size: 10px;
+            font-size: 8px;
             color: #888;
         }
     </style>
@@ -117,7 +121,7 @@
     <div class="form-container">
         {{-- Header / Logo --}}
         <div class="header">
-            <img src="{{ asset('logoksp.png') }}" alt="Logo" style="height: 40px;">
+            <img src="{{ asset('logo.png') }}" alt="Logo" style="height: 25px;">
         </div>
 
         {{-- Title --}}
@@ -167,16 +171,32 @@
                 </div>
             </div>
 
-            {{-- Schedule --}}
+            {{-- Schedule - Updated to show tanggal pelaksanaan inline --}}
             <div class="form-section">
                 <div class="section-content">
-                    <table class="schedule-table" style="width:100%; border-collapse:separate; border-spacing:0 5px;">
+                    <table class="schedule-table" style="width:100%; border-collapse:separate; border-spacing:0 3px;">
                         <tr>
                             <td style="width:50%;">
-                                <span class="field-label">Tanggal</span>
-                                <div class="field-value">
-                                    {{ \Carbon\Carbon::parse($surat->tanggal_mulai)->format('d M Y') }} -
-                                    {{ \Carbon\Carbon::parse($surat->tanggal_selesai)->format('d M Y') }}
+                                <span class="field-label">Tanggal Pelaksanaan</span>
+                                <div class="field-value" style="word-wrap: break-word;">
+                                    @php
+                                        $tanggalPelaksanaan = is_array($surat->tanggal_pelaksanaan)
+                                            ? $surat->tanggal_pelaksanaan
+                                            : json_decode($surat->tanggal_pelaksanaan ?? '[]', true);
+                                        $formattedDates = [];
+                                        
+                                        if(!empty($tanggalPelaksanaan)) {
+                                            foreach($tanggalPelaksanaan as $tgl) {
+                                                $formattedDates[] = \Carbon\Carbon::parse($tgl)->format('d M Y');
+                                            }
+                                            echo implode(', ', $formattedDates);
+                                        } else {
+                                            echo $surat->tanggal_mulai 
+                                                ? \Carbon\Carbon::parse($surat->tanggal_mulai)->format('d M Y') . ' - ' . 
+                                                  \Carbon\Carbon::parse($surat->tanggal_selesai)->format('d M Y')
+                                                : '-';
+                                        }
+                                    @endphp
                                 </div>
                             </td>
                             <td style="width:50%;">
@@ -184,6 +204,23 @@
                                 <div class="field-value">{{ $surat->durasi }} Hari</div>
                             </td>
                         </tr>
+
+                        {{-- 🔹 New row for Tanggal Mulai & Tanggal Selesai --}}
+                        <tr>
+                            <td>
+                                <span class="field-label">Tanggal Mulai</span>
+                                <div class="field-value">
+                                    {{ $surat->tanggal_mulai ? \Carbon\Carbon::parse($surat->tanggal_mulai)->format('d M Y') : '-' }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="field-label">Tanggal Selesai</span>
+                                <div class="field-value">
+                                    {{ $surat->tanggal_selesai ? \Carbon\Carbon::parse($surat->tanggal_selesai)->format('d M Y') : '-' }}
+                                </div>
+                            </td>
+                        </tr>
+
                         <tr>
                             <td colspan="2">
                                 <span class="field-label">Tempat</span>
@@ -209,7 +246,7 @@
                         <tr>
                             <td colspan="2">
                                 <span class="field-label">Keterangan</span>
-                                <div class="field-value" style="min-height:30px;">{{ $surat->keterangan }}</div>
+                                <div class="field-value" style="min-height:20px;">{{ $surat->keterangan }}</div>
                             </td>
                         </tr>
                     </table>
@@ -232,27 +269,52 @@
                 </div>
             </div>
 
-            {{-- Approval Section --}}
-            <div style="margin-top:10px;">
+            {{-- Tujuan Peserta Section - Added to match PDF --}}
+            <div class="form-section">
+                <div class="section-header">Tujuan Peserta</div>
                 <div class="section-content">
+                    <div class="field-value" style="min-height:15px;">{{ $surat->tujuan_peserta ?? '-' }}</div>
+                </div>
+            </div>
 
-                    {{-- Paraf --}}
-                    @php
-                        $latestRound = $surat->approvals->max('round');
-                        $parafs = $surat->approvals
-                            ->where('type','paraf')
-                            ->where('round', $latestRound)
-                            ->sortBy('sequence');
-                    @endphp
-                    @if($parafs->count())
-                        <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">Paraf</div>
-                        <table style="width:100%; margin-top:5px; text-align:center;">
+            {{-- Approval Section - With proper null checks --}}
+            @php
+                $latestRound = $surat->approvals->max('round') ?? 0;
+                
+                // Get all approvals and sort by sequence (parafs first, then signatures)
+                $parafs = $surat->approvals
+                    ->where('type', 'paraf')
+                    ->where('round', $latestRound)
+                    ->sortBy('sequence');
+                    
+                $signatures = $surat->approvals
+                    ->where('type', 'signature')
+                    ->where('round', $latestRound)
+                    ->sortBy('sequence');
+                
+                $parafsCount = $parafs->count();
+                $signaturesCount = $signatures->count();
+                
+                // Fixed labels for signature positions
+                $signatureLabels = ['Mengusulkan', 'Mengetahui', 'Menyetujui'];
+            @endphp
+
+            <div style="margin-top:5px;">
+                <div class="section-content">
+                    {{-- Paraf section - Always show 3 boxes --}}
+                    <div style="font-weight:bold; font-size:8px; margin-bottom:4px;">Paraf</div>
+                    <div class="form-section" style="margin-top:0; border:0;">
+                        <table style="width:100%; margin-top:2px; text-align:center; border-collapse:collapse;">
                             <tr>
-                                @foreach($parafs as $paraf)
+                                @for($i = 0; $i < 3; $i++)
                                     @php
-                                        $showImg = $paraf->status === 'approved' && !empty($paraf->preview_url);
+                                        // Safely check if the index exists before accessing
+                                        $showParafData = $i < $parafsCount;
+                                        // Use null coalescing to prevent "undefined array key" errors
+                                        $paraf = $showParafData ? ($parafs->values()->get($i) ?? null) : null;
+                                        $showImg = $showParafData && $paraf && $paraf->status === 'approved' && !empty($paraf->preview_url);
                                     @endphp
-                                    <td class="sign-cell">
+                                    <td class="sign-cell" style="border:1px solid #ddd; width:33.33%;">
                                         <div class="sign-image-box">
                                             @if($showImg)
                                                 <img src="{{ $paraf->preview_url }}" alt="Paraf">
@@ -261,38 +323,40 @@
                                             @endif
                                         </div>
                                         <div class="sign-meta">
-                                            {{ $paraf->user->name ?? '-' }}
-                                            <small>{{ $paraf->user->registration_id ?? '-' }}</small>
-                                            <small>{{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}</small>
+                                            @if($showParafData && $paraf)
+                                                {{ $paraf->user->name ?? '-' }}
+                                                <small>{{ $paraf->user->registration_id ?? '-' }}</small>
+                                                <small>{{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}</small>
+                                            @endif
                                         </div>
-                                        <div class="sign-role">(Paraf)</div>
+                                        @if($showParafData && $paraf)
+                                            <div class="sign-role">(Paraf)</div>
+                                        @endif
                                     </td>
-                                @endforeach
+                                @endfor
                             </tr>
                         </table>
-                    @endif
+                    </div>
 
-                    {{-- Signature --}}
-                    @php
-                        $sigs = $surat->approvals
-                            ->where('type','signature')
-                            ->where('round', $latestRound)
-                            ->sortBy('sequence');
-                    @endphp
-                    @if($sigs->count())
-                        <div style="font-weight:bold; font-size:13px; margin:25px 0 8px;">Tanda Tangan</div>
-                        <table style="width:100%; text-align:center;">
+                    {{-- Signature section - Always show exactly 3 signature boxes --}}
+                    <div style="font-weight:bold; font-size:8px; margin:10px 0 4px;">Tanda Tangan</div>
+                    <div class="form-section" style="margin-top:0; border:0;">
+                        <table style="width:100%; text-align:center; border-collapse:collapse; margin-bottom:5px;">
                             <tr class="sign-grid-header">
-                                <td>Mengusulkan</td>
-                                <td>Mengetahui</td>
-                                <td>Menyetujui</td>
+                                @foreach($signatureLabels as $label)
+                                    <td style="border:1px solid #ddd; border-bottom:none; width:33.33%;">{{ $label }}</td>
+                                @endforeach
                             </tr>
                             <tr>
-                                @foreach($sigs as $signature)
+                                @for($i = 0; $i < 3; $i++)
                                     @php
-                                        $showImg = $signature->status === 'approved' && !empty($signature->preview_url);
+                                        // Safely check if the index exists before accessing
+                                        $showData = $i < $signaturesCount;
+                                        // Use values() and get() for safer access to collection items
+                                        $signature = $showData ? ($signatures->values()->get($i) ?? null) : null;
+                                        $showImg = $showData && $signature && $signature->status === 'approved' && !empty($signature->preview_url);
                                     @endphp
-                                    <td class="sign-cell">
+                                    <td class="sign-cell" style="border:1px solid #ddd; border-top:none; width:33.33%;">
                                         <div class="sign-image-box">
                                             @if($showImg)
                                                 <img src="{{ $signature->preview_url }}" alt="Signature">
@@ -301,20 +365,20 @@
                                             @endif
                                         </div>
                                         <div class="sign-meta">
-                                            {{ $signature->user->name ?? '-' }}
-                                            <small>{{ $signature->user->registration_id ?? '-' }}</small>
-                                            <small>{{ $signature->user->jabatan_full ?? ($signature->user->jabatan->name ?? '-') }}</small>
+                                            @if($showData && $signature)
+                                                {{ $signature->user->name ?? '-' }}
+                                                <small>{{ $signature->user->registration_id ?? '-' }}</small>
+                                                <small>{{ $signature->user->jabatan_full ?? ($signature->user->jabatan->name ?? '-') }}</small>
+                                            @endif
                                         </div>
-                                        <div class="sign-role">(Tanda Tangan)</div>
+                                        <div class="sign-role">{{ ($showData && $signature) ? '(Tanda Tangan)' : '' }}</div>
                                     </td>
-                                @endforeach
+                                @endfor
                             </tr>
                         </table>
-                    @endif
-
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </body>

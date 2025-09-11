@@ -164,41 +164,68 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="trackerLabel-{{ $example->id }}">📋 Riwayat Persetujuan - {{ $example->kode_pelatihan }}</h5>
+                <h5 class="modal-title" id="trackerLabel-{{ $example->id }}">
+                    📋 Riwayat Persetujuan - {{ $example->kode_pelatihan }}
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body">
-                <ul class="list-group">
-                    @foreach ($example->approvals->sortBy(['round', 'sequence']) as $step)
-                        <li class="list-group-item d-flex justify-content-between align-items-start">
-                            <div class="ms-2 me-auto">
-                                <div>
-                                    <strong>
-                                        {{ ucfirst($step->type) }} - 
-                                        {{ $step->user->name }} 
-                                        ({{ $step->user->registration_id ?? '-' }},
-                                        {{ $step->user->jabatan_full ?? '-' }})
-                                    </strong>
-                                </div>
-                                <small>Round {{ $step->round }}, Step {{ $step->sequence }}</small><br>
-                                @if ($step->status === 'approved')
-                                    <span class="badge bg-success">
-                                        ✅ Disetujui -
-                                        {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
-                                    </span>
-                                @elseif ($step->status === 'rejected')
-                                    <span class="badge bg-danger">
-                                        ❌ Ditolak -
-                                        {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : '-' }}
-                                    </span><br>
-                                    <small>Alasan: {{ $step->rejection_reason }}</small>
-                                @else
-                                    <span class="badge bg-secondary">⏳ Menunggu Tindakan</span>
-                                @endif
-                            </div>
-                        </li>
+                @php
+                    $approvals = $example->approvals ?? collect();
+                    $latestRound = $approvals->max('round') ?? 1;
+                    $summary = $example->getApprovalStatus() ?? ['status' => 'pending', 'message' => 'Belum ada status'];
+                @endphp
+
+                {{-- Status Summary --}}
+                <div class="alert
+                    @if(($summary['status'] ?? '') === 'approved') alert-success
+                    @elseif(($summary['status'] ?? '') === 'rejected') alert-danger
+                    @elseif(($summary['status'] ?? '') === 'in_approval') alert-warning
+                    @else alert-secondary @endif">
+                    {{ $summary['message'] ?? 'Status tidak tersedia' }}
+                    @isset($summary['reason'])
+                        <br><small>Alasan: {{ $summary['reason'] }}</small>
+                    @endisset
+                </div>
+
+                {{-- Approval Steps Grouped by Round --}}
+                @if ($approvals->isEmpty())
+                    <p class="text-muted">Belum ada riwayat persetujuan.</p>
+                @else
+                    @foreach ($approvals->groupBy('round')->sortKeys() as $round => $steps)
+                        <h6 class="mt-3">🌀 Round {{ $round }}</h6>
+                        <ul class="list-group mb-3">
+                            @foreach ($steps->sortBy('sequence') as $step)
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div>
+                                            <strong>
+                                                {{ ucfirst($step->type) }} - {{ $step->user->name ?? '-' }}
+                                                ({{ $step->user->registration_id ?? '-' }},
+                                                {{ $step->user->jabatan_full ?? '-' }})
+                                            </strong>
+                                        </div>
+                                        <small>Step {{ $step->sequence }}</small><br>
+                                        @if ($step->status === 'approved')
+                                            <span class="badge bg-success">
+                                                ✅ Disetujui -
+                                                {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : ($step->updated_at ? \Carbon\Carbon::parse($step->updated_at)->format('d M Y H:i') : '-') }}
+                                            </span>
+                                        @elseif ($step->status === 'rejected')
+                                            <span class="badge bg-danger">
+                                                ❌ Ditolak -
+                                                {{ $step->signed_at ? \Carbon\Carbon::parse($step->signed_at)->format('d M Y H:i') : ($step->updated_at ? \Carbon\Carbon::parse($step->updated_at)->format('d M Y H:i') : '-') }}
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary">⏳ Menunggu Tindakan</span>
+                                        @endif
+
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
                     @endforeach
-                </ul>
+                @endif
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -207,6 +234,7 @@
     </div>
 </div>
 @endforeach
+
 
 {{-- Reject Modals --}}
 @foreach($examples as $example)
