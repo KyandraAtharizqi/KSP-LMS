@@ -2,41 +2,58 @@
 
 @push('style')
     <link rel="stylesheet" href="{{asset('sneat/vendor/libs/apex-charts/apex-charts.css')}}" />
-@endpush
-
-@push('script')
-    <script src="{{asset('sneat/vendor/libs/apex-charts/apexcharts.js')}}"></script>
-    <script>
-        const options = {
-            chart: {
-                type: 'bar'
-            },
-            series: [{
-                name: '{{ __('dashboard.letter_transaction') }}',
-                data: [{{ $todayIncomingLetter }},{{ $todayOutgoingLetter }},{{ $todayKnowledgeLetter }}]
-            }],
-            stroke: {
-                curve: 'smooth',
-            },
-            xaxis: {
-                categories: [
-                    '{{ __('dashboard.incoming_letter') }}',
-                    '{{ __('dashboard.outgoing_letter') }}',
-                    '{{ __('dashboard.disposition_letter') }}',
-                ],
+    <style>
+        .dashboard-card-hover {
+            transition: all 0.3s ease;
+            border: 1px solid #e7e7e7;
+        }
+        
+        .dashboard-card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #d4d4d4;
+        }
+        
+        .dashboard-card-hover .card-body {
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card-hover:hover .card-body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        }
+        
+        /* Card link styling */
+        .card-link {
+            text-decoration: none !important;
+            color: inherit !important;
+        }
+        
+        .card-link:hover {
+            text-decoration: none !important;
+            color: inherit !important;
+        }
+        
+        .card-link:focus {
+            text-decoration: none !important;
+            color: inherit !important;
+        }
+        
+        /* Responsive font sizes */
+        @media (max-width: 768px) {
+            .dashboard-card-hover .card-title {
+                font-size: 1.5rem;
+            }
+            .dashboard-card-hover .card-body {
+                min-height: 150px !important;
             }
         }
-
-        const chart = new ApexCharts(document.querySelector("#today-graphic"), options);
-
-        chart.render();
-    </script>
+    </style>
 @endpush
 
 @section('content')
     <div class="row">
-        <div class="col-lg-8 mb-4 order-0">
-            <div class="card mb-4">
+        <div class="col-lg-12 mb-4 order-0">
+            <div class="card">
                 <div class="d-flex align-items-end row">
                     <div class="col-sm-7">
                         <div class="card-body">
@@ -44,7 +61,6 @@
                             <p class="mb-4">
                                 {{ $currentDate }}
                             </p>
-                            <p style="font-size: smaller" class="text-gray">{{ __('dashboard.today_report') }}</p>
                         </div>
                     </div>
                     <div class="col-sm-5 text-center text-sm-left">
@@ -56,83 +72,152 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between flex-sm-row flex-column gap-3"
-                             style="position: relative;">
-                            <div class="">
-                                <div class="card-title">
-                                    <h5 class="text-nowrap mb-2">{{ __('dashboard.today_graphic') }}</h5>
-                                    <span class="badge bg-label-warning rounded-pill">{{ __('dashboard.today') }}</span>
-                                </div>
-                                <div class="mt-sm-auto">
-                                    @if($percentageLetterTransaction > 0)
-                                    <small class="text-success text-nowrap fw-semibold">
-                                        <i class="bx bx-chevron-up"></i> {{ $percentageLetterTransaction }}%
-                                    </small>
-                                    @elseif($percentageLetterTransaction < 0)
-                                        <small class="text-danger text-nowrap fw-semibold">
-                                            <i class="bx bx-chevron-down"></i> {{ $percentageLetterTransaction }}%
-                                        </small>
-                                    @endif
-                                    <h3 class="mb-0 display-4">{{ $todayLetterTransaction }}</h3>
-                                </div>
-                            </div>
-                            <div id="profileReportChart" style="min-height: 80px; width: 80%">
-                                <div id="today-graphic"></div>
-                            </div>
-                        </div>
+        <div class="col-lg-12 mb-4">
+            <div class="card">
+                <form action="{{ route('dashboard') }}" method="GET" id="typeFilterForm">
+                    <div class="roalign-items-center">
+                        <select class="form-select" name="type_filter" id="type_filter" onchange="this.form.submit()">
+                            <option value="" {{ request('type_filter') == '' ? 'selected' : '' }}>Semua Kegiatan</option>
+                            <option value="training" {{ request('type_filter') == 'training' ? 'selected' : '' }}>Training</option>
+                            <option value="knowledge" {{ request('type_filter') == 'knowledge' ? 'selected' : '' }}>Knowledge Sharing</option>
+                        </select>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
-        <div class="col-lg-4 col-md-4 order-1">
+
+        <div class="col-lg-12">
             <div class="row">
-                <div class="col-lg-6 col-md-12 col-6 mb-4">
-                    <x-dashboard-card-simple
-                        :label="__('dashboard.incoming_letter')"
-                        :value="$todayIncomingLetter"
-                        :daily="false"
-                        color="success"
-                        icon="bx-envelope"
-                        :percentage="$percentageIncomingLetter"
-                        :acceptedCount="$acceptedSuratPengajuan"
-                    />
-                </div>
-                <div class="col-lg-6 col-md-12 col-6 mb-4">
-                    <x-dashboard-card-simple
-                        :label="__('dashboard.outgoing_letter')"
-                        :value="$todayOutgoingLetter"
-                        :daily="false"
-                        color="danger"
-                        icon="bx-envelope"
-                        :percentage="$percentageOutgoingLetter"
-                        :acceptedCount="$acceptedSuratTugas"
-                    />
-                </div>
-                <div class="col-lg-6 col-md-12 col-6 mb-4">
-                    <x-dashboard-card-simple
-                        :label="__('dashboard.disposition_letter')"
-                        :value="$todayKnowledgeLetter"
-                        :daily="false"
-                        color="primary"
-                        icon="bx-brain"
-                        :percentage="$percentageKnowledgeLetter"
-                        :acceptedCount="$acceptedKnowledgeLetter"
-                    />
-                </div>
-                <div class="col-lg-6 col-md-12 col-6 mb-4">
-                    <x-dashboard-card-simple
-                        :label="__('dashboard.active_user')"
-                        :value="$activeUser"
-                        :daily="false"
-                        color="info"
-                        icon="bx-user-check"
-                        :percentage="0"
-                    />
-                </div>
+                @if(request('type_filter') == '' || request('type_filter') == 'training')
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            :label="__('dashboard.surat_pengajuan')"
+                            :value="$totalSuratPengajuan"
+                            :daily="false"
+                            color="primary"
+                            icon="bx-envelope"
+                            :percentage="$percentageSuratPengajuan"
+                            :acceptedCount="$acceptedSuratPengajuan"
+                        />
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            :label="__('dashboard.surat_tugas')"
+                            :value="$totalSuratTugas"
+                            :daily="false"
+                            color="warning"
+                            icon="bx-mail-send"
+                            :percentage="$percentageSuratTugas"
+                            :acceptedCount="$acceptedSuratTugas"
+                        />
+                    </div>
+                @endif
+
+                @if(request('type_filter') == 'training')
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            label="Pengajuan Disetujui"
+                            :value="$acceptedSuratPengajuan"
+                            :daily="false"
+                            color="success"
+                            icon="bx-check-circle"
+                            :percentage="0"
+                        />
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            label="Pengajuan Ditolak"
+                            :value="$rejectedSuratPengajuan ?? 0"
+                            :daily="false"
+                            color="danger"
+                            icon="bx-x-circle"
+                            :percentage="0"
+                        />
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            label="Menunggu Persetujuan"
+                            :value="$pendingSuratPengajuan ?? 0"
+                            :daily="false"
+                            color="warning"
+                            icon="bx-time-five"
+                            :percentage="0"
+                        />
+                    </div>
+                @endif
+
+                @if(request('type_filter') == '' || request('type_filter') == 'knowledge')
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            :label="__('dashboard.pengajuan_knowledge')"
+                            :value="$totalKnowledgeLetter"
+                            :daily="false"
+                            color="primary"
+                            icon="bx-envelope"
+                            :percentage="$percentageKnowledgeLetter"
+                            :acceptedCount="$acceptedKnowledgeLetter"
+                        />
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            :label="__('dashboard.undangan')"
+                            :value="$totalSuratUndangan"
+                            :daily="false"
+                            color="warning"
+                            icon="bx-mail-send"
+                            :percentage="$percentageSuratUndangan"
+                            :acceptedCount="$acceptedSuratUndangan"
+                        />
+                    </div>
+                @endif
+
+                @if(request('type_filter') == 'knowledge')
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            label="Pengajuan Disetujui"
+                            :value="$acceptedPengajuanKnowledge"
+                            :daily="false"
+                            color="success"
+                            icon="bx-check-circle"
+                            :percentage="0"
+                        />
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            label="Pengajuan Ditolak"
+                            :value="$rejectedPengajuanKnowledge ?? 0"
+                            :daily="false"
+                            color="danger"
+                            icon="bx-x-circle"
+                            :percentage="0"
+                        />
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            label="Menunggu Persetujuan"
+                            :value="$pendingPengajuanKnowledge ?? 0"
+                            :daily="false"
+                            color="warning"
+                            icon="bx-time-five"
+                            :percentage="0"
+                        />
+                    </div>
+                @endif
+
+                @if(request('type_filter') == '' && auth()->user()->role == 'admin')
+                    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <x-dashboard-card-simple
+                            :label="__('dashboard.active_user')"
+                            :value="$activeUser"
+                            :daily="false"
+                            color="info"
+                            icon="bx-user-check"
+                            :percentage="0"
+                        />
+                    </div>
+                @endif
             </div>
         </div>
     </div>

@@ -58,6 +58,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Home
     Route::get('/', [PageController::class, 'index'])->name('home');
+    
+    // Dashboard (alias untuk home dengan filter)
+    Route::get('/dashboard', [PageController::class, 'index'])->name('dashboard');
 
 
     /*

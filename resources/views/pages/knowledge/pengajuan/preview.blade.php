@@ -50,9 +50,9 @@
             <div class="row mb-2">
                 <div class="col-sm-3"><strong>Waktu</strong></div>
                 <div class="col-sm-9">
-                    : {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->format('H:i') }}
+                    : {{ $pengajuan->jam_mulai ? \Carbon\Carbon::parse($pengajuan->jam_mulai)->format('H:i') : '-' }}
                     -
-                    {{ \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->format('H:i') }} WIB
+                    {{ $pengajuan->jam_selesai ? \Carbon\Carbon::parse($pengajuan->jam_selesai)->format('H:i') : '-' }} WIB
                 </div>
             </div>
             <div class="row mb-2">

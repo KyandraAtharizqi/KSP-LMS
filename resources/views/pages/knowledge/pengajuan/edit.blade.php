@@ -41,12 +41,12 @@
                     <div class="col-md-3">
                         <label for="waktu_mulai" class="form-label">Jam Mulai</label>
                         <input type="time" class="form-control" id="waktu_mulai" name="waktu_mulai"
-                            value="{{ old('waktu_mulai', $pengajuan->tanggal_mulai?->format('H:i')) }}">
+                            value="{{ old('waktu_mulai', $pengajuan->jam_mulai) }}">
                     </div>
                     <div class="col-md-3">
                         <label for="waktu_selesai" class="form-label">Jam Selesai</label>
                         <input type="time" class="form-control" id="waktu_selesai" name="waktu_selesai"
-                            value="{{ old('waktu_selesai', $pengajuan->tanggal_selesai?->format('H:i')) }}">
+                            value="{{ old('waktu_selesai', $pengajuan->jam_selesai) }}">
                     </div>
                 </div>
 

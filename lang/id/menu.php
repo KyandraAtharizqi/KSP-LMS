@@ -18,12 +18,6 @@ return [
         'start_date' => 'Dari Tanggal',
         'end_date' => 'Sampai Tanggal',
     ],
-    'gallery' => [
-        'menu' => 'Galeri Surat',
-        'incoming_letter' => 'Surat Masuk',
-        'outgoing_letter' => 'Surat Keluar',
-        'disposition_letter' => 'Surat Disposisi',
-    ],
     'reference' => [
         'menu' => 'Referensi',
         'classification' => 'Klasifikasi Surat',

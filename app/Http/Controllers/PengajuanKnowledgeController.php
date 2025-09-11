@@ -82,8 +82,10 @@ class PengajuanKnowledgeController extends Controller
             'perihal' => $request->perihal,
             'judul' => $request->judul,
             'pemateri' => $request->pemateri,
-            'tanggal_mulai' => $request->tanggal_mulai . ' ' . $request->waktu_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai . ' ' . $request->waktu_selesai,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
+            'jam_mulai' => $request->waktu_mulai,
+            'jam_selesai' => $request->waktu_selesai,
             'peserta' => $participants,
             'lampiran' => $lampiranPath,
             'status' => 'pending',
@@ -245,9 +247,10 @@ class PengajuanKnowledgeController extends Controller
 
         $pengajuan->perihal = $request->perihal;
         $pengajuan->pemateri = $request->pemateri;
-        // Gabungkan tanggal dan waktu untuk update
-        $pengajuan->tanggal_mulai = $request->tanggal_mulai . ' ' . $request->waktu_mulai;
-        $pengajuan->tanggal_selesai = $request->tanggal_selesai . ' ' . $request->waktu_selesai;
+        $pengajuan->tanggal_mulai = $request->tanggal_mulai;
+        $pengajuan->tanggal_selesai = $request->tanggal_selesai;
+        $pengajuan->jam_mulai = $request->waktu_mulai;
+        $pengajuan->jam_selesai = $request->waktu_selesai;
 
         // Update lampiran jika ada
         if ($request->hasFile('lampiran')) {

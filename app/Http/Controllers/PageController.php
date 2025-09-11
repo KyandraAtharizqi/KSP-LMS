@@ -14,6 +14,7 @@ use App\Models\PengajuanKnowledge;
 use App\Models\SignatureAndParaf;
 use App\Models\SuratPengajuanPelatihan;
 use App\Models\SuratTugasPelatihan;
+use App\Models\SuratUndangan;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -32,16 +33,29 @@ class PageController extends Controller
     public function index(Request $request): View
     {
         $user = auth()->user();
+        $typeFilter = $request->get('type_filter');
         
         // Filter data berdasarkan role user - menampilkan semua data
         $baseSuratPengajuanQuery = SuratPengajuanPelatihan::query();
         $baseSuratTugasQuery = SuratTugasPelatihan::query();
         $baseKnowledgeQuery = PengajuanKnowledge::query();
+        $baseSuratUndanganQuery = SuratUndangan::query();
+        
+        // Inisialisasi variabel untuk status
+        $acceptedSuratPengajuan = 0;
+        $rejectedSuratPengajuan = 0;
+        $pendingSuratPengajuan = 0;
+        $acceptedPengajuanKnowledge = 0;
+        $rejectedPengajuanKnowledge = 0;
+        $pendingPengajuanKnowledge = 0;
         
         // Query untuk data yang diterima/disetujui
-        $baseSuratPengajuanAcceptedQuery = SuratPengajuanPelatihan::where('is_accepted', true);
         $baseSuratTugasAcceptedQuery = SuratTugasPelatihan::where('is_accepted', true);
+        
+        // Query untuk knowledge sharing berdasarkan status
         $baseKnowledgeAcceptedQuery = PengajuanKnowledge::where('status', 'approved');
+        $baseKnowledgeRejectedQuery = PengajuanKnowledge::where('status', 'rejected');
+        $baseKnowledgePendingQuery = PengajuanKnowledge::whereIn('status', ['pending', 'menunggu']);
         
         // Filter berdasarkan role
         switch ($user->role) {
@@ -59,14 +73,20 @@ class PageController extends Controller
                 $baseKnowledgeQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('department_id', $user->department_id);
                 });
-                // Filter untuk data yang diterima
-                $baseSuratPengajuanAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                $baseSuratUndanganQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('department_id', $user->department_id);
                 });
                 $baseSuratTugasAcceptedQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('department_id', $user->department_id);
                 });
                 $baseKnowledgeAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                // Filter untuk knowledge sharing status
+                $baseKnowledgeRejectedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('department_id', $user->department_id);
+                });
+                $baseKnowledgePendingQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('department_id', $user->department_id);
                 });
                 break;
@@ -81,14 +101,20 @@ class PageController extends Controller
                 $baseKnowledgeQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('division_id', $user->division_id);
                 });
-                // Filter untuk data yang diterima
-                $baseSuratPengajuanAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                $baseSuratUndanganQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('division_id', $user->division_id);
                 });
                 $baseSuratTugasAcceptedQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('division_id', $user->division_id);
                 });
                 $baseKnowledgeAcceptedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                // Filter untuk knowledge sharing status
+                $baseKnowledgeRejectedQuery->whereIn('created_by', function($query) use ($user) {
+                    return $query->select('id')->from('users')->where('division_id', $user->division_id);
+                });
+                $baseKnowledgePendingQuery->whereIn('created_by', function($query) use ($user) {
                     return $query->select('id')->from('users')->where('division_id', $user->division_id);
                 });
                 break;
@@ -99,39 +125,107 @@ class PageController extends Controller
                 $baseSuratPengajuanQuery->where('created_by', $user->id);
                 $baseSuratTugasQuery->where('created_by', $user->id);
                 $baseKnowledgeQuery->where('created_by', $user->id);
-                // Filter untuk data yang diterima
-                $baseSuratPengajuanAcceptedQuery->where('created_by', $user->id);
+                $baseSuratUndanganQuery->where('created_by', $user->id);
                 $baseSuratTugasAcceptedQuery->where('created_by', $user->id);
                 $baseKnowledgeAcceptedQuery->where('created_by', $user->id);
+                // Filter untuk knowledge sharing status
+                $baseKnowledgeRejectedQuery->where('created_by', $user->id);
+                $baseKnowledgePendingQuery->where('created_by', $user->id);
                 break;
         }
         
-        // Hitung total data
-        $todaySuratPengajuan = $baseSuratPengajuanQuery->count();
-        $todaySuratTugas = $baseSuratTugasQuery->count();
-        $todayKnowledgeLetter = $baseKnowledgeQuery->count();
+        // Filter berdasarkan jenis (training atau knowledge)
+        if ($typeFilter == 'training') {
+            // Jika filter training, hitung hanya data training
+            $totalSuratPengajuan = $baseSuratPengajuanQuery->count();
+            $totalSuratTugas = $baseSuratTugasQuery->count();
+            $acceptedSuratTugas = $baseSuratTugasAcceptedQuery->count();
+            
+            // Set knowledge dan undangan ke 0
+            $totalKnowledgeLetter = 0;
+            $totalSuratUndangan = 0;
+            $acceptedKnowledgeLetter = 0;
+            $acceptedSuratUndangan = 0;
+            
+            // Menghitung status surat pengajuan pelatihan berdasarkan field is_accepted
+            $acceptedSuratPengajuan = (clone $baseSuratPengajuanQuery)->where('is_accepted', 1)->count();
+            $rejectedSuratPengajuan = (clone $baseSuratPengajuanQuery)->where('is_accepted', 0)->whereNotNull('is_accepted')->count();
+            $pendingSuratPengajuan = (clone $baseSuratPengajuanQuery)->whereNull('is_accepted')->count();
+            
+            // Set default untuk knowledge sharing status
+            $acceptedPengajuanKnowledge = 0;
+            $rejectedPengajuanKnowledge = 0;
+            $pendingPengajuanKnowledge = 0;
+            
+        } elseif ($typeFilter == 'knowledge') {
+            // Jika filter knowledge, hitung hanya data knowledge
+            $totalKnowledgeLetter = $baseKnowledgeQuery->count();
+            $totalSuratUndangan = $baseSuratUndanganQuery->count();
+            $acceptedKnowledgeLetter = $baseKnowledgeAcceptedQuery->count();
+            $acceptedSuratUndangan = 0;
+            
+            // Set training ke 0
+            $totalSuratPengajuan = 0;
+            $totalSuratTugas = 0;
+            $acceptedSuratPengajuan = 0;
+            $acceptedSuratTugas = 0;
+            
+            // Hitung data yang ditolak dan menunggu untuk knowledge sharing
+            $acceptedPengajuanKnowledge = $baseKnowledgeAcceptedQuery->count();
+            $rejectedPengajuanKnowledge = $baseKnowledgeRejectedQuery->count();
+            $pendingPengajuanKnowledge = $baseKnowledgePendingQuery->count();
+            
+            // Set default untuk training status
+            $rejectedSuratPengajuan = 0;
+            $pendingSuratPengajuan = 0;
+            
+        } else {
+            // Jika semua jenis, hitung normal
+            $totalSuratPengajuan = $baseSuratPengajuanQuery->count();
+            $totalSuratTugas = $baseSuratTugasQuery->count();
+            $totalKnowledgeLetter = $baseKnowledgeQuery->count();
+            $totalSuratUndangan = $baseSuratUndanganQuery->count();
+
+            // Hitung data yang diterima/disetujui
+            $acceptedSuratPengajuan = (clone $baseSuratPengajuanQuery)->where('is_accepted', 1)->count();
+            $acceptedSuratTugas = $baseSuratTugasAcceptedQuery->count();
+            $acceptedKnowledgeLetter = $baseKnowledgeAcceptedQuery->count();
+            $acceptedSuratUndangan = 0; // Default 0 jika tidak ada field approval untuk undangan
+            
+            // Hitung status untuk knowledge sharing
+            $acceptedPengajuanKnowledge = $baseKnowledgeAcceptedQuery->count();
+            $rejectedPengajuanKnowledge = $baseKnowledgeRejectedQuery->count();
+            $pendingPengajuanKnowledge = $baseKnowledgePendingQuery->count();
+            
+            // Set default untuk status detailed training
+            $rejectedSuratPengajuan = 0;
+            $pendingSuratPengajuan = 0;
+        }
         
-        // Hitung data yang diterima/disetujui
-        $acceptedSuratPengajuan = $baseSuratPengajuanAcceptedQuery->count();
-        $acceptedSuratTugas = $baseSuratTugasAcceptedQuery->count();
-        $acceptedKnowledgeLetter = $baseKnowledgeAcceptedQuery->count();
-        
-        $todayLetterTransaction = $todaySuratPengajuan + $todaySuratTugas + $todayKnowledgeLetter;
+        $totalLetterTransaction = $totalSuratPengajuan + $totalSuratTugas + $totalKnowledgeLetter + $totalSuratUndangan;
 
         return view('pages.dashboard', [
             'greeting' => GeneralHelper::greeting(),
             'currentDate' => Carbon::now()->isoFormat('dddd, D MMMM YYYY'),
-            'todayIncomingLetter' => $todaySuratPengajuan,
-            'todayOutgoingLetter' => $todaySuratTugas,
-            'todayKnowledgeLetter' => $todayKnowledgeLetter,
-            'todayLetterTransaction' => $todayLetterTransaction,
+            'totalSuratPengajuan' => $totalSuratPengajuan,
+            'totalSuratTugas' => $totalSuratTugas,
+            'totalKnowledgeLetter' => $totalKnowledgeLetter,
+            'totalSuratUndangan' => $totalSuratUndangan,
+            'totalLetterTransaction' => $totalLetterTransaction,
             'acceptedSuratPengajuan' => $acceptedSuratPengajuan,
             'acceptedSuratTugas' => $acceptedSuratTugas,
             'acceptedKnowledgeLetter' => $acceptedKnowledgeLetter,
+            'acceptedSuratUndangan' => $acceptedSuratUndangan,
+            'rejectedSuratPengajuan' => $rejectedSuratPengajuan,
+            'pendingSuratPengajuan' => $pendingSuratPengajuan,
+            'acceptedPengajuanKnowledge' => $acceptedPengajuanKnowledge,
+            'rejectedPengajuanKnowledge' => $rejectedPengajuanKnowledge,
+            'pendingPengajuanKnowledge' => $pendingPengajuanKnowledge,
             'activeUser' => User::active()->count(),
-            'percentageIncomingLetter' => 0, // Set 0 karena kita tidak hitung persentase lagi
-            'percentageOutgoingLetter' => 0,
+            'percentageSuratPengajuan' => 0, // Set 0 karena kita tidak hitung persentase lagi
+            'percentageSuratTugas' => 0,
             'percentageKnowledgeLetter' => 0,
+            'percentageSuratUndangan' => 0,
             'percentageLetterTransaction' => 0,
         ]);
     }
