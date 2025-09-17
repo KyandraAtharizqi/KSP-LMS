@@ -24,7 +24,7 @@ use App\Http\Controllers\DaftarHadirKnowledgeController;
 use App\Http\Controllers\PengajuanKnowledgeController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\Elearning\ElearningVideoController;
 /* 👇 Evaluation controllers */
 use App\Http\Controllers\EvaluasiLevel1Controller;
 use App\Http\Controllers\EvaluasiLevel3PesertaController;
@@ -309,14 +309,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [EvaluasiLevel3PesertaController::class, 'index'])->name('index');
             Route::get('/create/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'create'])->name('create');
             Route::post('/store/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'store'])->name('store');
-            Route::get('/preview/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'preview'])->name('preview');
+            Route::get('/preview/{evaluasi}', [EvaluasiLevel3PesertaController::class, 'preview'])->name('preview');
             Route::get('/edit/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'edit'])->name('edit');
             Route::put('/update/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'update'])->name('update');
-            Route::get('/pdf/{pelatihan}', [EvaluasiLevel3PesertaController::class, 'pdfView'])->name('pdf');
-
-
-
+            Route::get('/pdf/{evaluasi}', [EvaluasiLevel3PesertaController::class, 'pdfView'])->name('pdf');
+            Route::post('/force-open/{evaluasiId}', [EvaluasiLevel3PesertaController::class, 'forceOpen'])->name('force-open');
         });
+
 
 
 
@@ -334,7 +333,11 @@ Route::middleware(['auth'])->group(function () {
                 // Create evaluation by supervisor
                 Route::get('/create/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'create'])->name('create');
                 Route::post('/store/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'store'])->name('store');
+
+                // ✅ Preview evaluation (GET)
+                Route::get('/preview/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'preview'])->name('preview');
             });
+
                 
 
         // Evaluation Atasan (manager follow‑up on behavior/transfer)
@@ -423,5 +426,16 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('knowledge')->name('knowledge.')->group(function () {
         Route::resource('daftarhadir', DaftarHadirKnowledgeController::class);
     });
+
+
+
+
+
+    Route::prefix('elearning/videos')
+        ->name('elearning.videos.')
+        ->group(function () {
+            // Index - list all videos
+            Route::get('/', [ElearningVideoController::class, 'index'])->name('index');
+        });
 
 });

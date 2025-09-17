@@ -105,20 +105,22 @@
                                 <td>{{ $pengajuan->creator?->name ?? '-' }}</td>
                                 <td class="text-nowrap">
                                     {{-- Preview --}}
-                                    <a href="{{ route('training.surattugas.preview', $tugas->id) }}" class="btn btn-sm btn-primary mb-1">
-                                        <i class="bx bx-show"></i> Preview
-                                    </a>
+                                    @if($tugas)
+                                        <a href="{{ route('training.surattugas.preview', $tugas->id) }}" class="btn btn-sm btn-primary mb-1">
+                                            <i class="bx bx-show"></i> Preview
+                                        </a>
+                                    @endif
 
                                     {{-- Download --}}
                                     @if ($tugas && $tugas->is_accepted)
-                                        <a href="{{ route('training.surattugas.download', $pengajuan->id) }}" class="btn btn-sm btn-success mb-1">
+                                        <a href="{{ route('training.surattugas.download', $tugas->id) }}" class="btn btn-sm btn-success mb-1">
                                             <i class="bx bx-download"></i> Download
                                         </a>
                                     @endif
 
                                     {{-- Assign --}}
                                     @if ($approvalNeeded && $canAssign)
-                                        <a href="{{ route('training.surattugas.assign.view', $pengajuan->id) }}" class="btn btn-sm btn-info mb-1">
+                                        <a href="{{ route('training.surattugas.assign.view', $tugas ? $tugas->id : $pengajuan->id) }}" class="btn btn-sm btn-info mb-1">
                                             <i class="bx bx-user-plus"></i> Assign
                                         </a>
                                     @endif

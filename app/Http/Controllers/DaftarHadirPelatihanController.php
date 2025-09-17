@@ -62,26 +62,33 @@ class DaftarHadirPelatihanController extends Controller
     /* ===============================================================
     | ADD DAY – Add a new date manually
     * ===============================================================*/
-    public function addDay(Request $request, $pelatihanId)
+        public function addDay(Request $request, $pelatihanId)
     {
-        $request->validate([
-            'date' => 'required|date',
-        ]);
-
-        $user = Auth::user();
+        $request->validate(['date' => 'required|date']);
+        
         $pelatihan = SuratPengajuanPelatihan::findOrFail($pelatihanId);
-
-        if (!$this->userCanManageAttendance($user, $pelatihan)) {
+        
+        if (!$this->userCanManageAttendance(Auth::user(), $pelatihan)) {
             abort(Response::HTTP_FORBIDDEN);
         }
 
-        // Check if date already exists
+        // ✅ FIX: Check if there are any days AND if all existing days are submitted
+        $totalDays = $pelatihan->daftarHadirStatus()->count();
+        $unsubmittedDays = $pelatihan->daftarHadirStatus()->where('is_submitted', false)->count();
+        
+        // Only prevent adding if there are existing days AND all of them are submitted
+        $allSubmitted = $totalDays > 0 && $unsubmittedDays === 0;
+        
+        if ($allSubmitted) {
+            return back()->with('error', 'Semua hari sudah disubmit. Tidak dapat menambahkan hari baru.');
+        }
+
+        // ❌ Prevent duplicate date
         $exists = $pelatihan->daftarHadirStatus()->whereDate('date', $request->date)->exists();
         if ($exists) {
             return back()->with('error', 'Tanggal ini sudah ada di daftar hadir.');
         }
 
-        // Directly create without validating against start/end date
         $pelatihan->daftarHadirStatus()->create([
             'date' => $request->date,
             'is_submitted' => false,
@@ -89,6 +96,7 @@ class DaftarHadirPelatihanController extends Controller
 
         return back()->with('success', 'Tanggal daftar hadir berhasil ditambahkan.');
     }
+
 
 
     /* ===============================================================

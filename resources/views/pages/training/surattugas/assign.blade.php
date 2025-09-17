@@ -7,77 +7,272 @@
     .modal-lg { max-width: 1100px !important; }
     .table th, .table td { vertical-align: middle; text-align: center; min-width: 140px; font-size: 15px; }
     .table th { background: #f8f9fa; }
+    .pre-filled {
+        border-left: 3px solid #fd7e14 !important;
+        padding-left: 10px !important;
+    }
+    .reference-label {
+        font-size: 12px;
+        color: #fd7e14;
+        display: block;
+        margin-top: 2px;
+    }
+    .form-control.pre-filled:focus {
+        box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25);
+    }
 </style>
 
 <script>
-let selectedParafs = @json($existingParafs ?? []);
-let selectedSignature = @json($existingSignature ?? null);
-let selectedTanggalPelaksanaan = @json($existingSuratTugas?->tanggal_pelaksanaan ?? []);
+// Debug information to console - this will help identify issues
+console.log("Debug - existingSuratTugas:", @json($existingSuratTugas));
+console.log("Debug - latestRejection:", @json($latestRejection));
+
+// Fix initialization of data from existing approval records
+@php
+    // Handle potential null/empty values to prevent errors
+    $latestRound = 1;  // Default value if no rounds exist
+    $existingParafsJson = '[]';
+    $existingSignatureJson = 'null';
+    
+    if ($existingSuratTugas) {
+        try {
+            // Get latest round DYNAMICALLY from existing approvals
+            $latestRound = $existingSuratTugas->signaturesAndParafs()->max('round') ?? 1;
+            
+            // Get parafs safely for the LATEST round only
+            $parafs = $existingSuratTugas->signaturesAndParafs()
+                ->where('type', 'paraf')
+                ->where('round', $latestRound)  // Using the dynamically determined latest round
+                ->get();
+                
+            if ($parafs->count() > 0) {
+                $existingParafsJson = $parafs->map(function($p) {
+                    if ($p->user) {
+                        return [
+                            'id' => $p->user_id,
+                            'name' => $p->user->name,
+                            'registration_id' => $p->user->registration_id,
+                            'jabatan_full' => $p->user->jabatan_full ?? ($p->user->jabatan ? $p->user->jabatan->name : '-'),
+                        ];
+                    }
+                    return null;
+                })->filter()->values()->toJson();
+            }
+            
+            // Get signature safely for the LATEST round only
+            $signature = $existingSuratTugas->signaturesAndParafs()
+                ->where('type', 'signature')
+                ->where('round', $latestRound)  // Using the same latest round
+                ->first();
+                
+            if ($signature && $signature->user) {
+                $existingSignatureJson = json_encode([
+                    'id' => $signature->user_id,
+                    'name' => $signature->user->name,
+                    'registration_id' => $signature->user->registration_id,
+                    'jabatan_full' => $signature->user->jabatan_full ?? ($signature->user->jabatan ? $signature->user->jabatan->name : '-'),
+                ]);
+            }
+
+            // Add debug info to help troubleshoot
+            \Log::info("SuratTugas #{$existingSuratTugas->id} - Latest round: {$latestRound}");
+            \Log::info("Parafs found: " . $parafs->count());
+            \Log::info("Signature found: " . ($signature ? 'Yes' : 'No'));
+        } catch (\Exception $e) {
+            // Log error but don't crash
+            \Log::error("Error loading existing approvals: " . $e->getMessage());
+        }
+    }
+@endphp
+
+// Properly initialize the selected arrays with error handling
+let selectedParafs = [];
+try {
+    selectedParafs = {!! $existingParafsJson !!} || [];
+} catch (e) {
+    console.error("Error parsing paraf data:", e);
+    selectedParafs = [];
+}
+
+let selectedSignature = null;
+try {
+    selectedSignature = {!! $existingSignatureJson !!};
+} catch (e) {
+    console.error("Error parsing signature data:", e);
+}
+
+let selectedTanggalPelaksanaan = [];
+
+// Handle tanggal_pelaksanaan from existing data with better error handling
+@if($existingSuratTugas && $existingSuratTugas->tanggal_pelaksanaan)
+    try {
+        let pelaksanaanData = @json($existingSuratTugas->tanggal_pelaksanaan);
+        if (typeof pelaksanaanData === 'string' && pelaksanaanData.trim() !== '') {
+            selectedTanggalPelaksanaan = JSON.parse(pelaksanaanData);
+        } else if (Array.isArray(pelaksanaanData)) {
+            selectedTanggalPelaksanaan = pelaksanaanData;
+        }
+    } catch(e) {
+        console.error("Error parsing tanggal pelaksanaan:", e);
+        selectedTanggalPelaksanaan = [];
+    }
+@endif
+
+// Log the parsed data for debugging
+console.log("Initial selectedParafs:", selectedParafs);
+console.log("Initial selectedSignature:", selectedSignature);
+console.log("Initial selectedTanggalPelaksanaan:", selectedTanggalPelaksanaan);
 
 // ==========================
-// Paraf & Signature Functions
+// Document Ready - SINGLE rendering implementation
 // ==========================
-function renderList(arr, containerId, inputName, inputContainerId, type) {
-    const container = document.getElementById(containerId);
-    const inputContainer = document.getElementById(inputContainerId);
-    container.innerHTML = '';
-    inputContainer.innerHTML = '';
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("DOM loaded - rendering data (SINGLE METHOD)");
+    
+    // Clear any existing rendered items first to prevent duplicates
+    document.getElementById('selected-paraf-list').innerHTML = '';
+    document.getElementById('paraf-inputs').innerHTML = '';
+    document.getElementById('selected-signature-list').innerHTML = '';
+    document.getElementById('signature-inputs').innerHTML = '';
+    
+    // Render parafs with error handling
+    try {
+        if (Array.isArray(selectedParafs) && selectedParafs.length > 0) {
+            console.log("Rendering parafs:", selectedParafs);
+            renderParafList(selectedParafs);
+        }
+    } catch (e) {
+        console.error("Error rendering parafs:", e);
+    }
+    
+    // Render signature with error handling
+    try {
+        if (selectedSignature) {
+            console.log("Rendering signature:", selectedSignature);
+            renderSignatureSelection(selectedSignature);
+        }
+    } catch (e) {
+        console.error("Error rendering signature:", e);
+    }
+    
+    // Render tanggal pelaksanaan
+    try {
+        renderTanggalPelaksanaan();
+    } catch (e) {
+        console.error("Error rendering tanggal pelaksanaan:", e);
+    }
+    
+    // Add reference styling
+    addReferenceTooltips();
+    
+    // Setup search filters
+    const searchInputs = [
+        { inputId: 'paraf-search', tableSelector: '#parafModal table tbody tr' },
+        { inputId: 'signature-search', tableSelector: '#signatureModal table tbody tr' }
+    ];
 
-    if (type === 'signature' && selectedSignature) {
+    searchInputs.forEach(({ inputId, tableSelector }) => {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        const rows = document.querySelectorAll(tableSelector);
+        input.addEventListener('input', function () {
+            const keyword = input.value.toLowerCase();
+            rows.forEach(row => {
+                const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                const regid = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const jabatan = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                const dept = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                const golongan = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                row.style.display = (name.includes(keyword) || regid.includes(keyword) || jabatan.includes(keyword) || dept.includes(keyword) || golongan.includes(keyword)) ? '' : 'none';
+            });
+        });
+    });
+});
+
+// Functions for rendering parafs
+function renderParafList(parafUsers) {
+    const container = document.getElementById('selected-paraf-list');
+    const inputContainer = document.getElementById('paraf-inputs');
+    // Don't clear here - we already clear in DOMContentLoaded
+    
+    parafUsers.forEach(user => {
+        if (!user || !user.id) return;
+        
         let tag = document.createElement('div');
-        tag.className = 'badge bg-success me-1 mb-1 d-inline-flex align-items-center';
-        tag.innerHTML = `${selectedSignature.name} (${selectedSignature.registration_id}) - ${selectedSignature.jabatan_full || '-' }
-            <button type="button" class="btn-close btn-sm ms-2" onclick="removeFromList('${selectedSignature.id}', '${containerId}')"></button>`;
+        tag.className = 'badge bg-warning text-dark me-1 mb-1 d-inline-flex align-items-center pre-filled';
+        tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan_full || '-'}
+            <button type="button" class="btn-close btn-sm ms-2" onclick="removeParaf(${user.id})"></button>`;
         container.appendChild(tag);
 
         let input = document.createElement('input');
         input.type = 'hidden';
-        input.name = inputName;
-        input.value = selectedSignature.id;
+        input.name = 'paraf_users[]';
+        input.value = user.id;
         inputContainer.appendChild(input);
-
-    } else if (type === 'paraf') {
-        arr.forEach(user => {
-            let tag = document.createElement('div');
-            tag.className = 'badge bg-warning text-dark me-1 mb-1 d-inline-flex align-items-center';
-            tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan_full || '-'}
-                <button type="button" class="btn-close btn-sm ms-2" onclick="removeFromList('${user.id}', '${containerId}')"></button>`;
-            container.appendChild(tag);
-
-            let input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = inputName;
-            input.value = user.id;
-            inputContainer.appendChild(input);
-        });
-    }
+    });
 }
 
-function removeFromList(userId, listType) {
-    if (listType === 'selected-paraf-list') {
-        selectedParafs = selectedParafs.filter(p => p.id != userId);
-        renderList(selectedParafs, 'selected-paraf-list', 'paraf_users[]', 'paraf-inputs', 'paraf');
-    } else if (listType === 'selected-signature-list') {
-        selectedSignature = null;
-        renderList([], 'selected-signature-list', 'signature_user', 'signature-inputs', 'signature');
-    }
+// Function to render signature
+function renderSignatureSelection(user) {
+    const container = document.getElementById('selected-signature-list');
+    const inputContainer = document.getElementById('signature-inputs');
+    // Don't clear here - we already clear in DOMContentLoaded
+    
+    if (!user || !user.id) return;
+    
+    let tag = document.createElement('div');
+    tag.className = 'badge bg-success text-white me-1 mb-1 d-inline-flex align-items-center pre-filled';
+    tag.innerHTML = `${user.name} (${user.registration_id}) - ${user.jabatan_full || '-'}
+        <button type="button" class="btn-close btn-close-white btn-sm ms-2" onclick="removeSignature()"></button>`;
+    container.appendChild(tag);
+
+    let input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'signature_user';
+    input.value = user.id;
+    inputContainer.appendChild(input);
 }
 
 function addToList(user, listType) {
-    if(listType === 'paraf' && selectedParafs.length >= 3) { 
-        alert('Maksimal 3 orang boleh dipilih sebagai paraf.'); 
-        return; 
-    }
+    if (listType === 'paraf') {
+        if (selectedParafs.length >= 3) { 
+            alert('Maksimal 3 orang boleh dipilih sebagai paraf.'); 
+            return; 
+        }
 
-    if(listType === 'paraf') {
-        if(!selectedParafs.find(p => p.id == user.id)) selectedParafs.push(user);
-        renderList(selectedParafs, 'selected-paraf-list', 'paraf_users[]', 'paraf-inputs', 'paraf');
+        // Check if user already exists in the array
+        if (!selectedParafs.some(p => p.id == user.id)) {
+            selectedParafs.push(user);
+        }
+        // Clear first, then render
+        document.getElementById('selected-paraf-list').innerHTML = '';
+        document.getElementById('paraf-inputs').innerHTML = '';
+        renderParafList(selectedParafs);
         bootstrap.Modal.getInstance(document.getElementById('parafModal')).hide();
-    } else if(listType === 'signature') {
+    } 
+    else if (listType === 'signature') {
         selectedSignature = user;
-        renderList([], 'selected-signature-list', 'signature_user', 'signature-inputs', 'signature');
+        // Clear first, then render
+        document.getElementById('selected-signature-list').innerHTML = '';
+        document.getElementById('signature-inputs').innerHTML = '';
+        renderSignatureSelection(user);
         bootstrap.Modal.getInstance(document.getElementById('signatureModal')).hide();
     }
+}
+
+function removeParaf(userId) {
+    selectedParafs = selectedParafs.filter(p => p.id != userId);
+    // Clear first, then render
+    document.getElementById('selected-paraf-list').innerHTML = '';
+    document.getElementById('paraf-inputs').innerHTML = '';
+    renderParafList(selectedParafs);
+}
+
+function removeSignature() {
+    selectedSignature = null;
+    document.getElementById('selected-signature-list').innerHTML = '';
+    document.getElementById('signature-inputs').innerHTML = '';
 }
 
 // ==========================
@@ -90,14 +285,15 @@ function renderTanggalPelaksanaan() {
     inputContainer.innerHTML = '';
 
     selectedTanggalPelaksanaan.forEach((tgl, idx) => {
-        // Badge display
+        // Create badge display
         const tag = document.createElement('div');
-        tag.className = 'badge bg-dark me-1 mb-1 d-inline-flex align-items-center';
+        tag.className = 'badge bg-dark me-1 mb-1 d-inline-flex align-items-center pre-filled';
         tag.innerHTML = `${formatDate(tgl)}
-            <button type="button" class="btn-close btn-close-white btn-sm ms-2" onclick="removeTanggalPelaksanaan(${idx})" aria-label="Remove"></button>`;
+            <button type="button" class="btn-close btn-close-white btn-sm ms-2" 
+                onclick="removeTanggalPelaksanaan(${idx})" aria-label="Remove"></button>`;
         container.appendChild(tag);
 
-        // Hidden input for form submission
+        // Create hidden input for form submission
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'tanggal_pelaksanaan[]';
@@ -105,11 +301,10 @@ function renderTanggalPelaksanaan() {
         inputContainer.appendChild(input);
     });
 
-    // Optional: count info
     if (selectedTanggalPelaksanaan.length > 0) {
         const countInfo = document.createElement('small');
-        countInfo.className = 'text-muted d-block mt-1';
-        countInfo.textContent = `${selectedTanggalPelaksanaan.length} tanggal dipilih`;
+        countInfo.className = 'text-muted d-block mt-1 pre-filled';
+        countInfo.innerHTML = `<i class="bx bx-info-circle"></i> ${selectedTanggalPelaksanaan.length} tanggal dari pengisian sebelumnya`;
         container.appendChild(countInfo);
     }
 }
@@ -141,7 +336,7 @@ function removeTanggalPelaksanaan(index) {
     }
 }
 
-// Helper: format date for badge
+// Helper function to format date
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', {
@@ -152,48 +347,91 @@ function formatDate(dateString) {
     });
 }
 
-// ==========================
-// Search Filter Functions
-// ==========================
-document.addEventListener('DOMContentLoaded', function () {
-    renderList(selectedParafs, 'selected-paraf-list', 'paraf_users[]', 'paraf-inputs', 'paraf');
-    renderList([], 'selected-signature-list', 'signature_user', 'signature-inputs', 'signature');
-    renderTanggalPelaksanaan();
-
-    const searchInputs = [
-        { inputId: 'paraf-search', tableSelector: '#parafModal table tbody tr' },
-        { inputId: 'signature-search', tableSelector: '#signatureModal table tbody tr' }
-    ];
-
-    searchInputs.forEach(({ inputId, tableSelector }) => {
-        const input = document.getElementById(inputId);
-        const rows = document.querySelectorAll(tableSelector);
-        input.addEventListener('input', function () {
-            const keyword = input.value.toLowerCase();
-            rows.forEach(row => {
-                const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-                const regid = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                const jabatan = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-                const dept = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-                const golongan = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
-                row.style.display = (name.includes(keyword) || regid.includes(keyword) || jabatan.includes(keyword) || dept.includes(keyword) || golongan.includes(keyword)) ? '' : 'none';
-            });
-        });
+// Add reference tooltips
+function addReferenceTooltips() {
+    const preFilled = document.querySelectorAll('.pre-filled');
+    preFilled.forEach(el => {
+        el.setAttribute('title', 'Data dari pengisian sebelumnya');
+        if (el.tagName !== 'SMALL') { // Don't add border to small elements
+            el.style.borderLeft = '3px solid #fd7e14'; // Orange border to indicate reference
+        }
     });
-});
+}
 </script>
+
 @endpush
+
+@php
+    // Update the controller to properly handle both scenarios:
+    // 1. New assignment (from SuratPengajuan)
+    // 2. Re-assignment (from SuratTugas)
+
+    // Ensure the form action is set correctly
+    $formAction = $existingSuratTugas 
+        ? route('training.surattugas.assign.submit', ['id' => $suratPengajuan->id])
+        : route('training.surattugas.assign.submit', ['id' => $suratPengajuan->id]);
+        
+    $pageTitle = $existingSuratTugas ? 'Re-assign Paraf & Signature' : 'Assign Paraf & Signature';
+@endphp
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold mb-4">{{ $existingSuratTugas ? 'Re-assign' : 'Assign' }} Paraf & Signature</h4>
+    <h4 class="fw-bold mb-4">{{ $pageTitle }}</h4>
 
-    {{-- Show rejection reason if exists --}}
-    @if ($latestRejection)
+    @if($latestRejection)
         <div class="alert alert-danger">
             <strong>❗ Surat Tugas Ditolak!</strong><br>
             Round {{ $latestRejection->round }}, Seq {{ $latestRejection->sequence }} – 
             "{{ $latestRejection->rejection_reason }}"
+        </div>
+    @endif
+
+    {{-- Debug information (can be kept or removed as needed) --}}
+    @if(app()->environment('local', 'development'))
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Debug Information</h5>
+            </div>
+            <div class="card-body">
+                <h6>Existing Surat Tugas:</h6>
+                <pre>{{ $existingSuratTugas ? json_encode([
+                    'id' => $existingSuratTugas->id,
+                    'kode_pelatihan' => $existingSuratTugas->kode_pelatihan,
+                    'created_at' => $existingSuratTugas->created_at,
+                ], JSON_PRETTY_PRINT) : 'null' }}</pre>
+                
+                <h6>Signatures & Parafs (if any):</h6>
+                @if($existingSuratTugas && $existingSuratTugas->signaturesAndParafs->count() > 0)
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Round</th>
+                                <th>Sequence</th>
+                                <th>Status</th>
+                                <th>User ID</th>
+                                <th>User Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($existingSuratTugas->signaturesAndParafs as $item)
+                                <tr>
+                                    <td>{{ $item->id }}</td>
+                                    <td>{{ $item->type }}</td>
+                                    <td>{{ $item->round }}</td>
+                                    <td>{{ $item->sequence }}</td>
+                                    <td>{{ $item->status }}</td>
+                                    <td>{{ $item->user_id }}</td>
+                                    <td>{{ $item->user->name ?? 'User not found' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <p>No signature or paraf records found</p>
+                @endif
+            </div>
         </div>
     @endif
 
@@ -226,26 +464,36 @@ document.addEventListener('DOMContentLoaded', function () {
     {{-- Assign Form --}}
     <div class="card">
         <div class="card-body">
-                <form action="{{ route('training.surattugas.assign.submit', ['id' => $suratPengajuan->id]) }}" method="POST">
+                <form action="{{ $formAction }}" method="POST">
                 @csrf
                 <!-- Detail Surat Tugas -->
                 <h4 class="fw-bold mb-3">Detail Surat Tugas</h4>
 
                 <div class="mb-3">
                     <label>Tempat <span class="text-danger">*</span></label>
-                    <input type="text" name="tempat" class="form-control" value="{{ old('tempat', $existingSuratTugas?->tempat) }}" required>
+                    <input type="text" name="tempat" class="form-control {{ $existingSuratTugas?->tempat ? 'pre-filled' : '' }}" 
+                        value="{{ old('tempat', $existingSuratTugas?->tempat) }}" required>
+                    @if($existingSuratTugas?->tempat)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
                     <label>Tanggal Mulai <span class="text-danger">*</span></label>
-                    <input type="date" name="tanggal_mulai" class="form-control" 
+                    <input type="date" name="tanggal_mulai" class="form-control {{ $existingSuratTugas?->tanggal_mulai ? 'pre-filled' : '' }}" 
                         value="{{ old('tanggal_mulai', $existingSuratTugas?->tanggal_mulai ?? $suratPengajuan->tanggal_mulai?->format('Y-m-d')) }}" required>
+                    @if($existingSuratTugas?->tanggal_mulai)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
                     <label>Tanggal Selesai <span class="text-danger">*</span></label>
-                    <input type="date" name="tanggal_selesai" class="form-control" 
+                    <input type="date" name="tanggal_selesai" class="form-control {{ $existingSuratTugas?->tanggal_selesai ? 'pre-filled' : '' }}"
                         value="{{ old('tanggal_selesai', $existingSuratTugas?->tanggal_selesai ?? $suratPengajuan->tanggal_selesai?->format('Y-m-d')) }}" required>
+                    @if($existingSuratTugas?->tanggal_selesai)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="col-md-12 mb-3">
@@ -260,32 +508,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 <div class="mb-3">
                     <label>Durasi (hari/jam) <span class="text-danger">*</span></label>
-                    <input type="text" name="durasi" class="form-control" value="{{ old('durasi', $existingSuratTugas?->durasi ?? $suratPengajuan->durasi) }}" required>
+                    <input type="text" name="durasi" class="form-control {{ $existingSuratTugas?->durasi ? 'pre-filled' : '' }}"
+                        value="{{ old('durasi', $existingSuratTugas?->durasi ?? $suratPengajuan->durasi) }}" required>
+                    @if($existingSuratTugas?->durasi)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
                     <label>Tujuan <span class="text-danger">*</span></label>
-                    <textarea name="tujuan" class="form-control" rows="3" required>{{ old('tujuan', $existingSuratTugas?->tujuan ?? 'Meningkatkan kompetensi dan keterampilan karyawan dalam bidang ' . $suratPengajuan->kompetensi) }}</textarea>
+                    <textarea name="tujuan" class="form-control {{ $existingSuratTugas?->tujuan ? 'pre-filled' : '' }}" rows="3" required>{{ old('tujuan', $existingSuratTugas?->tujuan ?? 'Meningkatkan kompetensi dan keterampilan karyawan dalam bidang ' . $suratPengajuan->kompetensi) }}</textarea>
+                    @if($existingSuratTugas?->tujuan)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
                     <label>Waktu <span class="text-danger">*</span></label>
-                    <input type="text" name="waktu" class="form-control" value="{{ old('waktu', $existingSuratTugas?->waktu ?? '08:00 - 17:00 WIB') }}" required>
+                    <input type="text" name="waktu" class="form-control {{ $existingSuratTugas?->waktu ? 'pre-filled' : '' }}"
+                        value="{{ old('waktu', $existingSuratTugas?->waktu ?? '08:00 - 17:00 WIB') }}" required>
+                    @if($existingSuratTugas?->waktu)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
                     <label>Instruksi <span class="text-danger">*</span></label>
-                    <textarea name="instruksi" class="form-control" rows="4" required>{{ old('instruksi', $existingSuratTugas?->instruksi ?? 'Melaksanakan pelatihan sesuai jadwal dan instruksi yang diberikan.') }}</textarea>
+                    <textarea name="instruksi" class="form-control {{ $existingSuratTugas?->instruksi ? 'pre-filled' : '' }}" rows="4" required>{{ old('instruksi', $existingSuratTugas?->instruksi ?? 'Melaksanakan pelatihan sesuai jadwal dan instruksi yang diberikan.') }}</textarea>
+                    @if($existingSuratTugas?->instruksi)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
                     <label>Hal-hal yang perlu diperhatikan <span class="text-danger">*</span></label>
-                    <textarea name="hal_perhatian" class="form-control" rows="4" required>{{ old('hal_perhatian', $existingSuratTugas?->hal_perhatian ?? '1. Hadir tepat waktu\n2. Berpakaian rapi\n3. Membawa perlengkapan\n4. Menjaga ketertiban') }}</textarea>
+                    <textarea name="hal_perhatian" class="form-control {{ $existingSuratTugas?->hal_perhatian ? 'pre-filled' : '' }}" rows="4" required>{{ old('hal_perhatian', $existingSuratTugas?->hal_perhatian ?? '1. Hadir tepat waktu
+2. Berpakaian rapi
+3. Membawa perlengkapan
+4. Menjaga ketertiban') }}</textarea>
+                    @if($existingSuratTugas?->hal_perhatian)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <div class="mb-3">
                     <label>Catatan <span class="text-danger">*</span></label>
-                    <textarea name="catatan" class="form-control" rows="3" required>{{ old('catatan', $existingSuratTugas?->catatan ?? 'Surat tugas berlaku selama pelatihan. Biaya ditanggung sesuai ketentuan.') }}</textarea>
+                    <textarea name="catatan" class="form-control {{ $existingSuratTugas?->catatan ? 'pre-filled' : '' }}" rows="3" required>{{ old('catatan', $existingSuratTugas?->catatan ?? 'Surat tugas berlaku selama pelatihan. Biaya ditanggung sesuai ketentuan.') }}</textarea>
+                    @if($existingSuratTugas?->catatan)
+                        <span class="reference-label">Data dari pengisian sebelumnya</span>
+                    @endif
                 </div>
 
                 <!-- Paraf -->

@@ -74,5 +74,17 @@ class PelatihanPresenter extends Model
         return 'Unknown Presenter';
     }
 
+    // In PelatihanLog model
+    public function pengajuanDepartment()
+    {
+        return $this->belongsTo(Department::class, 'pengajuan_department_id');
+    }
+
+    public function currentDepartment()
+    {
+        return $this->belongsTo(Department::class, 'current_department_id');
+    }
+
+
 }
 

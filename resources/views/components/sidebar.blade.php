@@ -119,6 +119,23 @@
             </ul>
         </li>
 
+        <!-- 👇 E-Learning Menu -->
+        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('elearning.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-play-circle"></i>
+                <div data-i18n="E-Learning">E-Learning</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('elearning.videos.index') ? 'active' : '' }}">
+                    <a href="{{ route('elearning.videos.index') }}" class="menu-link">
+                        <div data-i18n="Video Library">Video Library</div>
+                    </a>
+                </li>
+                {{-- Future: quizzes, progress, etc --}}
+            </ul>
+        </li>
+
+
         <!-- Other Menu -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">{{ __('menu.header.other_menu') }}</span>

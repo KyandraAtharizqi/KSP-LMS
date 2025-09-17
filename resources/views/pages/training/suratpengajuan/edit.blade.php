@@ -73,6 +73,9 @@
                 'jabatan_full' => $a->user->jabatan_full ?? ($a->user->jabatan->name ?? '-'),
             ];
         })->values();
+
+    // Decode existing tanggal pelaksanaan
+    $existingTanggalPelaksanaan = json_decode($surat->tanggal_pelaksanaan ?? '[]', true) ?: [];
 @endphp
 
 <script>
@@ -81,6 +84,91 @@
     let selectedSignature1 = [];
     let selectedSignature2 = [];
     let selectedSignature3 = [];
+    let selectedTanggalPelaksanaan = [];
+
+    function renderTanggalPelaksanaan() {
+        const container = document.getElementById('tanggal-pelaksanaan-list');
+        const inputContainer = document.getElementById('tanggal-pelaksanaan-inputs');
+        
+        // Clear existing content
+        container.innerHTML = '';
+        inputContainer.innerHTML = '';
+
+        // Render each selected date
+        selectedTanggalPelaksanaan.forEach((tgl, idx) => {
+            // Create display badge
+            const tag = document.createElement('div');
+            tag.className = 'badge bg-dark me-1 mb-1 d-inline-flex align-items-center';
+            tag.innerHTML = `${formatDate(tgl)}
+                <button type="button" class="btn-close btn-close-white btn-sm ms-2" onclick="removeTanggalPelaksanaan(${idx})" aria-label="Remove"></button>`;
+            container.appendChild(tag);
+
+            // Create hidden input for form submission
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'tanggal_pelaksanaan[]';
+            input.value = tgl;
+            inputContainer.appendChild(input);
+        });
+        
+        // Show count
+        if (selectedTanggalPelaksanaan.length > 0) {
+            const countInfo = document.createElement('small');
+            countInfo.className = 'text-muted d-block mt-1';
+            countInfo.textContent = `${selectedTanggalPelaksanaan.length} tanggal dipilih`;
+            container.appendChild(countInfo);
+        }
+    }
+
+    function addTanggalPelaksanaan() {
+        const picker = document.getElementById('tanggal-pelaksanaan-picker');
+        const tgl = picker.value;
+        
+        console.log('Date picker value:', tgl); // Debug log
+        
+        // Validate date input
+        if (!tgl) {
+            alert('Silakan pilih tanggal terlebih dahulu');
+            return;
+        }
+        
+        // Check if date already selected
+        if (selectedTanggalPelaksanaan.includes(tgl)) {
+            alert('Tanggal sudah dipilih sebelumnya');
+            picker.value = ''; // Clear the picker
+            return;
+        }
+        
+        // Add to array and sort
+        selectedTanggalPelaksanaan.push(tgl);
+        selectedTanggalPelaksanaan.sort(); // Keep chronological order
+        
+        // Re-render the list
+        renderTanggalPelaksanaan();
+        
+        // Clear the picker
+        picker.value = '';
+        
+        console.log('Selected dates:', selectedTanggalPelaksanaan); // Debug log
+    }
+
+    function removeTanggalPelaksanaan(index) {
+        if (confirm('Hapus tanggal ini?')) {
+            selectedTanggalPelaksanaan.splice(index, 1);
+            renderTanggalPelaksanaan();
+        }
+    }
+
+    // Helper function to format date for display
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short', 
+            day: 'numeric'
+        });
+    }
 
     function renderList(arr, containerId, inputName, inputContainerId, colorClass) {
         const container = document.getElementById(containerId);
@@ -104,7 +192,6 @@
             inputContainer.appendChild(input);
         });
     }
-
 
     function removeFromList(registrationId, listType) {
         if (listType === 'selected-participant-list') {
@@ -161,6 +248,38 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize existing data
+        @if(!empty($participantsData))
+            selectedParticipants = @json($participantsData);
+            renderList(selectedParticipants, 'selected-participant-list', 'participants', 'participant-inputs', 'bg-primary');
+        @endif
+
+        @if(!empty($parafsData))
+            selectedParafs = @json($parafsData);
+            renderList(selectedParafs, 'selected-paraf-list', 'parafs', 'paraf-inputs', 'bg-warning text-dark');
+        @endif
+
+        @if(!empty($signature1Data))
+            selectedSignature1 = @json($signature1Data);
+            renderList(selectedSignature1, 'selected-signature1-list', 'signatures', 'signature1-inputs', 'bg-success');
+        @endif
+
+        @if(!empty($signature2Data))
+            selectedSignature2 = @json($signature2Data);
+            renderList(selectedSignature2, 'selected-signature2-list', 'signature2', 'signature2-inputs', 'bg-info');
+        @endif
+
+        @if(!empty($signature3Data))
+            selectedSignature3 = @json($signature3Data);
+            renderList(selectedSignature3, 'selected-signature3-list', 'signature3', 'signature3-inputs', 'bg-secondary');
+        @endif
+
+        // Initialize existing tanggal pelaksanaan
+        @if(!empty($existingTanggalPelaksanaan))
+            selectedTanggalPelaksanaan = @json($existingTanggalPelaksanaan);
+        @endif
+        renderTanggalPelaksanaan();
+
         const searchInputs = [
             { inputId: 'participant-search', tableSelector: '#participant-table tbody tr' },
             { inputId: 'paraf-search', tableSelector: '#parafModal table tbody tr' },
@@ -296,6 +415,17 @@
                     <label>Tanggal Selesai</label>
                     <input type="date" name="tanggal_selesai" class="form-control" value="{{ old('tanggal_selesai', $surat->tanggal_selesai ? $surat->tanggal_selesai->format('Y-m-d') : '') }}" required>
                 </div>
+
+                <div class="col-md-12 mb-3">
+                    <label>Tanggal Pelaksanaan</label>
+                    <div id="tanggal-pelaksanaan-list" class="mb-2"></div>
+                    <div id="tanggal-pelaksanaan-inputs"></div>
+                    <div class="input-group">
+                        <input type="date" id="tanggal-pelaksanaan-picker" class="form-control">
+                        <button type="button" class="btn btn-outline-primary" onclick="addTanggalPelaksanaan()">+ Tambah</button>
+                    </div>
+                </div>
+
                 <div class="col-md-3 mb-3">
                     <label>Durasi (hari)</label>
                     <input type="text" id="durasi" class="form-control" value="{{ old('durasi', $surat->durasi) }}" readonly>
@@ -323,6 +453,11 @@
                 <div class="col-md-12 mb-3">
                     <label>Keterangan</label>
                     <textarea name="keterangan" class="form-control">{{ old('keterangan', $surat->keterangan) }}</textarea>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label>Tujuan Peserta</label>
+                    <textarea name="tujuan_peserta" class="form-control">{{ old('tujuan_peserta', $surat->tujuan_peserta) }}</textarea>
                 </div>
 
                 <!-- Participant -->
@@ -397,6 +532,7 @@
                                 <th>Registration ID</th>
                                 <th>Jabatan Lengkap</th>
                                 <th>Departemen</th>
+                                <th>Golongan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -409,6 +545,7 @@
                                 <td>{{ $user->registration_id }}</td>
                                 <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
                                 <td>{{ $user->department->name ?? '-' }}</td>
+                                <td>{{ $user->golongan ?? '-' }}</td>
                                 <td>
                                   <button type="button" class="btn btn-sm btn-success"
                                       onclick='addToList(@json([
@@ -456,7 +593,7 @@
             <tr data-name="{{ $user->name }}" data-department="{{ $user->department->name ?? '' }}" data-jabatan="{{ $user->jabatan->name ?? '' }}">
               <td>{{ $user->name }}</td>
               <td>{{ $user->registration_id }}</td>
-              <td>{{ $user->jabatan_full }}</td>
+              <td>{{ $user->jabatan_full ?? ($user->jabatan->name ?? '-') }}</td>
               <td>{{ $user->department->name ?? '-' }}</td>
               <td>{{ $user->golongan ?? '-' }}</td>
               <td>

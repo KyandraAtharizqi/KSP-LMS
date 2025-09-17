@@ -36,7 +36,7 @@
     <table class="header-table no-border">
         <tr>
             <td class="header-left" style="width:25%;">
-                <img src="{{ public_path('logoksp.png') }}" alt="Logo">
+                <img src="{{ public_path('logo.png') }}" alt="Logo">
             </td>
             <td class="header-center" style="width:50%;">
                 <h2 class="title">DAFTAR HADIR PELATIHAN</h2>
@@ -44,7 +44,7 @@
                 <div class="subtitle">{{ $pelatihan->judul ?? '-' }}</div>
             </td>
             <td class="header-right text-right" style="width:25%; text-align:right;">
-                <img src="{{ public_path('path/to/logo_ykan.png') }}" alt="Logo YKAN">
+                <img src="{{ public_path('logo.png') }}" alt="Logo YKAN">
             </td>
         </tr>
     </table>

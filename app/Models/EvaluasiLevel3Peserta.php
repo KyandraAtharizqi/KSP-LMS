@@ -59,4 +59,11 @@ class EvaluasiLevel3Peserta extends Model
     {
         return $this->hasMany(EvaluasiLevel3Signature::class, 'evaluasi_level_3_peserta_id');
     }
+
+    public function atasanEvaluation()
+    {
+        return $this->hasOne(EvaluasiLevel3Atasan::class, 'user_id', 'user_id')
+                    ->whereColumn('pelatihan_id', 'pelatihan_id')
+                    ->latest('id'); // get the latest if multiple exist
+    }
 }

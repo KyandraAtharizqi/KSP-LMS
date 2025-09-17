@@ -60,8 +60,8 @@
                 <td>{{ $log->registration_id }}</td>
                 <td>{{ $log->kode_pelatihan }}</td>
                 <td>{{ $log->pelatihan->judul ?? '-' }}</td>
-                <td>{{ $log->pengajuan_department }}</td>
-                <td>{{ $log->current_department }}</td>
+                <td>{{ $log->pengajuanDepartment?->name ?? '-' }}</td>
+                <td>{{ $log->currentDepartment?->name ?? '-' }}</td>
                 <td>{{ $log->pengajuan_jabatan_full }}</td>
                 <td>{{ $log->current_jabatan_full }}</td>
                 <td>{{ $log->jam }}</td>

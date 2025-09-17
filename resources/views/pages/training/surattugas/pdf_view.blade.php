@@ -1,4 +1,3 @@
-
 @php
     use Illuminate\Support\Facades\DB;
 
@@ -179,9 +178,21 @@
             <td><strong>Hari, Tanggal Pelaksanaan Pelatihan</strong></td>
             <td>
                 @php
-                    $pelaksanaan = $surat->pelatihan?->tanggal_pelaksanaan;
+                    // Try to get tanggal_pelaksanaan from surat tugas first
+                    $pelaksanaan = $surat->tanggal_pelaksanaan;
+                    
+                    // If not available, fall back to pengajuan
+                    if (empty($pelaksanaan) && $surat->pelatihan) {
+                        $pelaksanaan = $surat->pelatihan->tanggal_pelaksanaan;
+                    }
+                    
+                    // Handle JSON string if needed
                     if (is_string($pelaksanaan)) {
-                        $pelaksanaan = json_decode($pelaksanaan, true);
+                        try {
+                            $pelaksanaan = json_decode($pelaksanaan, true);
+                        } catch (\Exception $e) {
+                            $pelaksanaan = null;
+                        }
                     }
                 @endphp
 
@@ -282,7 +293,13 @@
                                                 <small>{{ $paraf->user->registration_id ?? '-' }}</small>
                                                 <small>{{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}</small>
                                             </div>
-                                            <div class="sign-role">(Paraf)</div>
+                                            <div class="sign-role">
+                                                @if($paraf->user?->registration_id === '0000')
+                                                    (Kepala Bagian)
+                                                @else
+                                                    (Paraf)
+                                                @endif
+                                            </div>
                                         </td>
                                     @endforeach
                                     

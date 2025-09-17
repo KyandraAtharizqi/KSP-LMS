@@ -308,110 +308,118 @@
             <div style="margin-top:5px;">
                 <div class="section-content">
 
-                    {{-- Paraf with row-based layout - Always show at least one row with three boxes --}}
-                    <div style="font-weight:bold; font-size:8px; margin-bottom:4px;">Paraf</div>
-                    <div class="form-section" style="margin-top:0; border:0;">
-                        <table style="width:100%; margin-top:2px; text-align:center; border-collapse:collapse;">
-                            <tr>
-                                @php
-                                    // Always display at least 3 paraf boxes, even if none assigned
-                                    $minParafBoxes = 3;
-                                    $actualParafs = $parafsCount;
-                                    $boxesToShow = max($minParafBoxes, $actualParafs);
-                                @endphp
-                                
-                                @for($i = 0; $i < $boxesToShow; $i++)
-                                    @php
-                                        $showParafData = $i < $parafsCount;
-                                        $paraf = $showParafData ? $parafs[$i] : null;
-                                        $pdfPath = $showParafData ? ($paraf->pdf_path ?? null) : null;
-                                        $showImg = $showParafData && $paraf->status === 'approved' && $pdfPath && is_readable($pdfPath);
-                                    @endphp
-                                    <td class="sign-cell" style="border:1px solid #ddd; width:{{ 100/$boxesToShow }}%;">
-                                        <div class="sign-image-box">
-                                            @if($showImg)
-                                                <img src="{{ $pdfPath }}" alt="Paraf">
-                                            @else
-                                                <div class="sign-blank"></div>
-                                            @endif
-                                        </div>
-                                        <div class="sign-meta">
-                                            {{ $showParafData ? ($paraf->user->name ?? '-') : '' }}
-                                            @if($showParafData)
-                                                <small>{{ $paraf->user->registration_id ?? '-' }}</small>
-                                                <small>{{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}</small>
-                                            @endif
-                                        </div>
-                                        @if($showParafData)
-                                            <div class="sign-role">(Paraf)</div>
-                                        @endif
-                                    </td>
-                                @endfor
-                            </tr>
-                        </table>
-                    </div>
+                {{-- Replace the problematic paraf section in your PDF template with this: --}}
 
-                    {{-- Signature with row-based layout - Only show if there are signatures --}}
-                    @if($sigsCount > 0)
-                        <div style="font-weight:bold; font-size:8px; margin:10px 0 4px;">Tanda Tangan</div>
-                        <div class="form-section" style="margin-top:0; border:0;">
-                            @for($row = 0; $row < $sigRows; $row++)
-                                <table style="width:100%; text-align:center; border-collapse:collapse; margin-bottom:5px;">
-                                    <tr class="sign-grid-header">
+                {{-- Paraf with row-based layout - Always show at least one row with three boxes --}}
+                <div style="font-weight:bold; font-size:8px; margin-bottom:4px;">Paraf</div>
+                <div class="form-section" style="margin-top:0; border:0;">
+                    <table style="width:100%; margin-top:2px; text-align:center; border-collapse:collapse;">
+                        <tr>
+                            @php
+                                // Always display at least 3 paraf boxes, even if none assigned
+                                $minParafBoxes = 3;
+                                $actualParafs = $parafsCount;
+                                $boxesToShow = max($minParafBoxes, $actualParafs);
+                            @endphp
+                            
+                            @for($i = 0; $i < $boxesToShow; $i++)
+                                @php
+                                    $showParafData = $i < $parafsCount;
+                                    // FIX: Use values()->get() instead of direct array access
+                                    $paraf = $showParafData ? ($parafs->values()->get($i) ?? null) : null;
+                                    $pdfPath = $showParafData && $paraf ? ($paraf->pdf_path ?? null) : null;
+                                    $showImg = $showParafData && $paraf && $paraf->status === 'approved' && $pdfPath && is_readable($pdfPath);
+                                @endphp
+                                <td class="sign-cell" style="border:1px solid #ddd; width:{{ 100/$boxesToShow }}%;">
+                                    <div class="sign-image-box">
+                                        @if($showImg)
+                                            <img src="{{ $pdfPath }}" alt="Paraf">
+                                        @else
+                                            <div class="sign-blank"></div>
+                                        @endif
+                                    </div>
+                                    <div class="sign-meta">
+                                        @if($showParafData && $paraf)
+                                            {{ $paraf->user->name ?? '-' }}
+                                            <small>{{ $paraf->user->registration_id ?? '-' }}</small>
+                                            <small>{{ $paraf->user->jabatan_full ?? ($paraf->user->jabatan->name ?? '-') }}</small>
+                                        @endif
+                                    </div>
+                                    @if($showParafData && $paraf)
+                                        <div class="sign-role">(Paraf)</div>
+                                    @endif
+                                </td>
+                            @endfor
+                        </tr>
+                    </table>
+                </div>
+
+                {{-- Also fix the signature section: --}}
+                @if($sigsCount > 0)
+                    <div style="font-weight:bold; font-size:8px; margin:10px 0 4px;">Tanda Tangan</div>
+                    <div class="form-section" style="margin-top:0; border:0;">
+                        @for($row = 0; $row < $sigRows; $row++)
+                            <table style="width:100%; text-align:center; border-collapse:collapse; margin-bottom:5px;">
+                                <tr class="sign-grid-header">
+                                    @php
+                                        $labels = ['Mengusulkan', 'Mengetahui', 'Menyetujui'];
+                                        $defaultLabel = 'Tanda Tangan';
+                                    @endphp
+                                    
+                                    @for($col = 0; $col < $sigsPerRow; $col++)
                                         @php
-                                            $labels = ['Mengusulkan', 'Mengetahui', 'Menyetujui'];
-                                            $defaultLabel = 'Tanda Tangan';
+                                            $idx = $row * $sigsPerRow + $col;
+                                            $showCell = $idx < $sigsCount;
+                                            $cellLabel = ($row == 0 && $col < count($labels)) ? $labels[$col] : $defaultLabel;
                                         @endphp
                                         
-                                        @for($col = 0; $col < $sigsPerRow; $col++)
-                                            @php
-                                                $idx = $row * $sigsPerRow + $col;
-                                                $showCell = $idx < $sigsCount;
-                                                $cellLabel = ($row == 0 && $col < count($labels)) ? $labels[$col] : $defaultLabel;
-                                            @endphp
-                                            
-                                            @if($showCell)
-                                                <td style="border:1px solid #ddd; border-bottom:none;">{{ $cellLabel }}</td>
-                                            @else
-                                                <td style="border:none;"></td>
-                                            @endif
-                                        @endfor
-                                    </tr>
-                                    <tr>
-                                        @php $startIdx = $row * $sigsPerRow; @endphp
-                                        @for($i = $startIdx; $i < min($startIdx + $sigsPerRow, $sigsCount); $i++)
-                                            @php
-                                                $signature = $sigs[$i];
-                                                $pdfPath = $signature->pdf_path ?? null;
-                                                $showImg = $signature->status === 'approved' && $pdfPath && is_readable($pdfPath);
-                                            @endphp
-                                            <td class="sign-cell" style="border:1px solid #ddd; border-top:none;">
-                                                <div class="sign-image-box">
-                                                    @if($showImg)
-                                                        <img src="{{ $pdfPath }}" alt="Signature">
-                                                    @else
-                                                        <div class="sign-blank"></div>
-                                                    @endif
-                                                </div>
-                                                <div class="sign-meta">
+                                        @if($showCell)
+                                            <td style="border:1px solid #ddd; border-bottom:none;">{{ $cellLabel }}</td>
+                                        @else
+                                            <td style="border:none;"></td>
+                                        @endif
+                                    @endfor
+                                </tr>
+                                <tr>
+                                    @php $startIdx = $row * $sigsPerRow; @endphp
+                                    @for($i = $startIdx; $i < min($startIdx + $sigsPerRow, $sigsCount); $i++)
+                                        @php
+                                            // FIX: Use values()->get() instead of direct array access
+                                            $signature = $sigs->values()->get($i) ?? null;
+                                            $pdfPath = $signature ? ($signature->pdf_path ?? null) : null;
+                                            $showImg = $signature && $signature->status === 'approved' && $pdfPath && is_readable($pdfPath);
+                                        @endphp
+                                        <td class="sign-cell" style="border:1px solid #ddd; border-top:none;">
+                                            <div class="sign-image-box">
+                                                @if($showImg)
+                                                    <img src="{{ $pdfPath }}" alt="Signature">
+                                                @else
+                                                    <div class="sign-blank"></div>
+                                                @endif
+                                            </div>
+                                            <div class="sign-meta">
+                                                @if($signature)
                                                     {{ $signature->user->name ?? '-' }}
                                                     <small>{{ $signature->user->registration_id ?? '-' }}</small>
                                                     <small>{{ $signature->user->jabatan_full ?? ($signature->user->jabatan->name ?? '-') }}</small>
-                                                </div>
+                                                @endif
+                                            </div>
+                                            @if($signature)
                                                 <div class="sign-role">(Tanda Tangan)</div>
-                                            </td>
-                                            {{-- Fill empty cells to maintain structure --}}
-                                            @if($i == $sigsCount-1 && ($i - $startIdx + 1) < $sigsPerRow)
-                                                @for($j = 0; $j < $sigsPerRow - ($i - $startIdx + 1); $j++)
-                                                    <td class="sign-cell" style="border:none;"></td>
-                                                @endfor
                                             @endif
-                                        @endfor
-                                    </tr>
-                                </table>
-                            @endfor
-                        </div>
-                    @endif
+                                        </td>
+                                        {{-- Fill empty cells to maintain structure --}}
+                                        @if($i == $sigsCount-1 && ($i - $startIdx + 1) < $sigsPerRow)
+                                            @for($j = 0; $j < $sigsPerRow - ($i - $startIdx + 1); $j++)
+                                                <td class="sign-cell" style="border:none;"></td>
+                                            @endfor
+                                        @endif
+                                    @endfor
+                                </tr>
+                            </table>
+                        @endfor
+                    </div>
+                @endif
 
                 </div>
             </div>

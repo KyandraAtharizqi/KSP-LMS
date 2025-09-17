@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\PelatihanLog;
 use App\Models\UserPositionHistory;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -27,44 +27,57 @@ class PelatihanLogController extends Controller
 
     public function rekap(Request $request)
     {
-        $viewMode = $request->get('viewMode', 'yearly'); // yearly | monthly
-        $mode     = $request->get('mode', 'pengajuan'); // pengajuan | current
-        $year     = (int) $request->get('year', now()->year);
+        // Input / defaults
+        $viewMode    = $request->get('viewMode', 'yearly'); // yearly | monthly
+        $year        = (int) $request->get('year', now()->year);
+        $month       = (int) $request->get('month', now()->month);
+        $detail      = (int) $request->get('detail', 0); // 0 = summary, 1 = detail
+        $selectedDept = $request->get('department_id', null);
 
+        // Determine date window
         if ($viewMode === 'monthly') {
-            $month = (int) $request->get('month', now()->month);
             $start = Carbon::create($year, $month, 1)->startOfMonth();
             $end   = Carbon::create($year, $month, 1)->endOfMonth();
         } else {
-            $month = null;
             $start = Carbon::create($year, 1, 1)->startOfYear();
             $end   = Carbon::create($year, 12, 31)->endOfYear();
+            // set $month to null when yearly
+            $month = null;
         }
 
-        // ✅ 1. Active positions until the end of the selected period
-        $positions = UserPositionHistory::with(['user', 'department'])
-            ->where('effective_date', '<=', $end)
-            ->where('is_active', true)
-            ->get()
-            ->groupBy('department_id');
+        // Departments for the dropdown
+        $departments = Department::orderBy('name')->get();
 
-        // ✅ 2. Logs in selected period
+        // 1) Snapshot of active positions up to the end of the period
+        //    - We fetch UserPositionHistory rows which indicate the user was (or still is) assigned
+        //    - We filter by effective_date <= $end and is_active = true
+        $positionsQuery = UserPositionHistory::with(['user', 'department'])
+            ->where('effective_date', '<=', $end)
+            ->where('is_active', true);
+
+        if ($selectedDept) {
+            $positionsQuery->where('department_id', $selectedDept);
+        }
+
+        // collect and group by department_id
+        $positions = $positionsQuery->get()->groupBy('department_id');
+
+        // 2) Logs in the selected period (grouped by user_id)
         $logs = PelatihanLog::with(['user', 'pelatihan'])
             ->whereBetween('tanggal', [$start, $end])
             ->get()
             ->groupBy('user_id');
 
-        // ✅ 3. Group logs per user & month
-        $userLogsByMonth = [];
-        foreach ($logs as $userId => $userLogs) {
-            foreach ($userLogs as $log) {
-                $logMonth = Carbon::parse($log->tanggal)->month;
-                $userLogsByMonth[$userId][$logMonth][] = $log;
-            }
-        }
-
+        // Pass to view
         return view('pages.training.pelatihanlog.rekap', compact(
-            'positions', 'userLogsByMonth', 'year', 'month', 'mode', 'viewMode', 'logs'
+            'positions',
+            'logs',
+            'departments',
+            'selectedDept',
+            'viewMode',
+            'year',
+            'month',
+            'detail'
         ));
     }
 }

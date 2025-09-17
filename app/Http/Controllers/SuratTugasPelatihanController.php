@@ -181,8 +181,10 @@ class SuratTugasPelatihanController extends Controller
 
     public function assignView($id): View|RedirectResponse
     {
+        // First check if the ID is for a SuratTugas (for reassignment)
         $suratTugas = SuratTugasPelatihan::with(['pelatihan', 'signaturesAndParafs.user'])->find($id);
-
+        
+        // If not found as SuratTugas, try to find as SuratPengajuan (for new assignment)
         if (!$suratTugas) {
             $suratPengajuan = SuratPengajuanPelatihan::findOrFail($id);
         } else {
@@ -194,6 +196,7 @@ class SuratTugasPelatihanController extends Controller
             return $this->denyAccessRedirect();
         }
 
+        // Get latest rejection reason, if any
         $latestRejection = $suratTugas?->signaturesAndParafs()
             ->where('status', 'rejected')
             ->latest('updated_at')
@@ -201,30 +204,65 @@ class SuratTugasPelatihanController extends Controller
 
         $users = $this->getAssignableUsers();
 
+        // FIXED CODE HERE - properly get the latest round data
         $existingSuratTugas = $suratTugas;
-        $existingParafs = $suratTugas
-            ? $suratTugas->signaturesAndParafs
+        $existingParafs = [];
+        $existingSignature = null;
+        
+        if ($suratTugas) {
+            // Explicitly load relationships to avoid issues
+            $suratTugas->load(['signaturesAndParafs.user', 'signaturesAndParafs.user.jabatan']);
+            
+            // Get the latest round
+            $latestRound = $suratTugas->signaturesAndParafs()->max('round') ?? 1;
+            
+            // Log detailed debugging info
+            \Log::info("AssignView - SuratTugas #{$suratTugas->id}, Pengajuan #{$suratPengajuan->id}, Latest Round: {$latestRound}");
+            
+            // Get parafs for the latest round
+            $parafRecords = $suratTugas->signaturesAndParafs()
                 ->where('type', 'paraf')
-                ->map(fn($p) => [
-                    'id' => $p->user_id,
-                    'name' => $p->user->name,
-                    'registration_id' => $p->user->registration_id,
-                    'jabatan_full' => $p->user->jabatan_full,
-                ])->toArray()
-            : [];
-
-        $existingSignature = $suratTugas
-            ? $suratTugas->signaturesAndParafs
-                ->firstWhere('type', 'signature')?->user
-            : null;
-
-        if ($existingSignature) {
-            $existingSignature = [
-                'id' => $existingSignature->id,
-                'name' => $existingSignature->name,
-                'registration_id' => $existingSignature->registration_id,
-                'jabatan_full' => $existingSignature->jabatan_full,
-            ];
+                ->where('round', $latestRound)
+                ->get();
+                
+            \Log::info("Found {$parafRecords->count()} paraf records in round {$latestRound}");
+            
+            foreach ($parafRecords as $p) {
+                if ($p->user) {
+                    $existingParafs[] = [
+                        'id' => $p->user_id,
+                        'name' => $p->user->name,
+                        'registration_id' => $p->user->registration_id,
+                        'jabatan_full' => $p->user->jabatan_full ?? ($p->user->jabatan->name ?? '-'),
+                    ];
+                } else {
+                    \Log::warning("Paraf has invalid user_id: {$p->user_id}");
+                }
+            }
+            
+            // Get signature for the latest round
+            $signatureRecord = $suratTugas->signaturesAndParafs()
+                ->where('type', 'signature')
+                ->where('round', $latestRound)
+                ->first();
+            
+            if ($signatureRecord && $signatureRecord->user) {
+                $existingSignature = [
+                    'id' => $signatureRecord->user_id,
+                    'name' => $signatureRecord->user->name,
+                    'registration_id' => $signatureRecord->user->registration_id, 
+                    'jabatan_full' => $signatureRecord->user->jabatan_full ?? ($signatureRecord->user->jabatan->name ?? '-'),
+                ];
+                
+                \Log::info("Signature user: " . json_encode($existingSignature));
+            } else if ($signatureRecord) {
+                \Log::warning("Signature has invalid user_id: {$signatureRecord->user_id}");
+            }
+            
+            // Debug the tanggal pelaksanaan
+            if ($suratTugas->tanggal_pelaksanaan) {
+                \Log::info("Tanggal pelaksanaan: " . $suratTugas->tanggal_pelaksanaan);
+            }
         }
 
         return view('pages.training.surattugas.assign', compact(

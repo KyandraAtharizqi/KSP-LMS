@@ -254,32 +254,28 @@ public function store(Request $request, SuratPengajuanPelatihan $pelatihan)
                 ? round((strtotime($dh->check_out_time) - strtotime($dh->check_in_time)) / 3600, 2)
                 : 0;
 
-            PelatihanLog::updateOrCreate(
-                [
-                    'pelatihan_id' => $pelatihan->id,
-                    'user_id' => $request->user_id,
-                    'tanggal' => $dh->date,
-                ],
-                [
-                    'kode_pelatihan' => $pelatihan->kode_pelatihan,
-                    'registration_id' => $request->registration_id,
+        PelatihanLog::updateOrCreate(
+            [
+                'pelatihan_id' => $pelatihan->id,
+                'user_id' => $request->user_id,
+                'tanggal' => $dh->date,
+            ],
+            [
+                'kode_pelatihan' => $pelatihan->kode_pelatihan,
+                'registration_id' => $request->registration_id,
 
-                    // Pengajuan snapshot
-                    'pengajuan_department_id' => $participantSnapshot?->department?->name 
-                        ?? $participantSnapshot?->department_id,
-                    'pengajuan_jabatan_full' => $participantSnapshot?->jabatan_full
-                        ?? ($participantSnapshot?->jabatan_id
-                            ? Jabatan::find($participantSnapshot->jabatan_id)?->name
-                            : null),
+                // Snapshot saat pengajuan (ambil dari training_participants)
+                'pengajuan_department_id' => $participantSnapshot?->department_id,
+                'pengajuan_jabatan_full' => $participantSnapshot?->jabatan_full, // ✅ langsung dari snapshot
 
-                    // Current (live user)
-                    'current_department_id' => $request->user()?->department?->name 
-                    ?? $request->user()?->department_id,
-                    'current_jabatan_full' => $userLive?->jabatan?->name,
+                // Kondisi saat ini (ambil dari user)
+                'current_department_id' => $userLive?->department_id,
+                'current_jabatan_full' => $userLive?->jabatan_full, // ✅ langsung dari user
 
-                    'jam' => $jam,
-                ]
-            );
+                'jam' => $jam,
+            ]
+        );
+
         }
 
         DB::commit();

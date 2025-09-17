@@ -24,8 +24,7 @@
                 <tbody>
                     @forelse($evaluasis as $evaluasi)
                         @php
-                            // Supervisor evaluation (atasan)
-                            $atasanEvaluasi = $evaluasi->atasanEvaluation ?? null;
+                            $atasanEvaluasi = $evaluasi->atasanEvaluation;
                         @endphp
                         <tr>
                             <td>{{ $evaluasi->pelatihan->kode_pelatihan }}</td>
@@ -49,10 +48,12 @@
 
                             {{-- Supervisor Evaluation Status --}}
                             <td>
-                                @if($atasanEvaluasi)
+                                @if($atasanEvaluasi && $atasanEvaluasi->is_submitted)
                                     <span class="badge bg-success">Sudah Diisi</span>
-                                @else
+                                @elseif($atasanEvaluasi)
                                     <span class="badge bg-warning">Belum Diisi</span>
+                                @else
+                                    <span class="badge bg-secondary">Belum tersedia</span>
                                 @endif
                             </td>
 
@@ -63,14 +64,16 @@
                                         Review & Approve
                                     </a>
                                 @elseif($evaluasi->is_accepted == 1)
-                                    @if(!$atasanEvaluasi)
+                                    @if($atasanEvaluasi && !$atasanEvaluasi->is_submitted)
                                         <a href="{{ route('evaluasi-level-3.atasan.create', $evaluasi->id) }}" class="btn btn-primary btn-sm">
                                             Isi Evaluasi
                                         </a>
-                                    @else
-                                        <a href="{{ route('evaluasi-level-3.atasan.show', $atasanEvaluasi->id) }}" class="btn btn-secondary btn-sm">
-                                            Lihat Evaluasi
+                                    @elseif($atasanEvaluasi && $atasanEvaluasi->is_submitted)
+                                        <a href="{{ route('evaluasi-level-3.atasan.preview', $atasanEvaluasi->id) }}" class="btn btn-secondary btn-sm">
+                                            Preview Evaluasi
                                         </a>
+                                    @else
+                                        <span class="text-muted">Belum tersedia</span>
                                     @endif
                                 @else
                                     <span class="text-muted">Tidak Bisa Diisi</span>

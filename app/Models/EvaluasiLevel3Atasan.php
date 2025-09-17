@@ -48,4 +48,10 @@ class EvaluasiLevel3Atasan extends Model
     {
         return $this->hasMany(EvaluasiLevel3AtasanFeedback::class, 'evaluasi_level_3_atasan_id');
     }
+
+    public function participantSnapshot()
+    {
+        return $this->belongsTo(TrainingParticipant::class, 'user_id', 'user_id')
+                    ->whereColumn('pelatihan_id', 'pelatihan_id');
+    }
 }
