@@ -122,47 +122,28 @@ class PengajuanKnowledgeController extends Controller
         }
 
         $pengajuan->status = 'approved';
+        $pengajuan->status_undangan = 'draft'; // Set sebagai draft, belum dikirim
         $pengajuan->save();
+
+        \Log::info('Pengajuan approved - status undangan set to draft', [
+            'pengajuan_id' => $pengajuan->id,
+            'status' => $pengajuan->status,
+            'status_undangan' => $pengajuan->status_undangan,
+            'message' => 'NO AUTOMATIC NOTIFICATIONS SENT TO PARTICIPANTS'
+        ]);
 
         // Tambahkan notifikasi ke pengaju
         Notifikasi::create([
             'user_id' => $pengajuan->created_by,
             'judul' => 'Pengajuan Knowledge Sharing Disetujui',
-            'pesan' => "Pengajuan kamu '{$pengajuan->perihal}' telah disetujui oleh " . Auth::user()->name,
+            'pesan' => "Pengajuan kamu '{$pengajuan->perihal}' telah disetujui oleh " . Auth::user()->name . ". Undangan akan dikirim setelah tanggal dikonfirmasi.",
             'link' => route('knowledge.pengajuan.preview', $pengajuan->id)
         ]);
 
-        // Kirim notifikasi ke semua peserta
-        try {
-            if (!empty($pengajuan->peserta)) {
-                foreach ($pengajuan->peserta as $peserta) {
-                    if (isset($peserta['id'])) {
-                        \Log::info('Creating notification for participant', [
-                            'user_id' => $peserta['id'],
-                            'name' => $peserta['name']
-                        ]);
+        // CATATAN: Notifikasi ke peserta tidak dikirim otomatis lagi
+        // Notifikasi akan dikirim melalui tombol "Kirim ke Peserta" di halaman undangan
 
-                        $tanggalMulai = \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->format('d M Y H:i');
-                        $tanggalSelesai = \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->format('H:i');
-
-                        Notifikasi::create([
-                            'user_id' => $peserta['id'],
-                            'judul' => 'Undangan Knowledge Sharing',
-                            'pesan' => "Anda diundang untuk mengikuti Kegiatan Knowledge Sharing '{$pengajuan->judul}' oleh {$pengajuan->pemateri} yang akan dilaksanakan pada {$tanggalMulai} - {$tanggalSelesai} WIB",
-                            'link' => route('knowledge.undangan.index')
-                        ]);
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            \Log::error('Error sending notifications to participants: ' . $e->getMessage(), [
-                'pengajuan_id' => $pengajuan->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
-
-        return back()->with('success', 'Pengajuan disetujui dan notifikasi dikirim.');
+        return back()->with('success', 'Pengajuan disetujui. Undangan dalam status draft dan perlu dikirim manual.');
     }
 
     public function reject(Request $request, $id)
@@ -275,11 +256,14 @@ class PengajuanKnowledgeController extends Controller
             }
         }
 
-        // Kirim notifikasi hanya ke peserta baru
-        $existingIds = collect($pengajuan->peserta ?? [])->pluck('id')->toArray();
-        foreach ($participantUsers as $user) {
-            if (!in_array($user->id, $existingIds)) {
-                $user->notify(new KnowledgeInvitation($pengajuan));
+        // Kirim notifikasi hanya ke peserta baru JIKA pengajuan masih pending
+        // Jika sudah approved, notifikasi akan dikirim melalui sistem undangan
+        if ($pengajuan->status === 'pending') {
+            $existingIds = collect($pengajuan->peserta ?? [])->pluck('id')->toArray();
+            foreach ($participantUsers as $user) {
+                if (!in_array($user->id, $existingIds)) {
+                    $user->notify(new KnowledgeInvitation($pengajuan));
+                }
             }
         }
 

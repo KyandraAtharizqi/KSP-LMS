@@ -59,11 +59,6 @@
                                 <div data-i18n="Evaluation 1">Evaluasi Level 1 (Peserta)</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluation2.index') ? 'active' : '' }}">
-                            <a href="{{ route('training.evaluation2.index') }}" class="menu-link">
-                                <div data-i18n="Evaluation 2">Evaluasi Level 2 (Peserta)</div>
-                            </a>
-                        </li>
                         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasilevel3.peserta.*') ? 'active' : '' }}">
                             <a href="{{ route('evaluasi-level-3.peserta.index') }}" class="menu-link">
                                 <div data-i18n="Evaluation 3 Peserta">Evaluasi Level 3 (Peserta)</div>
@@ -71,7 +66,6 @@
                         </li>
                         <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.evaluasilevel3.atasan.*') ? 'active' : '' }}">
                             <a href="{{ route('evaluasi-level-3.atasan.index') }}" class="menu-link">
-                                <i class="menu-icon tf-icons bx bx-user-check"></i>
                                 <div data-i18n="Evaluation Atasan">Evaluasi Level 3 (Atasan)</div>
                             </a>
                         </li>
@@ -81,7 +75,6 @@
                 <!-- ✅ Pelatihan Log / Rekap (TOP LEVEL UNDER TRAINING) -->
                 <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('training.pelatihanlog.*') ? 'active' : '' }}">
                     <a href="{{ route('training.pelatihanlog.index') }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-calendar-check"></i>
                         <div data-i18n="Pelatihan Log">Pelatihan Log / Rekap</div>
                     </a>
                 </li>
@@ -114,6 +107,16 @@
                 <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.daftarhadir.index') ? 'active' : '' }}">
                     <a href="{{ route('knowledge.daftarhadir.index') }}" class="menu-link">
                         <div data-i18n="Daftar Hadir">Daftar Hadir</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.evaluasi.index') ? 'active' : '' }}">
+                    <a href="{{ route('knowledge.evaluasi.index') }}" class="menu-link">
+                        <div data-i18n="Evaluasi">Evaluasi</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ \Illuminate\Support\Facades\Route::is('knowledge.log.index') ? 'active' : '' }}">
+                    <a href="{{ route('knowledge.log.index') }}" class="menu-link">
+                        <div data-i18n="Knowledge Log/Rekap">Knowledge Log / Rekap</div>
                     </a>
                 </li>
             </ul>
@@ -195,4 +198,37 @@
             </li>
         @endif
     </ul>
+
+    <div class="flex-grow-1"></div>
+
+    <hr class="my-2 mx-0" />
+
+    <div class="text-center border-bottom pb-3 mb-3 mt-2">
+        <a href="{{ route('profile.show') }}">
+            <div class="avatar avatar-online mx-auto">
+                @php
+                    $user = auth()->user();
+                    $picture = $user->profile_picture;
+                    $pictureUrl = $picture && !\Illuminate\Support\Str::startsWith($picture, 'http')
+                        ? asset('storage/' . $picture)
+                        : ($picture ?: 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random&size=128');
+                @endphp
+                <img src="{{ $pictureUrl }}" alt="Avatar" class="w-px-80 rounded-circle" />
+            </div>
+            <h6 class="mt-2 mb-0">{{ auth()->user()->name }}</h6>
+            <small class="text-muted d-block">{{ auth()->user()->email }}</small>
+        </a>
+    </div>
+
+    <div class="px-3 pb-3">
+        <a href="{{ route('profile.show') }}" class="btn btn-outline-primary w-100 mb-2">
+            <i class="bx bx-user me-2"></i> Profile
+        </a>
+        <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Yakin ingin logout?');">
+            @csrf
+            <button type="submit" class="btn btn-outline-danger w-100">
+                <i class="bx bx-power-off me-2"></i> Logout
+            </button>
+        </form>
+    </div>
 </aside>

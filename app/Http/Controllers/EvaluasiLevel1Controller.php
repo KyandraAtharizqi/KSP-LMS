@@ -18,6 +18,7 @@ use App\Models\EvaluasiLevel3Peserta;
 use App\Models\PelatihanPresenter;
 use App\Models\PelatihanLog;
 use App\Models\User; 
+use App\Models\Jabatan;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class EvaluasiLevel1Controller extends Controller
@@ -330,15 +331,21 @@ public function store(Request $request, SuratPengajuanPelatihan $pelatihan)
             abort(403, 'Evaluasi belum disubmit dan tidak dapat diunduh.');
         }
         
-        // Get user signature if available
+        // Get user signature/paraf if available
         $signature = null;
         if ($evaluasi->user && $evaluasi->user->registration_id) {
             $signatureRecord = \App\Models\SignatureAndParaf::where('registration_id', $evaluasi->user->registration_id)
                 ->first();
             
-            if ($signatureRecord && $signatureRecord->signature_path) {
-                $signaturePath = public_path('storage/' . ltrim($signatureRecord->signature_path, '/'));
-                $signature = file_exists($signaturePath) ? $signaturePath : null;
+            if ($signatureRecord) {
+                // Check for paraf first (more common for evaluations), then signature
+                if ($signatureRecord->paraf_path) {
+                    $parafPath = public_path('storage/' . ltrim($signatureRecord->paraf_path, '/'));
+                    $signature = file_exists($parafPath) ? $parafPath : null;
+                } elseif ($signatureRecord->signature_path) {
+                    $signaturePath = public_path('storage/' . ltrim($signatureRecord->signature_path, '/'));
+                    $signature = file_exists($signaturePath) ? $signaturePath : null;
+                }
             }
         }
 

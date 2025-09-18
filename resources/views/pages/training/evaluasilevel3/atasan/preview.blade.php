@@ -67,6 +67,11 @@
         </div>
     </div>
 
-    <a href="{{ route('evaluasi-level-3.atasan.index') }}" class="btn btn-secondary">Kembali</a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('evaluasi-level-3.atasan.index') }}" class="btn btn-secondary">Kembali</a>
+        <a href="{{ route('evaluasi-level-3.atasan.downloadPdf', $evaluasiAtasan->id) }}" class="btn btn-danger">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </a>
+    </div>
 </div>
 @endsection

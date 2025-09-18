@@ -143,7 +143,8 @@
                 SURAT TUGAS PELATIHAN
             </td>
             <td class="header-right">
-                <img src="{{ public_path('logo.png') }}" alt="Logo" height="25">
+                <img src="{{ public_path('sics.png') }}" alt="Logo" height="25" style="margin-top: 10px;">
+                <img src="{{ public_path('kan.png') }}" alt="Logo" height="25" style="margin-top: 10px;">
             </td>
         </tr>
     </table>

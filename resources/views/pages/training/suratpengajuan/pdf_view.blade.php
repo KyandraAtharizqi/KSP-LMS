@@ -12,13 +12,18 @@
             font-size: 8px;
             color: #000;
             line-height: 1.2;
+            min-height: 100vh;
         }
         .form-container {
             background-color: #fff;
             border: 1px solid #333;
-            width: 100%;
+            width: 98%;
             max-width: 800px;
             margin: 0 auto;
+            box-sizing: border-box;
+            min-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
         }
         .header {
             background-color: #ffffff;
@@ -38,12 +43,28 @@
             font-size: 8px;
         }
         .form-content {
-            padding: 5px;
+            padding: 3px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex-grow: 1;
+        }
+        .signature-section {
+            margin-top: auto;
+            padding-top: 10px;
         }
         .form-section {
-            border: 1px solid #333;
+            border-left: 1px solid #333;
+            border-right: 1px solid #333;
+            border-bottom: 1px solid #333;
             margin-bottom: 0;
-            margin-top: 3px;
+            margin-top: 0;
+            box-sizing: border-box;
+        }
+        .form-section:first-child {
+            border-top: 1px solid #333;
         }
         .section-header {
             background-color: #fff;
@@ -137,15 +158,19 @@
         <div class="title-bar">SURAT PENGAJUAN PELATIHAN</div>
 
         <div class="form-content">
+            <div class="main-content">
 
             {{-- Kompetensi --}}
             <div class="form-section">
                 <div class="section-header">Kompetensi : {{ $surat->kompetensi }}</div>
             </div>
 
-            {{-- Judul & quick fields --}}
             <div class="form-section">
                 <div class="section-header">Judul Pelatihan : {{ $surat->judul }}</div>
+            </div>
+
+            {{-- Judul & quick fields --}}
+            <div class="form-section">
                 <div class="section-content">
                     <div class="field-group">
                         <div class="field">
@@ -183,7 +208,7 @@
             {{-- Schedule --}}
             <div class="form-section">
                 <div class="section-content">
-                    <table class="schedule-table" style="width:100%; border-collapse:separate; border-spacing:0 3px;">
+                    <table class="schedule-table" style="width:98%; border-collapse:separate; border-spacing:0 3px; margin: 0 auto;">
                         <tr>
                             <td style="width:50%;">
                                 <span class="field-label">Tanggal Pelaksanaan</span>
@@ -282,7 +307,11 @@
                     <div class="field-value" style="min-height:15px;">{{ $surat->tujuan_peserta ?? '-' }}</div>
                 </div>
             </div>
+            
+            </div> {{-- End main-content --}}
 
+            {{-- Signature Section - Pushed to bottom --}}
+            <div class="signature-section">
             {{-- Approval Section - Improved layout to prevent cutoffs --}}
             @php
                 $latestRound = $surat->approvals->max('round') ?? 0;
@@ -313,7 +342,7 @@
                 {{-- Paraf with row-based layout - Always show at least one row with three boxes --}}
                 <div style="font-weight:bold; font-size:8px; margin-bottom:4px;">Paraf</div>
                 <div class="form-section" style="margin-top:0; border:0;">
-                    <table style="width:100%; margin-top:2px; text-align:center; border-collapse:collapse;">
+                    <table style="width:96%; margin: 2px auto; text-align:center; border-collapse:collapse;">
                         <tr>
                             @php
                                 // Always display at least 3 paraf boxes, even if none assigned
@@ -330,7 +359,7 @@
                                     $pdfPath = $showParafData && $paraf ? ($paraf->pdf_path ?? null) : null;
                                     $showImg = $showParafData && $paraf && $paraf->status === 'approved' && $pdfPath && is_readable($pdfPath);
                                 @endphp
-                                <td class="sign-cell" style="border:1px solid #ddd; width:{{ 100/$boxesToShow }}%;">
+                                <td class="sign-cell" style="border:1px solid #ddd; width:{{ 100/$boxesToShow }}%; box-sizing: border-box;">
                                     <div class="sign-image-box">
                                         @if($showImg)
                                             <img src="{{ $pdfPath }}" alt="Paraf">
@@ -346,7 +375,7 @@
                                         @endif
                                     </div>
                                     @if($showParafData && $paraf)
-                                        <div class="sign-role">(Paraf)</div>
+                                        <div class="sign-role"></div>
                                     @endif
                                 </td>
                             @endfor
@@ -359,7 +388,7 @@
                     <div style="font-weight:bold; font-size:8px; margin:10px 0 4px;">Tanda Tangan</div>
                     <div class="form-section" style="margin-top:0; border:0;">
                         @for($row = 0; $row < $sigRows; $row++)
-                            <table style="width:100%; text-align:center; border-collapse:collapse; margin-bottom:5px;">
+                            <table style="width:96%; text-align:center; border-collapse:collapse; margin: 2px auto 5px auto;">
                                 <tr class="sign-grid-header">
                                     @php
                                         $labels = ['Mengusulkan', 'Mengetahui', 'Menyetujui'];
@@ -374,7 +403,7 @@
                                         @endphp
                                         
                                         @if($showCell)
-                                            <td style="border:1px solid #ddd; border-bottom:none;">{{ $cellLabel }}</td>
+                                            <td style="border:1px solid #ddd; border-bottom:none; box-sizing: border-box;">{{ $cellLabel }}</td>
                                         @else
                                             <td style="border:none;"></td>
                                         @endif
@@ -389,7 +418,7 @@
                                             $pdfPath = $signature ? ($signature->pdf_path ?? null) : null;
                                             $showImg = $signature && $signature->status === 'approved' && $pdfPath && is_readable($pdfPath);
                                         @endphp
-                                        <td class="sign-cell" style="border:1px solid #ddd; border-top:none;">
+                                        <td class="sign-cell" style="border:1px solid #ddd; border-top:none; box-sizing: border-box;">
                                             <div class="sign-image-box">
                                                 @if($showImg)
                                                     <img src="{{ $pdfPath }}" alt="Signature">
@@ -405,7 +434,7 @@
                                                 @endif
                                             </div>
                                             @if($signature)
-                                                <div class="sign-role">(Tanda Tangan)</div>
+                                                <div class="sign-role"></div>
                                             @endif
                                         </td>
                                         {{-- Fill empty cells to maintain structure --}}
@@ -423,6 +452,8 @@
 
                 </div>
             </div>
+            
+            </div> {{-- End signature-section --}}
 
         </div>
     </div>

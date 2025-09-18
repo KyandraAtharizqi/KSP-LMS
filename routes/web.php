@@ -19,9 +19,12 @@ use App\Http\Controllers\ClassificationController;
 use App\Http\Controllers\LetterStatusController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DaftarHadirPelatihanPresenterController;
+use App\Http\Controllers\KnowledgeEvaluasiController;
+use App\Http\Controllers\KnowledgeLogController;
 use App\Http\Controllers\Knowledge\NotaDinasController;
 use App\Http\Controllers\DaftarHadirKnowledgeController;
 use App\Http\Controllers\PengajuanKnowledgeController;
+use App\Http\Controllers\SuratUndanganController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Elearning\ElearningVideoController;
@@ -336,6 +339,9 @@ Route::middleware(['auth'])->group(function () {
 
                 // ✅ Preview evaluation (GET)
                 Route::get('/preview/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'preview'])->name('preview');
+                
+                // ✅ Download PDF evaluation (GET)
+                Route::get('/download-pdf/{evaluasi}', [EvaluasiLevel3AtasanController::class, 'downloadPdf'])->name('downloadPdf');
             });
 
                 
@@ -397,7 +403,11 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::group(['prefix' => 'knowledge', 'middleware' => ['auth']], function() {
-        Route::get('undangan', [App\Http\Controllers\SuratUndanganController::class, 'index'])->name('knowledge.undangan.index');
+        Route::get('undangan', [SuratUndanganController::class, 'index'])->name('knowledge.undangan.index');
+        Route::get('undangan/{id}/edit', [SuratUndanganController::class, 'edit'])->name('knowledge.undangan.edit');
+        Route::put('undangan/{id}', [SuratUndanganController::class, 'update'])->name('knowledge.undangan.update');
+        Route::get('undangan/{id}', [SuratUndanganController::class, 'show'])->name('knowledge.undangan.show');
+        Route::post('undangan/{id}/send', [SuratUndanganController::class, 'send'])->name('knowledge.undangan.send');
     });
 
     /*
@@ -427,9 +437,23 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('daftarhadir', DaftarHadirKnowledgeController::class);
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Evaluasi Knowledge Sharing
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('knowledge')->name('knowledge.')->group(function () {
+        Route::get('evaluasi', [KnowledgeEvaluasiController::class, 'index'])->name('evaluasi.index');
+    });
 
-
-
+    /*
+    |--------------------------------------------------------------------------
+    | Knowledge Log/Rekap
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('knowledge')->name('knowledge.')->group(function () {
+        Route::get('log', [KnowledgeLogController::class, 'index'])->name('log.index');
+    });
 
     Route::prefix('elearning/videos')
         ->name('elearning.videos.')

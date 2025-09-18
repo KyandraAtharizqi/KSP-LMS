@@ -69,9 +69,8 @@
                                             Isi Evaluasi
                                         </a>
                                     @elseif($atasanEvaluasi && $atasanEvaluasi->is_submitted)
-                                        <a href="{{ route('evaluasi-level-3.atasan.preview', $atasanEvaluasi->id) }}" class="btn btn-secondary btn-sm">
-                                            Preview Evaluasi
-                                        </a>
+                                        <a href="{{ route('evaluasi-level-3.atasan.preview', $atasanEvaluasi->id) }}" class="btn btn-sm btn-outline-secondary mb-1"><i class="bx bx-show"></i> Preview</a>
+                                        <a href="{{ route('evaluasi-level-3.atasan.downloadPdf', $atasanEvaluasi->id) }}" class="btn btn-sm btn-success mb-1" target="_blank"><i class="bx bx-download"></i> PDF</a>
                                     @else
                                         <span class="text-muted">Belum tersedia</span>
                                     @endif

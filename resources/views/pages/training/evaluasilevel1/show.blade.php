@@ -4,11 +4,12 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-
-    {{-- HEADER --}}
-    <div class="text-center mb-4">
-        <h5 class="fw-bold">LEVEL 1 : EVALUASI PELATIHAN KARYAWAN (REAKSI)</h5>
-    </div>
+    <div class="card">
+        <div class="card-body">
+            {{-- HEADER --}}
+            <div class="text-center mb-4">
+                <h5 class="fw-bold">LEVEL 1 : EVALUASI PELATIHAN KARYAWAN (REAKSI)</h5>
+            </div>
 
     {{-- Styles --}}
     <style>
@@ -248,5 +249,12 @@
             </tr>
         </tbody>
     </table>
+        </div>
+    </div>
+        <div class="mt-4">
+        <a href="{{ route('training.evaluasilevel1.index') }}" class="btn btn-secondary">
+            <i class="bx bx-arrow-back"></i> Kembali
+        </a>
+    </div>
 </div>
 @endsection

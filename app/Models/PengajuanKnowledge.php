@@ -24,6 +24,7 @@ class PengajuanKnowledge extends Model
         'peserta',
         'lampiran',
         'status',
+        'status_undangan',
         'rejection_reason'
     ];
 

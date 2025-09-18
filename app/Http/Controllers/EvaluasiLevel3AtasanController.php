@@ -11,6 +11,7 @@ use App\Models\EvaluasiLevel3AtasanFeedback;
 use App\Models\EvaluasiLevel3Signature;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EvaluasiLevel3AtasanController extends Controller
 {
@@ -225,11 +226,37 @@ public function create($evaluasiId)
         $evaluasiAtasan = EvaluasiLevel3Atasan::with([
             'pelatihan',
             'user',
+            'atasan',
             'tujuanPembelajarans',
             'feedbacks'
         ])->findOrFail($evaluasiId);
 
         return view('pages.training.evaluasilevel3.atasan.preview', compact('evaluasiAtasan'));
+    }
+
+    public function downloadPdf($evaluasiId)
+    {
+        $evaluasiAtasan = EvaluasiLevel3Atasan::with([
+            'pelatihan',
+            'user',
+            'user.jabatan',
+            'user.department',
+            'atasan',
+            'atasan.jabatan',
+            'tujuanPembelajarans',
+            'feedbacks',
+            'participantSnapshot',
+            'participantSnapshot.department'
+        ])->findOrFail($evaluasiId);
+
+        $pdf = Pdf::loadView('pages.training.evaluasilevel3.atasan.pdf_view', compact('evaluasiAtasan'));
+        
+        $filename = 'Evaluasi_Level3_Atasan_' . 
+                   str_replace(' ', '_', $evaluasiAtasan->user->name) . '_' .
+                   $evaluasiAtasan->kode_pelatihan . '_' .
+                   now()->format('Ymd') . '.pdf';
+
+        return $pdf->download($filename);
     }
 
 

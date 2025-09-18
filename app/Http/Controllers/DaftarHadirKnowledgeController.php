@@ -9,8 +9,10 @@ class DaftarHadirKnowledgeController extends Controller
 {
     public function index()
     {
-        $daftarHadir = DB::table('daftar_hadir_knowledge')->latest()->get();
-        return view('pages.knowledge.daftarhadir.index', compact('daftarHadir'));
+        // Sementara kosong karena belum ada ID knowledge yang bisa ditarik
+        // $knowledgeList = []; // Nanti akan diisi dari model PengajuanKnowledge atau model knowledge lainnya
+        
+        return view('pages.knowledge.daftarhadir.index');
     }
 
     public function create()

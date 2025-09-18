@@ -147,10 +147,29 @@ class PageController extends Controller
             $acceptedKnowledgeLetter = 0;
             $acceptedSuratUndangan = 0;
             
-            // Menghitung status surat pengajuan pelatihan berdasarkan field is_accepted
-            $acceptedSuratPengajuan = (clone $baseSuratPengajuanQuery)->where('is_accepted', 1)->count();
-            $rejectedSuratPengajuan = (clone $baseSuratPengajuanQuery)->where('is_accepted', 0)->whereNotNull('is_accepted')->count();
-            $pendingSuratPengajuan = (clone $baseSuratPengajuanQuery)->whereNull('is_accepted')->count();
+            // Menghitung status surat pengajuan pelatihan berdasarkan approval workflow terkini
+            $approvedSuratPengajuan = 0;
+            $rejectedSuratPengajuan = 0;
+            $pendingSuratPengajuan = 0;
+            
+            // Iterasi setiap surat pengajuan untuk cek status terkini
+            $suratPengajuanList = $baseSuratPengajuanQuery->get();
+            foreach ($suratPengajuanList as $surat) {
+                $approvalStatus = $surat->getApprovalStatus();
+                switch ($approvalStatus['status']) {
+                    case 'approved':
+                        $approvedSuratPengajuan++;
+                        break;
+                    case 'rejected':
+                        $rejectedSuratPengajuan++;
+                        break;
+                    case 'in_approval':
+                    case 'not_started':
+                    default:
+                        $pendingSuratPengajuan++;
+                        break;
+                }
+            }
             
             // Set default untuk knowledge sharing status
             $acceptedPengajuanKnowledge = 0;
@@ -160,9 +179,23 @@ class PageController extends Controller
         } elseif ($typeFilter == 'knowledge') {
             // Jika filter knowledge, hitung hanya data knowledge
             $totalKnowledgeLetter = $baseKnowledgeQuery->count();
-            $totalSuratUndangan = $baseSuratUndanganQuery->count();
+            
+            // Hitung undangan sesuai logika SuratUndanganController
+            $approvedKnowledge = PengajuanKnowledge::where('status', 'approved')->get();
+            if ($user->role === 'admin') {
+                $totalSuratUndangan = $approvedKnowledge->count();
+            } else {
+                $filteredUndangan = $approvedKnowledge->filter(function ($u) use ($user) {
+                    $participantIds = collect($u->peserta ?? [])->pluck('id')->all();
+                    return $user->id === $u->created_by  // pengaju
+                        || $user->name === $u->kepada   // approver
+                        || in_array($user->id, $participantIds); // peserta
+                });
+                $totalSuratUndangan = $filteredUndangan->count();
+            }
+            
             $acceptedKnowledgeLetter = $baseKnowledgeAcceptedQuery->count();
-            $acceptedSuratUndangan = 0;
+            $acceptedSuratUndangan = $totalSuratUndangan; // Semua undangan sudah approved
             
             // Set training ke 0
             $totalSuratPengajuan = 0;
@@ -184,22 +217,53 @@ class PageController extends Controller
             $totalSuratPengajuan = $baseSuratPengajuanQuery->count();
             $totalSuratTugas = $baseSuratTugasQuery->count();
             $totalKnowledgeLetter = $baseKnowledgeQuery->count();
-            $totalSuratUndangan = $baseSuratUndanganQuery->count();
+            
+            // Hitung undangan sesuai logika SuratUndanganController
+            $approvedKnowledge = PengajuanKnowledge::where('status', 'approved')->get();
+            if ($user->role === 'admin') {
+                $totalSuratUndangan = $approvedKnowledge->count();
+            } else {
+                $filteredUndangan = $approvedKnowledge->filter(function ($u) use ($user) {
+                    $participantIds = collect($u->peserta ?? [])->pluck('id')->all();
+                    return $user->id === $u->created_by  // pengaju
+                        || $user->name === $u->kepada   // approver
+                        || in_array($user->id, $participantIds); // peserta
+                });
+                $totalSuratUndangan = $filteredUndangan->count();
+            }
 
             // Hitung data yang diterima/disetujui
-            $acceptedSuratPengajuan = (clone $baseSuratPengajuanQuery)->where('is_accepted', 1)->count();
+            // Untuk training, gunakan approval workflow terkini
+            $approvedSuratPengajuan = 0;
+            $rejectedSuratPengajuan = 0;
+            $pendingSuratPengajuan = 0;
+            
+            $suratPengajuanList = $baseSuratPengajuanQuery->get();
+            foreach ($suratPengajuanList as $surat) {
+                $approvalStatus = $surat->getApprovalStatus();
+                switch ($approvalStatus['status']) {
+                    case 'approved':
+                        $approvedSuratPengajuan++;
+                        break;
+                    case 'rejected':
+                        $rejectedSuratPengajuan++;
+                        break;
+                    case 'in_approval':
+                    case 'not_started':
+                    default:
+                        $pendingSuratPengajuan++;
+                        break;
+                }
+            }
+            
             $acceptedSuratTugas = $baseSuratTugasAcceptedQuery->count();
             $acceptedKnowledgeLetter = $baseKnowledgeAcceptedQuery->count();
-            $acceptedSuratUndangan = 0; // Default 0 jika tidak ada field approval untuk undangan
+            $acceptedSuratUndangan = $totalSuratUndangan; // Semua undangan sudah approved
             
             // Hitung status untuk knowledge sharing
             $acceptedPengajuanKnowledge = $baseKnowledgeAcceptedQuery->count();
             $rejectedPengajuanKnowledge = $baseKnowledgeRejectedQuery->count();
             $pendingPengajuanKnowledge = $baseKnowledgePendingQuery->count();
-            
-            // Set default untuk status detailed training
-            $rejectedSuratPengajuan = 0;
-            $pendingSuratPengajuan = 0;
         }
         
         $totalLetterTransaction = $totalSuratPengajuan + $totalSuratTugas + $totalKnowledgeLetter + $totalSuratUndangan;
@@ -212,7 +276,7 @@ class PageController extends Controller
             'totalKnowledgeLetter' => $totalKnowledgeLetter,
             'totalSuratUndangan' => $totalSuratUndangan,
             'totalLetterTransaction' => $totalLetterTransaction,
-            'acceptedSuratPengajuan' => $acceptedSuratPengajuan,
+            'acceptedSuratPengajuan' => $approvedSuratPengajuan,
             'acceptedSuratTugas' => $acceptedSuratTugas,
             'acceptedKnowledgeLetter' => $acceptedKnowledgeLetter,
             'acceptedSuratUndangan' => $acceptedSuratUndangan,

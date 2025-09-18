@@ -78,7 +78,7 @@
         <!-- Layout container -->
         <div class="layout-page">
             <!-- Navbar -->
-            @include('components.navbar')
+            {{-- @include('components.navbar') --}}
             <!-- / Navbar -->
 
             <!-- Content wrapper -->
